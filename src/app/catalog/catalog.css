@@ -1,0 +1,2 @@
+/* The catalog sits on paper, like the rest of the site (rack.css holds the rack). */
+body:has(.rk) { background: theme('colors.paper'); }
