@@ -8,16 +8,16 @@ import type { Art, Deco, Drawn, DrawnKind, Pattern, Sticker } from '@/lib/work';
 /**
  * Drawn versions of collection assets that have no photograph yet.
  *
- * Garments reuse the catalog's technical drawings, plus the pieces a Mitzvah
- * collection needs that the catalog doesn't draw (baby tee, tank, racing jersey, PJ
- * pant, zip hoodie, the box). Each is dressed the way the collection describes it:
- * contrast rib, a hood lining, racing stripes, a gingham or a crest on repeat, then
- * the decoration (chenille, satin script, puff print, a crest). Plates are flat lays
- * on a coloured ground with a sticker or a hang-tag slapped on; macros blow the
- * decoration up on its cloth. All of it is SVG, so it costs nothing to download.
+ * Garments reuse the catalog's technical drawings, plus the few pieces the catalog
+ * doesn't draw (quarter-zip, zip hoodie, singlet). Each is dressed the way the
+ * collection describes it: contrast rib, a hood lining, a rope brim, then the
+ * decoration (an arched collegiate wordmark in tackle twill, a small left-chest
+ * embroidery, a club crest, a woven patch, a screen print). Plates are flat lays on a
+ * coloured ground with a hang-tag or woven label laid on; macros blow the decoration
+ * up on its cloth. All of it is SVG, so it costs nothing to download.
  */
 
-type ExtraKind = 'quarterzip' | 'robe' | 'babytee' | 'tank' | 'jersey' | 'pajama' | 'ziphoodie' | 'box';
+type ExtraKind = 'quarterzip' | 'tank' | 'ziphoodie';
 
 const EXTRA: Record<ExtraKind, Part[]> = {
   quarterzip: [
@@ -29,41 +29,10 @@ const EXTRA: Record<ExtraKind, Part[]> = {
     { t: 'shade', d: 'M112 318Q200 326 288 318L288 336Q200 344 112 336Z' },
     { t: 'stitch', d: 'M52 305L82 313M348 305L318 313' },
   ],
-  robe: [
-    { t: 'body', d: 'M156 64L244 64L316 96Q350 150 372 206L328 230L300 178L300 358Q200 366 100 358L100 178L72 230L28 206Q50 150 84 96Z' },
-    { t: 'shade', d: 'M156 64L200 196L176 64Z' },
-    { t: 'shade', d: 'M244 64L200 196L224 64Z' },
-    { t: 'line', d: 'M200 196L214 356', w: 2 },
-    { t: 'line', d: 'M100 214Q200 224 300 214', w: 9 },
-    { t: 'line', d: 'M258 219L270 282M268 219L292 272', w: 6 },
-    { t: 'stitch', d: 'M84 96L100 178M316 96L300 178M36 200L74 222M364 200L326 222' },
-  ],
-  // Cropped and fitted, with short cap sleeves: the friends' set top.
-  babytee: [
-    { t: 'body', d: 'M170 92C180 106 220 106 230 92L276 106L318 146L292 176L272 162Q266 214 276 290Q200 300 124 290Q134 214 128 162L108 176L82 146L124 106Z' },
-    { t: 'line', d: 'M170 92C180 106 220 106 230 92', w: 7 },
-    { t: 'stitch', d: 'M124 106L128 162M276 106L272 162' },
-    { t: 'stitch', d: 'M128 280Q200 289 272 280' },
-  ],
   tank: [
     { t: 'body', d: 'M152 84L168 84Q200 128 232 84L248 84Q252 130 280 150L284 312Q200 322 116 312L120 150Q148 130 152 84Z' },
     { t: 'line', d: 'M150 162L149 308M175 152L175 314M200 134L200 316M225 152L225 314M250 162L251 308', w: 1.2 },
     { t: 'stitch', d: 'M120 300Q200 310 280 300' },
-  ],
-  // A boxy vintage racing jersey: V collar, long sleeves, ribbed cuffs and hem.
-  jersey: [
-    { t: 'body', d: 'M162 86L200 128L238 86L296 104Q328 150 340 214L356 312L322 322L300 226L292 206L292 338Q200 346 108 338L108 206L100 226L78 322L44 312L60 214Q72 150 104 104Z' },
-    { t: 'shade', d: 'M162 86L200 128L238 86L250 90L200 144L150 90Z' },
-    { t: 'stitch', d: 'M104 104L108 206M296 104L292 206' },
-    { t: 'stitch', d: 'M110 324Q200 332 290 324M47 300L80 310M353 300L320 310' },
-  ],
-  // Wide, relaxed PJ pant with a gathered waist and a drawcord.
-  pajama: [
-    { t: 'body', d: 'M130 72L270 72L274 98L302 350L214 356L200 160L186 356L98 350L126 98Z' },
-    { t: 'shade', d: 'M130 72L270 72L274 98L126 98Z' },
-    { t: 'line', d: 'M148 76L148 94M166 76L166 94M184 76L184 94M216 76L216 94M234 76L234 94M252 76L252 94', w: 1.4 },
-    { t: 'line', d: 'M194 98Q190 124 182 140M206 98Q212 126 220 138', w: 3 },
-    { t: 'stitch', d: 'M102 336L188 342M298 336L212 342' },
   ],
   ziphoodie: [
     { t: 'body', d: 'M146 98C140 44 260 44 254 98Z' },
@@ -77,13 +46,6 @@ const EXTRA: Record<ExtraKind, Part[]> = {
     { t: 'dot', cx: 200, cy: 148, r: 4.5 },
     { t: 'stitch', d: 'M114 324Q200 332 286 324M50 304L81 312M350 304L319 312' },
     { t: 'stitch', d: 'M160 92L112 206M240 92L288 206' },
-  ],
-  // The collection box, front on, lid on.
-  box: [
-    { t: 'body', d: 'M92 186L308 186L302 332L98 332Z' },
-    { t: 'body', d: 'M80 146L320 146L320 192L80 192Z' },
-    { t: 'line', d: 'M80 192L320 192', w: 2 },
-    { t: 'stitch', d: 'M98 320L302 320' },
   ],
 };
 
@@ -100,16 +62,11 @@ const ANCHOR: Record<DrawnKind, { chest: [number, number, number]; left: [number
   quarterzip: { chest: [200, 196, 104], left: [244, 150, 38] },
   polo: { chest: [200, 184, 100], left: [244, 154, 30] },
   jacket: { chest: [200, 180, 100], left: [250, 150, 44] },
-  robe: { chest: [240, 150, 44], left: [236, 150, 50] },
   cap: { chest: [196, 196, 74], left: [196, 196, 74] },
   shorts: { chest: [160, 236, 40], left: [244, 236, 30] },
   pants: { chest: [156, 156, 46], left: [246, 156, 46] },
-  pajama: { chest: [160, 150, 44], left: [246, 150, 36] },
   tote: { chest: [200, 250, 136], left: [200, 250, 104] },
-  babytee: { chest: [200, 176, 98], left: [232, 140, 30] },
   tank: { chest: [200, 198, 96], left: [228, 160, 30] },
-  jersey: { chest: [200, 192, 96], left: [242, 156, 34] },
-  box: { chest: [200, 262, 112], left: [254, 262, 70] },
 };
 
 /**
@@ -132,24 +89,12 @@ const TRIM: Partial<Record<DrawnKind, Trim[]>> = {
     { d: 'M112 318Q200 326 288 318L288 336Q200 344 112 336Z' },
   ],
   tee: [{ d: 'M165 88C177 104 223 104 235 88', w: 7 }, { d: 'M58 163L91 194', w: 6 }, { d: 'M342 163L309 194', w: 6 }],
-  babytee: [{ d: 'M170 92C180 106 220 106 230 92', w: 7 }, { d: 'M85 150L107 172', w: 6 }, { d: 'M315 150L293 172', w: 6 }],
   polo: [{ d: 'M165 86L186 124L200 100Z' }, { d: 'M235 86L214 124L200 100Z' }, { d: 'M58 163L91 194', w: 6 }, { d: 'M342 163L309 194', w: 6 }],
   tank: [{ d: 'M168 84Q200 128 232 84', w: 5 }, { d: 'M152 84Q148 130 120 150', w: 5 }, { d: 'M248 84Q252 130 280 150', w: 5 }],
-  jersey: [
-    { d: 'M162 86L200 128L238 86L250 90L200 144L150 90Z' },
-    { d: 'M44 312L78 322L81 309L47 299Z' }, { d: 'M356 312L322 322L319 309L353 299Z' },
-    { d: 'M108 326Q200 334 292 326L292 338Q200 346 108 338Z' },
-  ],
   shorts: [{ d: 'M118 110L282 110L284 134L116 134Z' }],
   pants: [{ d: 'M128 70L272 70L275 96L125 96Z' }, { d: 'M112 330L188 330L184 356L106 356Z' }, { d: 'M212 330L288 330L294 356L216 356Z' }],
-  pajama: [{ d: 'M130 72L270 72L274 98L126 98Z' }, { d: 'M194 98Q190 124 182 140M206 98Q212 126 220 138', w: 3.5 }],
   cap: [{ d: 'M190 250C236 244 290 238 326 244C356 250 364 272 338 284C298 300 232 294 186 276C176 268 178 254 190 250Z' }],
   tote: [{ d: 'M98 300L302 300L304 340L96 340Z' }, { d: 'M150 162C150 70 192 70 192 162M208 162C208 70 250 70 250 162', w: 12 }],
-  box: [
-    { d: 'M189 146L211 146L211 192L189 192Z' }, { d: 'M190 186L210 186L209 332L191 332Z' },
-    { d: 'M200 146C178 112 148 116 166 140C174 150 190 149 200 146C210 149 226 150 234 140C252 116 222 112 200 146', w: 7 },
-    { d: 'M200 147L184 174M200 147L216 174', w: 6 },
-  ],
 };
 
 /** The inside of the hood. */
@@ -161,26 +106,31 @@ const LINING: Partial<Record<DrawnKind, string>> = {
 /** Side-seam racing stripes on a bottom. */
 const SIDE: Partial<Record<DrawnKind, string[]>> = {
   pants: ['M125 96L137 96L120 330L110 330Z', 'M275 96L263 96L280 330L290 330Z'],
-  pajama: ['M126 98L138 98L114 351L100 350Z', 'M274 98L262 98L286 351L300 350Z'],
   shorts: ['M116 134L128 134L108 281L94 280Z', 'M284 134L272 134L292 281L306 280Z'],
 };
 
 /** Where chest stripes cross a top (they run straight through the sleeves too). */
 const STRIPE_Y: Partial<Record<DrawnKind, number>> = {
-  jersey: 262, tee: 246, babytee: 230, crewneck: 246, hoodie: 238, ziphoodie: 238, longsleeve: 246, tank: 250,
+  tee: 246, crewneck: 246, hoodie: 238, ziphoodie: 238, longsleeve: 246, tank: 250,
 };
 
 const FONT = {
   block: { fontFamily: 'var(--font-display), var(--font-sans), system-ui, sans-serif', fontWeight: 800 },
-  varsity: { fontFamily: 'var(--font-serif), Georgia, serif', fontWeight: 400 },
-  script: { fontFamily: 'var(--font-serif), Georgia, serif', fontStyle: 'italic' as const, fontWeight: 400 },
+  // Collegiate caps: the heavy wide display cut, outlined like tackle twill.
+  varsity: { fontFamily: 'var(--font-display), var(--font-sans), system-ui, sans-serif', fontWeight: 900, fontStretch: '125%' },
+  // The brand's baseball script, upright. An accent, used once per piece at most.
+  script: { fontFamily: 'var(--font-serif), Georgia, serif', fontWeight: 400 },
+  // A crest monogram: a bookish serif, the way a club's die is cut.
+  mono: { fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700 },
   chenille: { fontFamily: 'var(--font-display), var(--font-sans), system-ui, sans-serif', fontWeight: 800 },
-  mono: { fontFamily: 'var(--font-mono), ui-monospace, monospace', fontWeight: 500 },
+  label: { fontFamily: 'var(--font-mono), ui-monospace, monospace', fontWeight: 600 },
 };
 
-const INK = '#0E1A47';
-const POP = '#F9A8C9';
+// Brand chrome: green ink, beige tags, paper.
+const INK = '#133327';
+const POP = '#C4B19A';
 const WHITE = '#FFFFFF';
+const PAPER = '#F7F3EC';
 
 const shade = (hex: string, amt: number) => {
   const n = parseInt(hex.slice(1), 16);
@@ -244,7 +194,7 @@ function DecoMark({ deco, cx, cy, w, big = false, uid }: { deco: Deco; cx: numbe
             <ellipse cx={cx + 35 * s} cy={y + h * (t + 0.1)} rx={4.5 * s} ry={2 * s} transform={`rotate(40 ${cx + 35 * s} ${y + h * (t + 0.1)})`} fill={deco.ink} />
           </g>
         ))}
-        <text x={cx} y={y + h * 0.7} textAnchor="middle" fontSize={h * 0.5} style={FONT.script} fill={deco.ink}>
+        <text x={cx} y={y + h * 0.68} textAnchor="middle" fontSize={h * 0.46} style={FONT.mono} fill={deco.ink}>
           {deco.letter}
         </text>
         {deco.words && w >= 26 && (
@@ -252,52 +202,6 @@ function DecoMark({ deco, cx, cy, w, big = false, uid }: { deco: Deco; cx: numbe
             {deco.words}
           </text>
         )}
-      </g>
-    );
-  }
-
-  if (deco.t === 'art') {
-    const h = w * (deco.photo ? 1.1 : 1);
-    const [a, b, c, d, e] = deco.colors;
-    const x = cx - w / 2;
-    const y = cy - h / 2;
-    if (deco.photo) {
-      return (
-        <g>
-          <defs>
-            <linearGradient id={`sky-${uid}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor={d} />
-              <stop offset="0.45" stopColor={c} />
-              <stop offset="0.75" stopColor={b} />
-              <stop offset="1" stopColor={a} />
-            </linearGradient>
-            <clipPath id={`frame-${uid}`}><rect x={x} y={y} width={w} height={h} rx={w * 0.02} /></clipPath>
-          </defs>
-          <g clipPath={`url(#frame-${uid})`}>
-            <rect x={x} y={y} width={w} height={h} fill={`url(#sky-${uid})`} />
-            <circle cx={cx + w * 0.12} cy={y + h * 0.62} r={w * 0.17} fill={e} opacity="0.92" />
-            <path d={`M${x} ${y + h * 0.7}L${x + w * 0.3} ${y + h * 0.52}L${x + w * 0.52} ${y + h * 0.66}L${x + w * 0.78} ${y + h * 0.5}L${x + w} ${y + h * 0.62}L${x + w} ${y + h}L${x} ${y + h}Z`} fill={d} opacity="0.85" />
-            <path d={`M${x} ${y + h * 0.84}L${x + w * 0.4} ${y + h * 0.72}L${x + w * 0.7} ${y + h * 0.82}L${x + w} ${y + h * 0.76}L${x + w} ${y + h}L${x} ${y + h}Z`} fill="#0E1022" />
-          </g>
-        </g>
-      );
-    }
-    // A retro sun of stripes over rolling hills.
-    return (
-      <g>
-        <defs>
-          <clipPath id={`disc-${uid}`}><circle cx={cx} cy={cy} r={w / 2} /></clipPath>
-        </defs>
-        <g clipPath={`url(#disc-${uid})`}>
-          <rect x={x} y={y} width={w} height={h} fill={e} />
-          {[a, b, a, b, a].map((col, i) => (
-            <rect key={i} x={x} y={y + h * 0.12 + i * h * 0.1} width={w} height={h * 0.05} fill={col} />
-          ))}
-          <circle cx={cx} cy={cy + h * 0.08} r={w * 0.2} fill={b} />
-          <path d={`M${x} ${cy + h * 0.18}Q${cx - w * 0.2} ${cy + h * 0.02} ${cx} ${cy + h * 0.2}T${x + w} ${cy + h * 0.14}V${y + h}H${x}Z`} fill={c} />
-          <path d={`M${x} ${cy + h * 0.32}Q${cx} ${cy + h * 0.18} ${x + w} ${cy + h * 0.34}V${y + h}H${x}Z`} fill={d} />
-        </g>
-        <circle cx={cx} cy={cy} r={w / 2} fill="none" stroke={d} strokeWidth={w * 0.03} />
       </g>
     );
   }
@@ -312,13 +216,14 @@ function DecoMark({ deco, cx, cy, w, big = false, uid }: { deco: Deco; cx: numbe
   const lead = size * (deco.face === 'script' ? 0.9 : 0.96);
   const embroidered = deco.tech === 'embroidery';
   const puff = deco.tech === 'puff';
+  const twill = deco.tech === 'twill';
   const fillFor = (i: number) => (deco.ink2 && deco.face === 'block' && i === n - 1 ? deco.ink2 : deco.ink);
   const outline = deco.face === 'varsity' && deco.ink2 ? deco.ink2 : undefined;
 
   const lineProps = (i: number) => ({
     fill: big && embroidered && !chenille ? `url(#satin-${uid}-${i})` : fillFor(i),
     stroke: outline ?? (embroidered ? shade(fillFor(i), -0.22) : puff ? shade(fillFor(i), 0.16) : 'none'),
-    strokeWidth: outline ? size * 0.14 : embroidered ? size * (big ? 0.018 : 0.03) : puff ? size * 0.025 : 0,
+    strokeWidth: outline ? size * (twill ? 0.16 : 0.14) : embroidered ? size * (big ? 0.018 : 0.03) : puff ? size * 0.025 : 0,
     paintOrder: 'stroke' as const,
     strokeLinejoin: 'round' as const,
     style: face,
@@ -379,6 +284,8 @@ function DecoMark({ deco, cx, cy, w, big = false, uid }: { deco: Deco; cx: numbe
       <g key={i}>
         {under}
         {text(lineProps(i), 'ink')}
+        {/* Tackle twill is cut cloth sewn down: a zigzag edge stitch just inside each letter. */}
+        {twill && big && text({ fill: 'none', stroke: shade(fillFor(i), -0.28), strokeWidth: size * 0.012, strokeDasharray: `${size * 0.02} ${size * 0.014}`, style: face }, 'edge')}
       </g>
     );
   };
@@ -392,7 +299,7 @@ function DecoMark({ deco, cx, cy, w, big = false, uid }: { deco: Deco; cx: numbe
   });
 
   return (
-    <g filter={big && (embroidered || puff) ? `url(#raise-${uid})` : undefined}>
+    <g filter={big && (embroidered || puff || twill) ? `url(#raise-${uid})` : undefined}>
       {big && (
         <defs>
           {embroidered && !chenille && deco.lines.map((_, i) => {
@@ -426,9 +333,6 @@ function DecoMark({ deco, cx, cy, w, big = false, uid }: { deco: Deco; cx: numbe
 
 // ── patterns ────────────────────────────────────────────────────────────────
 
-const BOW = 'M0 0C-6 -7 -13 -6 -12 0C-13 6 -6 7 0 0C6 -7 13 -6 12 0C13 6 6 7 0 0Z';
-const SPARKLE = 'M0 -9L2 -2L9 0L2 2L0 9L-2 2L-9 0L-2 -2Z';
-
 /** A pattern tile in the 400-unit garment space. */
 function PatternTile({ id, p }: { id: string; p: Pattern }) {
   switch (p.t) {
@@ -446,38 +350,6 @@ function PatternTile({ id, p }: { id: string; p: Pattern }) {
           {p.ink2 && <rect x="15" width="2" height="24" fill={p.ink2} />}
         </pattern>
       );
-    case 'checker':
-      return (
-        <pattern id={id} patternUnits="userSpaceOnUse" width="34" height="34">
-          <rect width="17" height="17" fill={p.ink} />
-          <rect x="17" y="17" width="17" height="17" fill={p.ink} />
-        </pattern>
-      );
-    case 'scatter': {
-      const motif = (x: number, y: number, r: number) => (
-        <g transform={`translate(${x} ${y}) rotate(${r})`}>
-          {p.motif === 'bow' ? (
-            <>
-              <path d={BOW} fill={p.ink} />
-              <path d="M0 0L-5 10M0 0L5 10" stroke={p.ink} strokeWidth="2" strokeLinecap="round" />
-            </>
-          ) : p.motif === 'sparkle' ? (
-            <path d={SPARKLE} fill={p.ink} />
-          ) : (
-            <>
-              <path d="M-9 -10L9 -10L9 1Q9 9 0 13Q-9 9 -9 1Z" fill="none" stroke={p.ink} strokeWidth="1.6" />
-              <text y="5" textAnchor="middle" fontSize="13" style={FONT.script} fill={p.ink}>{p.letter ?? 'A'}</text>
-            </>
-          )}
-        </g>
-      );
-      return (
-        <pattern id={id} patternUnits="userSpaceOnUse" width="64" height="64">
-          {motif(16, 18, -8)}
-          {motif(48, 50, 8)}
-        </pattern>
-      );
-    }
   }
 }
 
@@ -576,16 +448,6 @@ function DrawnGarment({ g, uid }: { g: Drawn; uid: string }) {
         </g>
       )}
 
-      {g.tape && (
-        <g clipPath={`url(#cloth-${uid})`}>
-          {[248, 290].map((y) => (
-            <g key={y}>
-              <rect x="0" y={y} width="400" height="13" fill="#CDD0D2" />
-              <rect x="0" y={y + 5} width="400" height="3" fill="#EEF0F1" />
-            </g>
-          ))}
-        </g>
-      )}
       {g.deco && <DecoMark deco={g.deco} cx={cx} cy={cy} w={w} uid={uid} />}
       {/* Light and a soft fold across the cloth only. */}
       <g clipPath={`url(#cloth-${uid})`} pointerEvents="none">
@@ -609,14 +471,16 @@ function StickerMark({ s, ground }: { s: Sticker; ground: string }) {
   // Trims sit (nearly) square: a woven label straight, a swing tag within 3deg.
   const rot = Math.max(-3, Math.min(3, s.r));
   if (s.shape === 'round') {
-    // Once a round sticker; now a woven label: ink, paper mono, two lines.
+    // A woven label: folded ends, two lines of tracked caps.
     const lw = Math.max(...s.lines.map((l) => l.length)) * 13 + 44;
     return (
       <g transform={`translate(${s.x} ${s.y})`}>
         <g className="wk-sticker">
-          <rect x={-lw / 2} y={-30} width={lw} height={60} fill={INK} />
+          <rect x={-lw / 2} y={-30} width={lw} height={60} fill={s.color ?? INK} />
+          <rect x={-lw / 2} y={-30} width={9} height={60} fill="#000" opacity="0.18" />
+          <rect x={lw / 2 - 9} y={-30} width={9} height={60} fill="#000" opacity="0.18" />
           {s.lines.map((l, i) => (
-            <text key={i} y={i === 0 ? -4 : 18} textAnchor="middle" fontSize={i === 0 ? 20 : 13} style={FONT.mono} fill={WHITE} fillOpacity={i === 0 ? 1 : 0.6} letterSpacing="0.14em">
+            <text key={i} y={i === 0 ? -4 : 18} textAnchor="middle" fontSize={i === 0 ? 20 : 13} style={FONT.label} fill={s.ink ?? PAPER} fillOpacity={i === 0 ? 1 : 0.7} letterSpacing="0.14em">
               {l}
             </text>
           ))}
@@ -642,7 +506,7 @@ function StickerMark({ s, ground }: { s: Sticker; ground: string }) {
           {head}
         </text>
         {rest.map((l, i) => (
-          <text key={i} x={x0 + 51} y={24 + i * 16} fontSize="14" style={FONT.mono} fill={ink} letterSpacing="0.14em">
+          <text key={i} x={x0 + 51} y={24 + i * 16} fontSize="14" style={FONT.label} fill={ink} letterSpacing="0.14em">
             {l}
           </text>
         ))}
@@ -699,7 +563,8 @@ export default function WorkArt({ art, className = '', label }: { art: Art; clas
 
     case 'macro': {
       const onDark = inkOn(art.cloth) === '#FFFFFF';
-      const big = art.deco.t === 'crest' ? 240 : art.deco.t === 'type' && art.deco.lines.length > 1 ? 330 : 390;
+      const script = art.deco.t === 'type' && art.deco.face === 'script';
+      const big = art.deco.t === 'crest' ? 240 : script ? 340 : art.deco.t === 'type' && art.deco.lines.length > 1 ? 330 : 390;
       return (
         <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice" className={className} {...a11y}>
           <defs>
@@ -722,7 +587,7 @@ export default function WorkArt({ art, className = '', label }: { art: Art; clas
           </defs>
           <rect width="400" height="400" fill={art.cloth} />
           {!art.satin && <rect width="400" height="400" fill={`url(#knit-${uid})`} />}
-          <DecoMark deco={art.deco} cx={art.deco.t === 'type' && art.deco.lines.length === 1 ? 230 : 200} cy={205} w={big} big uid={uid} />
+          <DecoMark deco={art.deco} cx={art.deco.t === 'type' && art.deco.lines.length === 1 && !script ? 230 : 200} cy={205} w={big} big uid={uid} />
           <rect width="400" height="400" fill={`url(#sheen-${uid})`} />
         </svg>
       );
@@ -731,9 +596,9 @@ export default function WorkArt({ art, className = '', label }: { art: Art; clas
     case 'swatch':
       return (
         <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" className={className} {...a11y}>
-          <rect width="100" height="100" fill="#F7F5F0" />
+          <rect width="100" height="100" fill={PAPER} />
           <rect x="0" y="0" width="100" height="70" fill={art.color} />
-          <text x="8" y="86" fontSize="9" style={{ ...FONT.mono, letterSpacing: '0.1em' }} fill={INK}>
+          <text x="8" y="86" fontSize="9" style={{ ...FONT.label, letterSpacing: '0.1em' }} fill={INK}>
             {art.name.toUpperCase()}
           </text>
         </svg>
@@ -767,52 +632,6 @@ export default function WorkArt({ art, className = '', label }: { art: Art; clas
         </svg>
       );
 
-    case 'box': {
-      // From above: the lid in the collection colour, a ribbon crossed and tied, the card.
-      const lid = art.color ?? '#C9A77A';
-      const ribbon = art.ribbon ?? WHITE;
-      const ink = inkOn(lid) === '#FFFFFF' ? WHITE : INK;
-      const [eyebrow, name, foot] = art.lines;
-      return (
-        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" className={className} {...a11y}>
-          <defs>
-            <linearGradient id={`lid-${uid}`} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#fff" stopOpacity="0.16" />
-              <stop offset="0.6" stopColor="#fff" stopOpacity="0" />
-              <stop offset="1" stopColor="#000" stopOpacity="0.2" />
-            </linearGradient>
-            <linearGradient id={`satin-${uid}`} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stopColor="#000" stopOpacity="0.12" />
-              <stop offset="0.45" stopColor="#fff" stopOpacity="0.28" />
-              <stop offset="1" stopColor="#000" stopOpacity="0.12" />
-            </linearGradient>
-          </defs>
-          <rect width="100" height="100" fill={lid} />
-          <rect x="5" y="5" width="90" height="90" fill="none" stroke={ink} strokeOpacity="0.14" strokeWidth="0.6" />
-          {/* ribbon */}
-          <rect x="68" y="0" width="9" height="100" fill={ribbon} />
-          <rect x="68" y="0" width="9" height="100" fill={`url(#satin-${uid})`} />
-          <rect x="0" y="22" width="100" height="9" fill={ribbon} />
-          <path d="M72.5 26.5C62 14 54 18 58 25C60 29 67 28.5 72.5 26.5C83 14 91 18 87 25C85 29 78 28.5 72.5 26.5Z" fill={ribbon} stroke="#000" strokeOpacity="0.15" strokeWidth="0.5" />
-          <path d="M72.5 26.5L66 40M72.5 26.5L80 39" stroke={ribbon} strokeWidth="3.2" strokeLinecap="round" />
-          <circle cx="72.5" cy="26.5" r="2.6" fill={ribbon} stroke="#000" strokeOpacity="0.2" strokeWidth="0.5" />
-          {/* card */}
-          <g transform="rotate(-4 34 66)">
-            <rect x="9" y="47" width="52" height="38" fill="#000" opacity="0.15" transform="translate(1 1.6)" />
-            <rect x="9" y="47" width="52" height="38" fill={WHITE} />
-            {eyebrow && <text x="14" y="56" fontSize="3.6" style={{ ...FONT.mono, letterSpacing: '0.14em' }} fill={INK} fillOpacity="0.6">{eyebrow}</text>}
-            {name && (
-              <text x="14" y="70" fontSize="11" style={FONT.block} fill={INK} letterSpacing="-0.02em" textLength={name.length > 6 ? 42 : undefined} lengthAdjust="spacingAndGlyphs">
-                {name}
-              </text>
-            )}
-            {foot && <text x="14" y="79" fontSize="3.4" style={{ ...FONT.mono, letterSpacing: '0.12em' }} fill={INK} fillOpacity="0.6">{foot}</text>}
-          </g>
-          <rect width="100" height="100" fill={`url(#lid-${uid})`} />
-        </svg>
-      );
-    }
-
     case 'tag': {
       const fill = art.color ?? POP;
       const ink = art.ink ?? INK;
@@ -821,9 +640,9 @@ export default function WorkArt({ art, className = '', label }: { art: Art; clas
           <g transform="rotate(-10 50 50)">
             <path d="M14 50C4 40 8 28 20 30" fill="none" stroke={INK} strokeOpacity="0.5" strokeWidth="0.8" />
             <path d="M22 34L32 24L88 24L88 76L32 76L22 66Z" fill={fill} />
-            <circle cx="30" cy="50" r="3" fill="#F2F0EA" stroke={ink} strokeOpacity="0.3" strokeWidth="0.5" />
+            <circle cx="30" cy="50" r="3" fill={PAPER} stroke={ink} strokeOpacity="0.3" strokeWidth="0.5" />
             {art.lines.map((l, i) => (
-              <text key={i} x="38" y={i ? 52 + i * 10 : 50} fontSize={i ? 5 : 11} style={i ? { ...FONT.mono, letterSpacing: '0.14em' } : FONT.block} fill={ink}>
+              <text key={i} x="38" y={i ? 52 + i * 10 : 50} fontSize={i ? 5 : 11} style={i ? { ...FONT.label, letterSpacing: '0.14em' } : FONT.block} fill={ink}>
                 {l}
               </text>
             ))}
@@ -854,7 +673,7 @@ export default function WorkArt({ art, className = '', label }: { art: Art; clas
               </text>
             )}
             {bottom && (
-              <text x="50" y="60" textAnchor="middle" fontSize="4.6" style={{ ...FONT.mono, letterSpacing: '0.16em' }} fill={art.ink} fillOpacity="0.85">
+              <text x="50" y="60" textAnchor="middle" fontSize="4.6" style={{ ...FONT.label, letterSpacing: '0.16em' }} fill={art.ink} fillOpacity="0.85">
                 {bottom}
               </text>
             )}

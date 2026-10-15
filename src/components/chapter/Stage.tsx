@@ -5,22 +5,22 @@ import Hoodie from './Hoodie';
 import { VIEW } from './geometry';
 import Receipt, { type SlipLine } from './Receipt';
 import { register } from '@/lib/reveal';
-import { NAME_MAX, YOUR_NAME, useKidName } from '@/lib/name';
+import { NAME_MAX, YOUR_NAME, useOrgName } from '@/lib/name';
 import { useVibe } from '@/lib/vibe';
 import {
-  ACT1, BLANK, CALLOUTS, COLORWAYS, LINER_STARS, colorwayIndex, isOn, named,
+  ACT1, BLANK, CALLOUTS, COLORWAYS, LINER_STRIPE, colorwayIndex, initial, isOn, named,
   type Callout, type Custom, type Look,
 } from '@/lib/chapter';
 
 /**
- * Act 01's toy: their hoodie on a pale-blue plate, seven details to tap.
+ * Act 01's toy: the house hoodie on a cream plate, eight details to tap.
  *
- * Each callout (a white pill; navy once it's on) switches a detail on or off
+ * Each callout (a white pill; green once it's on) switches a detail on or off
  * (colour steps through the colorways, and the site's colorway with it, via
- * `useVibe`; the hood liner goes off → solid → stars → off). Pointing at one
- * previews where it goes. Under the hoodie: the
- * name pill (the chest script, shared with the finale and /quote) and the five
- * colorway dots. The tech-pack slip sits top left on the board (under the chips on a phone).
+ * `useVibe`; the hood liner goes off → solid → stripe → off). Pointing at one
+ * previews where it goes. Under the hoodie: the organization field (the chest
+ * wordmark, shared with the finale and /quote) and the five colorway dots. The
+ * tech-pack slip sits bottom right on the board (under the chips on a phone).
  *
  * Desktop lays it out as one board with leaders; a phone gets the hoodie, the
  * name, the colorway dots and the details as chips.
@@ -38,7 +38,7 @@ const at = ({ x, y, w, h }: Box): React.CSSProperties => ({
 });
 
 const GARMENT = { x: 380, y: 10, size: 840 };
-/** The pale-blue plate behind the garment and the name row. */
+/** The cream plate behind the garment and the name row. */
 const PLATE = { x: 400, y: 0, w: 800, h: 1050 };
 /** Matches the house cut in Hoodie. */
 const CUT = { w: 48, l: -70 };
@@ -55,14 +55,18 @@ function anchor(c: Callout): [number, number] {
 /** Where each label sits. Left labels end at x; right labels start at x. */
 const LABEL: Partial<Record<Custom, [number, number]>> = {
   construction: [350, 325], patch: [350, 450], color: [350, 570], rib: [350, 777],
-  liner: [1250, 61], embroidery: [1250, 362], print: [1250, 470],
+  liner: [1250, 61], trims: [1250, 196], embroidery: [1250, 331], print: [1250, 466],
 };
 const LABEL_W = 260;
 
 function lineOf(c: Callout, look: Look, name: string, you = false) {
   const cw = COLORWAYS[look.color];
-  const line = c.id === 'liner' && look.linerStars ? LINER_STARS.line : c.line;
-  return named(line.replace('{color}', cw.name).replace('{liner}', cw.linerName), name, you);
+  const line = c.id === 'liner' && look.linerStripe ? LINER_STRIPE.line : c.line;
+  return named(
+    line.replace('{color}', cw.name).replace('{liner}', cw.linerName).replace('{accent}', cw.accentName.toLowerCase()).replace('{initial}', initial(name)),
+    name,
+    you,
+  );
 }
 
 /** The last detail that went on, and a counter so the chip and bump replay. */
@@ -75,7 +79,7 @@ export default function Stage({ receipt = false }: { receipt?: boolean }) {
   const [focus, setHover] = useState<Custom | null>(null);
   const [said, setSaid] = useState('');
   const [burst, setBurst] = useState<Burst>({ id: null, n: 0 });
-  const { name: typed, isDefault: you } = useKidName();
+  const { name: typed, isDefault: you } = useOrgName();
   /** What the garment and tag show: the typed name, or a prompt. */
   const name = you ? YOUR_NAME : typed;
   const { vibe, set: setVibe } = useVibe();
@@ -110,9 +114,9 @@ export default function Stage({ receipt = false }: { receipt?: boolean }) {
   const press = useCallback(
     (id: Custom) => {
       if (id === 'color') return pick((ciRef.current + 1) % COLORWAYS.length);
-      // The liner has a second step: solid, then stars, then off.
+      // The liner has a second step: solid, then a rugby stripe, then off.
       if (id === 'liner') {
-        return apply(id, (l) => (!l.liner ? { ...l, liner: true, linerStars: false } : !l.linerStars ? { ...l, linerStars: true } : { ...l, liner: false, linerStars: false }));
+        return apply(id, (l) => (!l.liner ? { ...l, liner: true, linerStripe: false } : !l.linerStripe ? { ...l, linerStripe: true } : { ...l, liner: false, linerStripe: false }));
       }
       apply(id, (l) => ({ ...l, [id]: !l[id] }));
     },
@@ -199,64 +203,66 @@ function Step({
 const bump = (b: Burst) => (b.n === 0 ? '' : b.n % 2 ? 'chapter-bump-a' : 'chapter-bump-b');
 
 /**
- * Four flat dots, the site's colorways minus Berry (too close to Lily in a row
- * this small; still reachable from the hero, and shown here while it's current),
- * then a rainbow "any color" mark. The mark is not a control: it only says the
- * dots are examples. 34px targets, 22px dots.
+ * Five flat dots, one per colorway, then the current colorway's name and a
+ * quiet "any color" note (not a control: it only says the dots are examples).
+ * 34px targets, 22px dots; every dot carries a hairline so cream reads on paper.
  */
 function Colorways({ look, pick, className = '' }: Pick<Shared, 'look' | 'pick'> & { className?: string }) {
   return (
-    <div role="group" aria-label={ACT1.colorways} className={`flex items-center justify-center gap-0.5 ${className}`}>
-      {COLORWAYS.map((c, i) => {
-        const current = look.color === i;
-        if (c.id === 'varsity' && !current) return null;
-        return (
-          <button
-            key={c.id}
-            type="button"
-            aria-pressed={current}
-            aria-label={`Colorway: ${c.name}`}
-            onClick={() => pick(i)}
-            data-current={current || undefined}
-            className="chapter-swatch"
-            style={{ '--sw': c.body } as React.CSSProperties}
-          >
-            <span aria-hidden className="chapter-swatch-dot" />
-          </button>
-        );
-      })}
-      <span className="chapter-anycolor">
-        <span aria-hidden className="chapter-anycolor-dot" />
-        {ACT1.anyColor}
+    <div className={`flex items-center justify-center gap-3 ${className}`}>
+      <div role="group" aria-label={ACT1.colorways} className="flex items-center gap-0.5">
+        {COLORWAYS.map((c, i) => {
+          const current = look.color === i;
+          return (
+            <button
+              key={c.id}
+              type="button"
+              aria-pressed={current}
+              aria-label={`Colorway: ${c.name}`}
+              title={c.name}
+              onClick={() => pick(i)}
+              data-current={current || undefined}
+              className="chapter-swatch"
+              style={{ '--sw': c.body } as React.CSSProperties}
+            >
+              <span aria-hidden className="chapter-swatch-dot" />
+            </button>
+          );
+        })}
+      </div>
+      <span className="chapter-cwname" aria-live="polite">
+        <span key={look.color} className="chapter-fade-in inline-block">{COLORWAYS[look.color].name}</span>
+        <span aria-hidden className="mx-2 text-ink/25">/</span>
+        <span className="text-muted">{ACT1.anyColor}</span>
       </span>
     </div>
   );
 }
 
-/** The name input: the chest script, the finale and /quote all read it. */
+/** The organization field: the chest wordmark, the finale and /quote all read it. */
 function NameField({ className = '' }: { className?: string }) {
-  const { raw, set, clear } = useKidName();
+  const { raw, set, clear } = useOrgName();
   return (
-    <div className={`chapter-name relative flex h-10 w-[12rem] items-center rounded-full bg-white ${className}`}>
+    <div className={`chapter-name relative flex h-11 w-[17rem] max-w-full items-center rounded-full bg-white ${className}`}>
       <input
         type="text"
         value={raw}
         onChange={(e) => set(e.target.value)}
         maxLength={NAME_MAX}
-        placeholder="Your name"
-        aria-label="Name"
-        autoComplete="off"
+        placeholder={ACT1.namePlaceholder}
+        aria-label={ACT1.nameLabel}
+        autoComplete="organization"
         autoCapitalize="words"
         spellCheck={false}
         enterKeyHint="done"
-        className="caps h-full w-full rounded-full bg-transparent pl-4 pr-10 text-[0.9375rem] text-ink caret-uv placeholder:text-ink/40 focus-visible:outline-none"
+        className="chapter-name-input h-full w-full rounded-full bg-transparent pl-5 pr-10 text-ink caret-uv placeholder:text-ink/40 focus-visible:outline-none"
       />
       {raw && (
         <button
           type="button"
           onClick={clear}
           aria-label="Clear the name"
-          className="absolute right-0.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-ink/50 transition-colors hover:text-ink"
+          className="absolute right-0.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-ink/50 transition-colors hover:text-ink"
         >
           <svg viewBox="0 0 16 16" className="h-3 w-3" aria-hidden>
             <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -304,7 +310,7 @@ function Board({ look, focus, uid, press, pick, setHover, burst, name, lines }: 
             <Hoodie look={look} focus={focus} uid={`${uid}-d`} name={name} />
           </div>
         </div>
-        <div className="chapter-namerow absolute z-30 flex items-center justify-center gap-3" style={at({ x: PLATE.x, y: 900, w: PLATE.w })}>
+        <div className="chapter-namerow absolute z-30 flex flex-col items-center justify-center gap-2.5" style={at({ x: PLATE.x, y: 866, w: PLATE.w })}>
           <NameField />
           <Colorways look={look} pick={pick} />
         </div>

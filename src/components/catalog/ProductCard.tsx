@@ -52,7 +52,7 @@ export default function ProductCard({
   return (
     <article
       // No border, no card: the ash plate is the field, the grid's gap does the spacing.
-      className={`group relative flex h-full flex-col overflow-hidden rounded-3xl bg-white ring-1 ring-rule ${featured ? 'lg:col-span-2 lg:row-span-2' : ''}`}
+      className={`group relative flex h-full flex-col ${featured ? 'lg:col-span-2 lg:row-span-2' : ''}`}
       onPointerEnter={(e) => e.pointerType === 'mouse' && setHovering(true)}
       onPointerLeave={() => {
         setHovering(false);
@@ -61,7 +61,7 @@ export default function ProductCard({
       }}
     >
       <Link href={`/catalog/${product.slug}`} className="flex flex-1 flex-col focus-visible:outline-none">
-        <div className="relative aspect-square overflow-hidden">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-cream">
           {/* Photo or drawing, the same inset either way. A second photo crossfades in
               on hover; a lone photo or a drawing lifts slightly instead. */}
           <div
@@ -77,16 +77,14 @@ export default function ProductCard({
             </div>
           )}
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4">
-            <span />
-            {product.sticker && (
-              <span className="rounded-full bg-uv-lit px-3 py-1.5 text-[0.75rem] font-semibold text-ink">{product.sticker}</span>
-            )}
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5">
+            <span className="label text-ink/55">{product.styleNumber}</span>
+            {product.sticker && <span className="label rounded-full bg-paper px-3 py-1.5 text-ink">{product.sticker}</span>}
           </div>
 
           {colors[colorIndex] && (
             <span
-              className="pointer-events-none absolute bottom-4 left-4 translate-y-2 rounded-full bg-ink/5 px-3 py-1.5 text-[0.75rem] font-semibold text-ink opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+              className="label pointer-events-none absolute bottom-5 left-5 translate-y-2 text-ink/60 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
               aria-hidden
             >
               {colors[colorIndex].name}
@@ -101,9 +99,9 @@ export default function ProductCard({
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
+        <div className="flex flex-1 flex-col gap-2 pt-4">
           <div className="flex items-baseline justify-between gap-4">
-            <h3 className={`font-semibold tracking-tight ${featured ? 'text-d3' : 'text-[1.125rem]'} group-hover:text-electric-deep`}>
+            <h3 className={`font-semibold tracking-tight ${featured ? 'text-d3' : 'text-[1.0625rem]'} underline-offset-4 group-hover:underline`}>
               {product.name}
             </h3>
             {price ? (
@@ -112,9 +110,10 @@ export default function ProductCard({
                 {formatMoney(price.cents, price.currency)}
               </p>
             ) : (
-              <p className="shrink-0 text-[0.8125rem] text-muted">In collection</p>
+              <p className="shrink-0 text-[0.8125rem] text-muted">With your collection</p>
             )}
           </div>
+          {product.category && <p className="text-[0.8125rem] text-muted">{product.category}</p>}
           {featured && product.description && (
             <p className="max-w-measure text-[0.9375rem] leading-relaxed text-muted">{product.description}</p>
           )}
@@ -122,7 +121,7 @@ export default function ProductCard({
       </Link>
 
       {colors.length > 0 && (
-        <div className="flex items-center gap-1.5 px-5 pb-5 sm:px-6 sm:pb-6" role="group" aria-label={`${product.name} colorways`}>
+        <div className="flex items-center gap-1.5 pt-3" role="group" aria-label={`${product.name} colorways`}>
           {colors.slice(0, MAX_DOTS).map((c, i) => (
             <button
               key={`${c.name}-${i}`}
@@ -133,7 +132,7 @@ export default function ProductCard({
               onPointerEnter={() => setPinned(i)}
               onFocus={() => setPinned(i)}
               onClick={() => setPinned(i)}
-              className={`h-5 w-5 rounded-full border transition-transform duration-200 hover:scale-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue ${
+              className={`h-4 w-4 rounded-full border transition-transform duration-200 hover:scale-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue ${
                 colorIndex === i && (hovering || pinned !== null) ? 'scale-125 border-ink' : 'border-ink/15'
               }`}
               style={{ background: c.hex ?? '#C9C9C9' }}

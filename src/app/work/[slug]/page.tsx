@@ -8,7 +8,7 @@ import { bandStyle, bandTheme } from '@/components/work/band';
 import { PieceStamp, ShareButton } from '@/components/work/hype';
 import '@/components/work/work.css';
 import { CASES, type CaseStudy } from '@/lib/cases';
-import { WORK, assetById, leadOf, projectBySlug, specs, type WorkAsset, type WorkItem } from '@/lib/work';
+import { WORK, assetById, leadOf, pieces, projectBySlug, specs, type WorkAsset, type WorkItem } from '@/lib/work';
 
 export function generateStaticParams() {
   return WORK.map((w) => ({ slug: w.slug }));
@@ -16,7 +16,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const w = projectBySlug((await params).slug);
-  return w ? { title: w.title, description: w.note ?? `${w.title}: ${w.sector}. ${specs(w).join(', ')}.` } : {};
+  return w ? { title: `${w.title} · Collections`, description: w.note ?? `${w.title}: ${w.sector}. ${specs(w).join(', ')}.` } : {};
 }
 
 /**
@@ -85,7 +85,7 @@ function Chips({ w, className = '' }: { w: WorkItem; className?: string }) {
 
 /**
  * The hero band: a rounded panel washed with the collection's first colour, with the piece
- * count and a button to send it to the group chat.
+ * count and a share button.
  */
 function Hero({ w }: { w: WorkItem }) {
   const t = bandTheme(w);
@@ -133,6 +133,7 @@ function Footer({ next }: { next: WorkItem }) {
       <Link href={`/work/${next.slug}`} className="group">
         <p className="text-[0.875rem] text-muted">Next collection</p>
         <p className="caps mt-2 text-d2 transition-colors group-hover:text-uv">{next.title} <span aria-hidden>→</span></p>
+        <p className="mt-2 text-[0.875rem] text-muted">{next.sector}</p>
       </Link>
       <Link href="/quote" className="btn-blue">
         Start a collection <span aria-hidden>→</span>
@@ -199,6 +200,7 @@ function Chaptered({ w, next, study }: { w: WorkItem; next: WorkItem; study?: Ca
         </section>
         {/* The words come after the first picture: the photograph introduces them. */}
         {i === 0 && study && <CaseBlock study={study} />}
+        {c.label === 'The pieces' && w.pieces && <Schedule w={w} />}
         <Story story={(w.story ?? []).filter((t) => (t.after ?? chapters[0].label) === c.label)} />
         </Fragment>
       ))}
@@ -206,6 +208,43 @@ function Chaptered({ w, next, study }: { w: WorkItem; next: WorkItem; study?: Ca
       <Footer next={next} />
     </article>
     </div>
+  );
+}
+
+/**
+ * The piece schedule: every style in the collection with its count and how it's made,
+ * set as a ruled spec sheet. A detail line that reads "120 pieces" is the count.
+ */
+function Schedule({ w }: { w: WorkItem }) {
+  const rows = w.pieces!.map((p) => {
+    const count = p.details.find((d) => /^\d+ pieces$/.test(d));
+    return { name: p.name, count: count?.replace(' pieces', ''), details: p.details.filter((d) => d !== count) };
+  });
+  return (
+    <section aria-label="Piece schedule" className="mt-16 grid gap-6 lg:mt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-[4vw]">
+      <div>
+        <h2 className="text-[0.9375rem] font-semibold text-muted">Piece schedule</h2>
+        <p className="mt-3 max-w-[28ch] text-[0.875rem] leading-relaxed text-muted">
+          {pieces(w)} pieces across {rows.length} styles. Sizes mix freely within each style.
+        </p>
+      </div>
+      <ol className="border-t border-ink/15">
+        {rows.map((r, i) => (
+          <li key={r.name} className="grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-baseline gap-x-4 border-b border-rule py-5 sm:grid-cols-[3rem_minmax(0,14rem)_minmax(0,1fr)_auto] sm:gap-x-6">
+            <span className="label text-muted">{String(i + 1).padStart(2, '0')}</span>
+            <p className="caps text-[1.0625rem] leading-tight text-ink">{r.name}</p>
+            <ul className="col-span-3 col-start-2 row-start-2 mt-2 space-y-1 text-[0.9375rem] leading-snug text-ink/70 sm:col-span-1 sm:col-start-3 sm:row-start-1 sm:mt-0">
+              {r.details.map((d) => <li key={d}>{d}</li>)}
+            </ul>
+            {r.count && (
+              <p className="col-start-3 row-start-1 text-right font-display text-[1.0625rem] font-extrabold tabular-nums text-ink sm:col-start-4">
+                {r.count}
+              </p>
+            )}
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

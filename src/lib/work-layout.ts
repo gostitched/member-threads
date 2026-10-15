@@ -68,19 +68,19 @@ const HERO: Archetype = {
   slots: [
     // group 0: the anchor, scattered
     { g: 0, role: 'photo', x: 2, y: 16.5, w: 19.5, h: 26, z: 2, credit: 'below' },
-    { g: 0, role: 'garment', x: 57.5, y: 5.5, w: 24.5, z: 4, prefer: ['hoodie', 'ziphoodie', 'jersey', 'crewneck', 'quarterzip', 'tee'] },
+    { g: 0, role: 'garment', x: 57.5, y: 5.5, w: 24.5, z: 4, prefer: ['hoodie', 'ziphoodie', 'crewneck', 'quarterzip', 'polo', 'tee'] },
     { g: 0, role: 'detail', x: 40.5, y: 37.5, w: 10.8, h: 8.1, z: 3 },
     { g: 0, role: 'photo', x: 67.5, y: 33.5, w: 14, h: 18.67, z: 2 },
     { g: 0, role: 'detail', x: 89.5, y: 43, w: 8.5, h: 11.1, z: 3, note: { dx: -8.2, dy: 12.4, r: -4, arrow: 'up' } },
     // group 1
     { g: 1, role: 'photo', x: 24, y: 17, w: 17.5, h: 12.3, z: 1, credit: 'right-end' },
     { g: 1, role: 'garment', x: 36.5, y: 7.2, w: 11, z: 5, prefer: ['cap'], strict: true },
-    { g: 1, role: 'garment', x: 16, y: 32.5, w: 19.5, z: 5, prefer: ['hoodie', 'ziphoodie', 'jersey', 'quarterzip', 'jacket'] },
+    { g: 1, role: 'garment', x: 16, y: 32.5, w: 19.5, z: 5, prefer: ['hoodie', 'ziphoodie', 'crewneck', 'quarterzip', 'jacket'] },
     { g: 1, role: 'bit', x: 35.8, y: 31.4, w: 4, h: 4, z: 6 },
     { g: 1, role: 'photo', x: 53.2, y: 35.5, w: 11.2, h: 14.9, z: 1 },
     { g: 1, role: 'detail', x: 24.5, y: 52, w: 13.5, h: 8.5, z: 3 },
     // group 2
-    { g: 2, role: 'garment', x: 41.5, y: 15.5, w: 16.5, z: 4, prefer: ['jersey', 'tee', 'babytee', 'tank'] },
+    { g: 2, role: 'garment', x: 41.5, y: 15.5, w: 16.5, z: 4, prefer: ['tee', 'tank', 'polo'] },
     { g: 2, role: 'photo', x: 83.5, y: 6.5, w: 16.5, h: 11.5, z: 1, credit: 'below' },
     { g: 2, role: 'garment', x: 85, y: 20.5, w: 12.5, z: 5 },
     { g: 2, role: 'detail', x: 41.5, y: 48.5, w: 7.5, h: 10, z: 2 },

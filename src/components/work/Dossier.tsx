@@ -206,11 +206,18 @@ export default function Dossier({
             {project.palette && (
               <ul data-fade className="mt-6 flex flex-wrap gap-2.5" aria-label="Palette">
                 {project.palette.map((c) => (
-                  <li key={c.name} title={c.name} className="h-8 w-8 rounded-full shadow-[0_0_0_2px_#FFFFFF,0_0_0_3px_theme(colors.rule)]" style={{ background: c.hex }}>
+                  <li key={c.name} title={c.name} className="h-8 w-8 rounded-full shadow-[0_0_0_2px_theme(colors.paper),0_0_0_3px_theme(colors.rule)]" style={{ background: c.hex }}>
                     <span className="sr-only">{c.name}</span>
                   </li>
                 ))}
               </ul>
+            )}
+
+            {project.brief?.[0] && (
+              <div data-fade className="mt-8 max-w-[34rem]">
+                <p className="label text-muted">{project.brief[0].label}</p>
+                <p className="mt-3 text-lead text-ink/75">{project.brief[0].text}</p>
+              </div>
             )}
 
             <div data-fade className="mt-8">

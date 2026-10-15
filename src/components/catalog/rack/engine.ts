@@ -356,7 +356,7 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     const msg = document.createElement('div');
     msg.className = 'rk-empty';
     msg.style.top = `${lay.railPad + 20 + lay.gh * 0.42}px`;
-    msg.innerHTML = `<h3>Nothing on this rack.</h3><p>Try another search, or describe it and we&rsquo;ll develop it.</p><a class="btn-blue" href="/custom" data-nav>Describe the piece</a>`;
+    msg.innerHTML = `<h3>No styles match.</h3><p>Try another search, or tell us what you need and we&rsquo;ll source it.</p><a class="btn-blue" href="/quote" data-nav>Start a collection</a>`;
     wrap.appendChild(msg);
     return wrap;
   }
@@ -488,7 +488,7 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     railEl.setAttribute('viewBox', `0 0 ${W} ${H + 20}`);
     railEl.innerHTML = `<defs>${gdefs}${sdefs}</defs>
       <g transform="translate(0 ${t * 1.3})">${shadow}</g>
-      <g fill="none" stroke="rgba(14,26,71,.18)" stroke-width="${t + 2}">${lines.join('')}${bends.map((b) => `<path d="${b.d}"/>`).join('')}</g>
+      <g fill="none" stroke="rgba(19,51,39,.18)" stroke-width="${t + 2}">${lines.join('')}${bends.map((b) => `<path d="${b.d}"/>`).join('')}</g>
       <g>${straights.join('')}${bends.map((b, i) => `<path d="${b.d}" fill="none" stroke="url(#rk-bd${i})" stroke-width="${t}"/>`).join('')}</g>
       <g>${collars.join('')}</g>`;
   }

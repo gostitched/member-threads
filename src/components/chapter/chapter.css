@@ -1,8 +1,8 @@
 /* ── The chapter: 01 the hoodie toy, 02 the collection row, the finale ─────────────
    Every colour is a theme token (theme('colors.…')), so palette changes in
-   tailwind.config.ts flow straight through. Every ground is paper; accents are
-   pale plates (blue, pink, cream) and navy type. Board type is sized in
-   container units so the board scales as one object. */
+   tailwind.config.ts flow straight through. Grounds are paper, plates are
+   cream and beige, type is green, the close is a green band. Board type
+   is sized in container units so the board scales as one object. */
 
 .chapter-ground,
 .chapter-design,
@@ -12,7 +12,7 @@
 }
 
 
-/* The turn: Jost, medium, a touch bigger than the lead. */
+/* The turn: the sans, medium, a touch bigger than the lead. */
 .chapter-turn {
   font-family: var(--font-sans);
   font-weight: 500;
@@ -47,7 +47,7 @@
   translate: 0 28px;
 }
 
-/* Leaders: navy hairlines, full strength when pointed at or on. */
+/* Leaders: green hairlines, full strength when pointed at or on. */
 .chapter-board > svg { z-index: 20; }
 .chapter-leader { color: theme('colors.ink / 40%'); }
 .chapter-leader[data-on] { color: theme('colors.ink / 70%'); }
@@ -66,15 +66,16 @@
 .chapter-leader[data-active] .chapter-lead { stroke-width: 2; }
 .chapter-board[data-in='false'] .chapter-lead { stroke-dashoffset: 1; }
 
-/* Preview marks on the garment (Hoodie's Overlay): raspberry. */
+/* Preview marks on the garment (Hoodie's Overlay): --mark is set per colorway
+   (dusty blue on light bodies, cream on dark ones). */
 .chapter-marks path,
 .chapter-marks rect,
-.chapter-marks circle { stroke: theme('colors.uv'); }
-.chapter-marks .chapter-mark-dot { fill: theme('colors.uv'); stroke: none; }
-.chapter-marks text { fill: theme('colors.uv'); stroke: theme('colors.white'); }
+.chapter-marks circle { stroke: var(--mark, theme('colors.dusty')); }
+.chapter-marks .chapter-mark-dot { fill: var(--mark, theme('colors.dusty')); stroke: none; }
+.chapter-marks text { fill: var(--mark, theme('colors.dusty')); stroke: none; }
 
 
-/* ── Callouts: the details you can tap, as white pills (navy once on) ── */
+/* ── Callouts: the details you can tap, as white pills (green once on) ── */
 .chapter-callout {
   display: flex;
   flex-direction: column;
@@ -182,7 +183,7 @@
 @keyframes chapter-bump-a { 0% { scale: 1; } 35% { scale: 1.02; } 100% { scale: 1; } }
 @keyframes chapter-bump-b { 0% { scale: 1; } 35% { scale: 1.02; } 100% { scale: 1; } }
 
-/* Colorways: five flat 28px dots in 44px targets; the current one gets a navy ring. */
+/* Colorways: five flat 22px dots in 34px targets; the current one gets a green ring. */
 .chapter-swatch {
   display: grid;
   place-items: center;
@@ -197,34 +198,30 @@
   height: 22px;
   border-radius: 9999px;
   background: var(--sw);
-  box-shadow: inset 0 0 0 1px theme('colors.ink / 14%');
+  box-shadow: inset 0 0 0 1px theme('colors.ink / 22%');
   transition: box-shadow 0.25s ease, scale 0.25s ease;
 }
 .chapter-swatch:hover .chapter-swatch-dot { scale: 1.1; }
 .chapter-swatch[data-current] .chapter-swatch-dot {
   box-shadow:
-    inset 0 0 0 1px theme('colors.ink / 14%'),
-    0 0 0 2px theme('colors.white'),
+    inset 0 0 0 1px theme('colors.ink / 22%'),
+    0 0 0 2.5px theme('colors.paper'),
     0 0 0 4px theme('colors.ink');
 }
 .chapter-swatch:focus-visible { outline: 2px solid theme('colors.electric-deep'); outline-offset: 0; }
-/* After the dots: not a swatch, just a note that any colour can be made. */
-.chapter-anycolor {
+/* After the dots: the current colorway's name, and a note that any colour can be made. */
+.chapter-cwname {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-left: 4px;
+  min-width: 9.5em;
   white-space: nowrap;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: theme('colors.ink / 70%');
-}
-.chapter-anycolor-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 9999px;
-  background: conic-gradient(#F9A8C9, #C8336E, #F2B33D, #7BC67E, #A9CCF4, #2B5BD7, #7E5BD7, #F9A8C9);
-  box-shadow: inset 0 0 0 1px theme('colors.ink / 14%');
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: theme('colors.ink');
 }
 
 /* The name pill under the hoodie. */
@@ -233,8 +230,24 @@
   transition: box-shadow 0.2s ease;
 }
 .chapter-name:focus-within { box-shadow: inset 0 0 0 2px theme('colors.ink'); }
+.chapter-name-input {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.chapter-name-input::placeholder {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-stretch: 100%;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 0.9375rem;
+}
 
-/* ── Act 02: pieces settle in on pale plates ─────────────────────────── */
+/* ── Act 02: pieces settle in on their plates ────────────────────────── */
 .chapter-piece {
   transition:
     translate 0.9s var(--settle) var(--d, 0ms),
@@ -243,6 +256,23 @@
 .chapter-table[data-in='false'] .chapter-piece {
   translate: var(--from, 0 30px);
   opacity: 0;
+}
+
+/* The close: the logo in cream, cut from the logo file as a mask so the file stays untouched. */
+.chapter-logo {
+  background-color: theme('colors.cream');
+  -webkit-mask: url('/mt-logo.svg') center / contain no-repeat;
+  mask: url('/mt-logo.svg') center / contain no-repeat;
+  transition: opacity 0.8s ease 0.1s, translate 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
+}
+.chapter-finale[data-in='false'] .chapter-logo { opacity: 0; translate: 0 12px; }
+/* A soft light from above, so the band reads as cloth rather than a flat fill. */
+.chapter-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 0%, rgba(238, 230, 217, 0.06), transparent 60%);
 }
 
 /* The finale headline scales in as it arrives. */
@@ -274,70 +304,82 @@
   100% { opacity: 1; scale: 1; rotate: 0deg; }
 }
 
-/* ── The tech-pack slip (hidden on the homepage; `<Stage receipt />`) ── */
+/* ── The tech-pack card ─────────────────────────────────────────────── */
 .chapter-slip {
-  padding: 1.8em 1.6em 1.6em;
+  padding: 1.6em 1.6em 1.4em;
   font-size: 12px;
-  background: theme('colors.white');
+  background: #FFFDF9;
   color: theme('colors.ink');
-  box-shadow: 0 30px 50px -24px rgba(40, 32, 20, 0.45), 0 2px 4px rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px theme('colors.rule'),
+    0 28px 44px -26px rgba(19, 51, 39, 0.42),
+    0 2px 4px rgba(19, 51, 39, 0.05);
 }
-/* On the board the slip scales with the board, so it fits its corner at any width. */
-.chapter-board .chapter-slip { font-size: clamp(8px, 0.78cqw, 12px); }
-.chapter-slip-wrap { z-index: 5; }
-/* Torn at the top as well as the bottom (the bottom tear comes from .receipt). */
+/* A green binding strip along the top, like a spec sheet in a sleeve. */
 .chapter-slip::before {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  top: -7px;
-  height: 7px;
-  background:
-    linear-gradient(-135deg, transparent 5px, #fff 0) 0 0 / 10px 7px repeat-x,
-    linear-gradient(135deg, transparent 5px, #fff 0) 0 0 / 10px 7px repeat-x;
+  inset: 0 0 auto 0;
+  height: 0.45em;
+  border-radius: 4px 4px 0 0;
+  background: theme('colors.ink');
 }
+/* On the board the card scales with the board, so it fits its corner at any width. */
+.chapter-board .chapter-slip { font-size: clamp(8px, 0.78cqw, 12px); }
+.chapter-slip-wrap { z-index: 5; }
 .chapter-slip-brand {
-  font-family: var(--font-mono);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 118%;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 1.3em;
+  letter-spacing: 0.06em;
+  font-size: 1.05em;
   line-height: 1.1;
+}
+.chapter-slip-org {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 112%;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  font-size: 1.9em;
+  line-height: 1;
+  overflow-wrap: anywhere;
 }
 .chapter-slip-text {
   font-family: var(--font-mono);
-  font-size: 1em;
-  line-height: 1.4;
-  letter-spacing: 0.06em;
+  font-size: 0.92em;
+  line-height: 1.45;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .chapter-slip-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.5em;
+  gap: 0.75em;
   margin: 0 -0.5em;
-  padding: 0.18em 0.5em;
+  padding: 0.2em 0.5em;
   transition: background-color 0.25s ease, color 0.25s ease;
 }
-.chapter-slip-row[data-lit] { background: theme('colors.electric-lit'); color: theme('colors.ink'); }
-.chapter-slip-rule { border-top: 1px dashed theme('colors.rule'); }
-.chapter-slip-double { border-top: 3px double theme('colors.rule'); }
-.chapter-slip-barcode {
-  height: 2.6em;
-  margin-inline: 8%;
-  background: repeating-linear-gradient(90deg,
-    currentColor 0 2px, transparent 2px 4px, currentColor 4px 5px, transparent 5px 8px,
-    currentColor 8px 11px, transparent 11px 12px, currentColor 12px 13px, transparent 13px 16px);
-  opacity: 0.6;
-}
+.chapter-slip-row[data-lit] { background: theme('colors.cream'); color: theme('colors.ink'); }
+.chapter-slip-rule { border-top: 1px solid theme('colors.rule'); }
 .chapter-slip-total {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 112%;
+  font-size: 3em;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+}
+.chapter-slip-code {
   font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 3.2em;
-  line-height: 0.95;
-  letter-spacing: -0.04em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: theme('colors.beige-deep');
 }
 .chapter-slip-in { animation: chapter-print 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
 @keyframes chapter-print {

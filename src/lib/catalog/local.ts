@@ -1,47 +1,133 @@
 /**
- * Member Threads's pieces, held here rather than in the dashboard.
+ * Member Threads' catalog, held here rather than in the dashboard.
  *
- * The Studio sells collections, not SKUs: every piece below is a starting point a
- * designer builds on (fabric, color, fit, decoration), and every price is a
- * "from" number that lives inside one collection price. Pieces with no `pricing`
- * render as "Priced inside your collection".
+ * Every style below is a foundation, not a finished SKU: an organization starts
+ * from the established pattern and changes the color, fabric, fit, graphics,
+ * embroidery and details. Minimum 36 pieces per style; sizes mix freely within it.
+ *
+ * Prices are per piece with design and decoration included, as a ladder at
+ * 36 / 72 / 144 / 300 pieces. EVERY PRICE IS A PLACEHOLDER: each ladder is marked
+ * [CONFIRM] and must be checked against real costing before launch. Size charts
+ * are standard blank measurements, also [CONFIRM].
  *
  * There are no photographs yet, on purpose: `images` stays empty and GarmentArt
- * draws each piece in its colourways. Set `CATALOG_SOURCE=live` to read the
+ * draws each piece in its colorways. Set `MT_CATALOG_SOURCE=live` to read the
  * dashboard instead (see api.ts).
  */
 
-import type { Catalog, CatalogProduct, Colorway } from './types';
+import type { Catalog, CatalogProduct, Colorway, PublicPricing } from './types';
 
-const UPDATED = '2026-09-01T00:00:00.000Z';
+const UPDATED = '2026-10-01T00:00:00.000Z';
 
-/** Youth XS through adult 2XL: how a Mitzvah guest list actually sizes. */
-const GUEST_SIZES = ['YXS', 'YS', 'YM', 'YL', 'YXL', 'S', 'M', 'L', 'XL', '2XL'].map((code) => ({ code }));
-const ADULT_SIZES = ['S', 'M', 'L', 'XL', '2XL'].map((code) => ({ code }));
+/** Adult unisex XS through 3XL. */
+const ADULT = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'].map((code) => ({ code }));
+
+/** Matches site.ts: minimum 36 pieces per style. */
+const MINIMUM = 36;
+/** Matches site.ts FAQ: 6 to 8 weeks, design and sampling included. [CONFIRM] */
+const LEAD = { min: 42, max: 56 };
 
 const cw = (name: string, hex: string): Colorway => ({ name, hex, pantone: null, moq: null });
-const from = (dollars: number) => ({ mode: 'starting_at' as const, startingAtCents: dollars * 100, currency: 'USD' });
 
-/** Everything a piece shares, so each entry below is only what makes it that piece. */
-function piece(p: Partial<CatalogProduct> & Pick<CatalogProduct, 'slug' | 'name' | 'category'>): CatalogProduct {
+/** Realistic garment colors, shared so the same color reads the same across styles. */
+const C = {
+  heather: cw('Heather Grey', '#B9B7B1'),
+  oatmeal: cw('Oatmeal Heather', '#D8CEBD'),
+  cream: cw('Cream', '#ECE4D4'),
+  white: cw('White', '#F5F3EE'),
+  natural: cw('Natural', '#E6DCC6'),
+  stone: cw('Stone', '#D2C6AE'),
+  sand: cw('Sand', '#C9B596'),
+  khaki: cw('Khaki', '#B3A07C'),
+  olive: cw('Olive', '#55553A'),
+  forest: cw('Forest', '#1F3D30'),
+  navy: cw('Navy', '#1E2A3D'),
+  slate: cw('Slate Blue', '#56677A'),
+  burgundy: cw('Burgundy', '#5A2230'),
+  charcoal: cw('Charcoal', '#3A3B3D'),
+  black: cw('Black', '#1B1B1C'),
+};
+
+/**
+ * One per-piece price ladder at 36 / 72 / 144 / 300, in whole dollars.
+ * Decoration and design are included, so there is one price per quantity.
+ */
+const ladder = (at36: number, at72: number, at144: number, at300: number): PublicPricing => ({
+  mode: 'full_breaks',
+  breaks: [
+    [36, at36],
+    [72, at72],
+    [144, at144],
+    [300, at300],
+  ].map(([minQuantity, dollars]) => ({ decorationMethod: null, minQuantity, unitPriceCents: dollars * 100, currency: 'USD' })),
+});
+
+// ── size charts (inches, measured flat) [CONFIRM all measurements] ───────────
+
+type Chart = Record<string, Record<string, number>>;
+const chart = (rows: Record<string, number[]>, sizes = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']): Chart =>
+  Object.fromEntries(sizes.map((s, i) => [s, Object.fromEntries(Object.entries(rows).map(([m, v]) => [m, v[i]]))]));
+
+const FLEECE_CHART = chart({
+  'Chest width': [21, 22.5, 24, 25.5, 27, 28.5, 30],
+  'Body length': [26, 27, 28, 29, 30, 31, 32],
+  'Sleeve length': [33, 34, 35, 36, 37, 37.5, 38],
+});
+const TEE_CHART = chart({
+  'Chest width': [19.5, 21, 22.5, 24, 25.5, 27, 28.5],
+  'Body length': [26, 27, 28, 29, 30, 31, 32],
+  'Sleeve length': [8, 8.5, 9, 9.5, 10, 10.5, 11],
+});
+const LS_CHART = chart({
+  'Chest width': [19.5, 21, 22.5, 24, 25.5, 27, 28.5],
+  'Body length': [26, 27, 28, 29, 30, 31, 32],
+  'Sleeve length': [32.5, 33.5, 34.5, 35.5, 36.5, 37, 37.5],
+});
+const POLO_CHART = chart({
+  'Chest width': [19, 20.5, 22, 23.5, 25, 26.5, 28],
+  'Body length': [26.5, 27.5, 28.5, 29.5, 30.5, 31.5, 32.5],
+  'Sleeve length': [7.5, 8, 8.5, 9, 9.5, 10, 10.5],
+});
+const OUTER_CHART = chart({
+  'Chest width': [21.5, 23, 24.5, 26, 27.5, 29, 30.5],
+  'Body length': [26.5, 27.5, 28.5, 29.5, 30.5, 31.5, 32.5],
+  'Sleeve length': [33, 34, 35, 36, 37, 37.5, 38],
+});
+const VEST_CHART = chart({
+  'Chest width': [21.5, 23, 24.5, 26, 27.5, 29, 30.5],
+  'Body length': [25.5, 26.5, 27.5, 28.5, 29.5, 30.5, 31.5],
+});
+const PANT_CHART = chart({
+  'Waist, relaxed': [12.5, 13.5, 14.5, 15.5, 16.5, 17.5, 18.5],
+  Inseam: [29, 30, 30.5, 31, 31.5, 32, 32],
+  'Leg opening': [4.5, 4.75, 5, 5.25, 5.5, 5.75, 6],
+});
+const SHORT_CHART = chart({
+  'Waist, relaxed': [12.5, 13.5, 14.5, 15.5, 16.5, 17.5, 18.5],
+  Inseam: [6, 6, 6.5, 6.5, 7, 7, 7],
+  'Leg opening': [11, 11.5, 12, 12.5, 13, 13.5, 14],
+});
+
+/** Everything a style shares, so each entry below is only what makes it that style. */
+function style(p: Partial<CatalogProduct> & Pick<CatalogProduct, 'slug' | 'name' | 'category'>): CatalogProduct {
   return {
     styleNumber: null,
     description: null,
     fabric: null,
     fit: null,
     gsm: null,
-    careInstructions: 'Wash cold, inside out. Hang dry.',
+    careInstructions: 'Machine wash cold, inside out. Tumble dry low.',
     countryOfOrigin: null,
     sustainabilityNotes: null,
     decorationMethods: [],
     sizeMode: 'sized',
-    sizes: GUEST_SIZES,
+    sizes: ADULT,
     sizeChart: {},
     sizeChartUnit: 'in',
     colorways: [],
-    minimumOrderQuantity: null,
+    minimumOrderQuantity: MINIMUM,
     moqPerColorway: null,
-    leadTimeDays: null,
+    leadTimeDays: LEAD,
     sampleLeadTimeDays: null,
     tags: [],
     isFeatured: false,
@@ -53,235 +139,269 @@ function piece(p: Partial<CatalogProduct> & Pick<CatalogProduct, 'slug' | 'name'
   };
 }
 
+/** Segment tags, so search and the list read the way buyers describe themselves. */
+const SEG = {
+  campus: 'University clubs',
+  company: 'Companies',
+  nonprofit: 'Nonprofits',
+  athletic: 'Teams & fitness',
+  social: 'Clubs & associations',
+};
+
 const PRODUCTS: CatalogProduct[] = [
-  // ── featured: the three pieces a collection is usually built around ────────
-  piece({
+  // ── featured: the three styles most collections are built around ─────────
+  style({
     slug: 'heavyweight-hoodie',
     name: 'Heavyweight Hoodie',
     styleNumber: 'MT-01',
-    category: 'Hoodies & crewnecks',
+    category: 'Fleece',
     isFeatured: true,
-    sticker: "The one they'll actually wear",
     description:
-      'The anchor of most collections. A 420 GSM brushed-back fleece, cut oversized with a dropped shoulder, in a color we dye to match the event.\n\n' +
-      'Contrast rib at the cuffs and hem, a lined hood, a custom zipper pull if you want one, their name in chenille or satin script, and a woven label inside the neck. It is meant to be worn for years, not packed away after the party.',
-    fabric: 'Brushed-back cotton fleece',
-    gsm: 420,
-    fit: 'Oversized, dropped shoulder',
-    decorationMethods: ['Chenille appliqué', 'Embroidery', 'Puff print', 'Woven neck label', 'Custom zipper pull'],
-    colorways: [cw('Cream', '#FFF3CF'), cw('Navy', '#141B66'), cw('Sky', '#59C8FF'), cw('Kelly', '#0FA958')],
-    tags: ['oversized', 'contrast rib', 'chenille', 'guest piece'],
-    pricing: from(65),
+      'The piece most collections are built on. A dense brushed-back fleece with a relaxed body, a lined double-layer hood and ribbed cuffs and hem that hold their shape wash after wash.\n\n' +
+      'Change the color, swap the drawcord and tips, add a contrast rib, then finish it with embroidery, chenille or a print. A woven neck label makes it read as yours, not a blank.',
+    fabric: '80/20 cotton-poly brushed-back fleece',
+    gsm: 400,
+    fit: 'Relaxed, set-in sleeve',
+    decorationMethods: ['Embroidery', 'Chenille appliqué', 'Screen printing', 'Puff print', 'Woven neck label'],
+    colorways: [C.heather, C.forest, C.navy, C.cream, C.black],
+    sizeChart: FLEECE_CHART,
+    tags: ['fleece', 'hooded', SEG.campus, SEG.company, SEG.nonprofit, SEG.athletic, SEG.social],
+    pricing: ladder(58, 52, 47, 43), // [CONFIRM] MT-01 prices
   }),
-  piece({
-    slug: 'pajama-pants',
-    name: 'Pajama Pants',
+  style({
+    slug: 'quarter-zip',
+    name: 'Quarter-Zip Pullover',
     styleNumber: 'MT-02',
-    category: 'Bottoms',
+    category: 'Fleece',
     isFeatured: true,
-    sticker: 'After-party approved',
     description:
-      'Soft brushed flannel with the event art in the pattern itself: their monogram, the date, a crest, a palm, whatever the collection is built on, repeated as a check or an all-over print.\n\n' +
-      'Drawcord waist, side pockets, a woven tab at the hip. The piece every guest changes into the minute they get home.',
-    fabric: 'Brushed cotton flannel',
-    gsm: 170,
-    fit: 'Relaxed, drawcord waist',
-    decorationMethods: ['Custom all-over print', 'Jacquard', 'Embroidery', 'Woven tab'],
-    colorways: [cw('Sky', '#59C8FF'), cw('Navy', '#141B66'), cw('Blush', '#FFC2DD'), cw('Kelly', '#0FA958')],
-    tags: ['event artwork', 'pattern', 'sleepover'],
-    pricing: from(35),
+      'A clean mid-layer for offices, sidelines and alumni weekends. Smooth-faced fleece outside, brushed inside, with a stand collar and a metal quarter zip.\n\n' +
+      'Embroidery sits best here: a left-chest mark, a sleeve hit, a custom zipper pull in your color.',
+    fabric: 'Cotton-poly double-face fleece',
+    gsm: 340,
+    fit: 'Classic, set-in sleeve',
+    decorationMethods: ['Embroidery', 'Custom zipper pull', 'Woven neck label', 'Debossed trims'],
+    colorways: [C.navy, C.heather, C.forest, C.oatmeal, C.black],
+    sizeChart: FLEECE_CHART,
+    tags: ['mid-layer', 'zip', SEG.company, SEG.social, SEG.athletic, SEG.campus],
+    pricing: ladder(64, 58, 53, 49), // [CONFIRM] MT-02 prices
   }),
-  piece({
-    slug: 'racing-jersey',
-    name: 'Racing Jersey',
+  style({
+    slug: 'embroidered-polo',
+    name: 'Embroidered Polo',
     styleNumber: 'MT-03',
-    category: 'Jerseys',
+    category: 'Polos & Rugbys',
     isFeatured: true,
-    sticker: 'Pick your number',
     description:
-      'Vintage racing, hockey or basketball cut, in a mesh or interlock that moves on the dance floor. Their name across the back, every guest gets a number.\n\n' +
-      'Twill numbers, contrast striping and sponsor-style patches built from the event: the date, the city, the inside jokes.',
-    fabric: 'Athletic interlock or mesh',
-    gsm: 180,
-    fit: 'Boxy, racing, hockey or basketball cut',
-    decorationMethods: ['Tackle twill', 'Screen printing', 'Woven patches', 'Embroidery'],
-    colorways: [cw('Cherry', '#FF2F2F'), cw('Black', '#111014'), cw('White', '#FAFAF7'), cw('Silver', '#C9CDD4')],
-    tags: ['numbered', 'racing', 'hockey', 'basketball'],
-    pricing: from(35),
+      'A heavy cotton piqué polo with a knit collar, a two-button placket and a side-vented hem. The polo you wear to the club, the client dinner and the tournament.\n\n' +
+      'Tipped collars, a contrast placket and a tonal or full-color embroidered mark are all part of the price.',
+    fabric: '100% cotton piqué',
+    gsm: 240,
+    fit: 'Classic, side-vented hem',
+    decorationMethods: ['Embroidery', 'Tipped collar', 'Woven neck label'],
+    colorways: [C.white, C.navy, C.forest, C.black, C.burgundy],
+    sizeChart: POLO_CHART,
+    tags: ['piqué', 'collared', SEG.company, SEG.social, SEG.athletic],
+    pricing: ladder(44, 40, 36, 33), // [CONFIRM] MT-03 prices
   }),
 
-  // ── the rest of the rack ─────────────────────────────────────────────────
-  piece({
-    slug: 'sweatpants',
-    name: 'Sweatpants',
+  // ── fleece ──────────────────────────────────────────────────────────────
+  style({
+    slug: 'heavyweight-crewneck',
+    name: 'Heavyweight Crewneck',
     styleNumber: 'MT-04',
-    category: 'Bottoms',
-    sticker: 'Matches the hoodie',
+    category: 'Fleece',
     description:
-      'Built to pair with the hoodie: the same fleece, the same dyed color, a straight leg with a rib cuff. Puff print or embroidery down one leg, their initials on the hip.',
-    fabric: 'Brushed-back cotton fleece',
-    gsm: 380,
-    fit: 'Relaxed, straight leg, rib cuff',
-    decorationMethods: ['Puff print', 'Embroidery', 'Screen printing'],
-    colorways: [cw('Cream', '#FFF3CF'), cw('Navy', '#141B66'), cw('Heather', '#B9B6AE'), cw('Sky', '#59C8FF')],
-    tags: ['matching', 'fleece'],
-    pricing: from(40),
+      'A heavyweight crewneck in the same fleece as the hoodie, with a tall rib collar, a cover-stitched neck and a straight hem. Quiet enough for an embroidered crest, sturdy enough for chenille.',
+    fabric: '80/20 cotton-poly brushed-back fleece',
+    gsm: 400,
+    fit: 'Relaxed, set-in sleeve',
+    decorationMethods: ['Embroidery', 'Chenille appliqué', 'Screen printing', 'Woven neck label'],
+    colorways: [C.oatmeal, C.forest, C.navy, C.burgundy, C.heather],
+    sizeChart: FLEECE_CHART,
+    tags: ['fleece', 'crest', SEG.social, SEG.campus, SEG.nonprofit],
+    pricing: ladder(52, 47, 43, 39), // [CONFIRM] MT-04 prices
   }),
-  piece({
+
+  // ── tees ────────────────────────────────────────────────────────────────
+  style({
     slug: 'heavyweight-tee',
     name: 'Heavyweight Tee',
     styleNumber: 'MT-05',
-    category: 'Tees & tanks',
+    category: 'Tees',
     description:
-      'A boxy, heavyweight cotton tee with a thick rib neck. Vintage-wash on request, so it feels like it has been in their closet for years.',
-    fabric: 'Combed cotton jersey',
+      'A thick, structured cotton tee with a tight rib neck and a slightly boxy body. Garment-dyed on request, so it wears in rather than out.',
+    fabric: '100% combed cotton jersey',
     gsm: 240,
-    fit: 'Boxy, slightly cropped',
-    decorationMethods: ['Screen printing', 'Puff print', 'Embroidery'],
-    colorways: [cw('White', '#FAFAF7'), cw('Cream', '#FFF3CF'), cw('Lemon', '#FFE600'), cw('Kelly', '#0FA958')],
-    tags: ['vintage wash', 'guest piece'],
-    pricing: from(25),
+    fit: 'Boxy, dropped shoulder',
+    decorationMethods: ['Screen printing', 'Water-based ink', 'Puff print', 'Embroidery', 'Garment dye'],
+    colorways: [C.white, C.cream, C.heather, C.forest, C.black],
+    sizeChart: TEE_CHART,
+    tags: ['cotton', SEG.campus, SEG.nonprofit, SEG.athletic, SEG.company],
+    pricing: ladder(26, 23, 20, 18), // [CONFIRM] MT-05 prices
   }),
-  piece({
-    slug: 'baby-tee',
-    name: 'Baby Tee',
+  style({
+    slug: 'long-sleeve-tee',
+    name: 'Long Sleeve Tee',
     styleNumber: 'MT-06',
-    category: 'Tees & tanks',
-    sticker: 'Friends section',
+    category: 'Tees',
     description:
-      'Fitted, cropped and soft, in a color matched to the Pantone of the event. Usually half of a matching set with the foldover short.',
-    fabric: 'Cotton-modal rib',
-    gsm: 200,
-    fit: 'Fitted, cropped',
-    decorationMethods: ['Puff print', 'Embroidery', 'Rhinestones'],
-    colorways: [cw('Sky', '#59C8FF'), cw('Lemon', '#FFE600'), cw('Blush', '#FFC2DD'), cw('White', '#FAFAF7')],
-    tags: ['pantone match', 'matching set'],
-    pricing: from(25),
-  }),
-  piece({
-    slug: 'dance-floor-hat',
-    name: 'Dance-Floor Hat',
-    styleNumber: 'MT-07',
-    category: 'Hats',
-    sticker: 'Rope brim',
-    description:
-      'The hat that comes out when the DJ does. A rope-brim cap, a foam trucker or a washed bucket, with the event mark in puff embroidery on the front.',
-    fabric: 'Washed cotton twill',
-    gsm: 280,
-    fit: 'Rope-brim, trucker or bucket',
-    sizeMode: 'one_size',
-    sizes: [],
-    decorationMethods: ['Puff embroidery', 'Embroidery', 'Woven patches'],
-    colorways: [cw('Cream & navy', '#FFF3CF'), cw('Navy', '#141B66'), cw('Kelly', '#0FA958'), cw('Sky', '#59C8FF')],
-    tags: ['rope brim', 'trucker', 'bucket', 'dance floor'],
-    pricing: from(25),
+      'The heavyweight tee with a full sleeve and rib cuffs. Room for a sleeve print or a running sleeve hit, which is most of the reason to choose it.',
+    fabric: '100% combed cotton jersey',
+    gsm: 240,
+    fit: 'Boxy, rib cuff',
+    decorationMethods: ['Screen printing', 'Water-based ink', 'Embroidery', 'Garment dye'],
+    colorways: [C.white, C.navy, C.sand, C.charcoal],
+    sizeChart: LS_CHART,
+    tags: ['cotton', 'sleeve print', SEG.campus, SEG.athletic, SEG.nonprofit],
+    pricing: ladder(32, 29, 26, 23), // [CONFIRM] MT-06 prices
   }),
 
-  // ── priced inside your collection ───────────────────────────────────────
-  piece({
-    slug: 'heavyweight-crewneck',
-    name: 'Heavyweight Crewneck',
+  // ── polos & rugbys ──────────────────────────────────────────────────────
+  style({
+    slug: 'rugby-shirt',
+    name: 'Rugby Shirt',
+    styleNumber: 'MT-07',
+    category: 'Polos & Rugbys',
+    description:
+      'A heavy jersey rugby with a woven twill collar, a rubber-button placket and reinforced side vents. Solid or hooped, in your colors.\n\n' +
+      'An embroidered crest on the chest and a number or year on the sleeve make it a club piece.',
+    fabric: '100% cotton heavy jersey, twill collar',
+    gsm: 330,
+    fit: 'Relaxed, side-vented hem',
+    decorationMethods: ['Embroidery', 'Tackle twill', 'Woven patches', 'Custom stripe'],
+    colorways: [C.navy, C.forest, C.burgundy, C.cream],
+    sizeChart: OUTER_CHART,
+    tags: ['collared', 'stripes', SEG.social, SEG.campus, SEG.athletic],
+    pricing: ladder(72, 66, 60, 55), // [CONFIRM] MT-07 prices
+  }),
+
+  // ── outerwear ───────────────────────────────────────────────────────────
+  style({
+    slug: 'coach-jacket',
+    name: 'Coach Jacket',
     styleNumber: 'MT-08',
-    category: 'Hoodies & crewnecks',
+    category: 'Outerwear',
     description:
-      'Vintage country-club crewneck in heavyweight fleece, with a varsity rib collar and a chenille crest on the chest.',
-    fabric: 'Brushed-back cotton fleece',
-    gsm: 400,
-    fit: 'Relaxed, set-in sleeve',
-    decorationMethods: ['Chenille appliqué', 'Embroidery', 'Screen printing'],
-    colorways: [cw('Kelly', '#0FA958'), cw('Cream', '#FFF3CF'), cw('Navy', '#141B66')],
-    tags: ['country club', 'crest'],
-  }),
-  piece({
-    slug: 'varsity-jacket',
-    name: 'Varsity Jacket',
-    styleNumber: 'MT-09',
-    category: 'Hoodies & crewnecks',
-    sticker: 'Family only',
-    description:
-      'Wool body, contrast sleeves, striped rib and snaps, with chenille letters and their name in satin script across the back. Usually a family piece, or for the closest friends.',
-    fabric: 'Melton wool body, contrast sleeves',
+      'A water-resistant nylon shell with a mesh lining, a snap front and a drawcord hem. Light enough for three seasons, with a large back panel for a print or a full embroidered mark.',
+    fabric: 'Nylon taslan, water-resistant, mesh lined',
     gsm: null,
-    fit: 'Classic varsity, snap front',
-    sizes: ADULT_SIZES,
-    careInstructions: 'Dry clean only.',
-    decorationMethods: ['Chenille appliqué', 'Satin script embroidery', 'Woven neck label'],
-    colorways: [cw('Navy', '#141B66'), cw('Kelly', '#0FA958'), cw('Cherry', '#FF2F2F')],
-    tags: ['family', 'chenille letters'],
+    fit: 'Classic, snap front, drawcord hem',
+    decorationMethods: ['Screen printing', 'Embroidery', 'Woven neck label'],
+    colorways: [C.black, C.navy, C.forest, C.khaki],
+    sizeChart: OUTER_CHART,
+    careInstructions: 'Machine wash cold. Hang dry.',
+    tags: ['nylon', 'shell', SEG.athletic, SEG.company, SEG.campus],
+    pricing: ladder(76, 69, 63, 58), // [CONFIRM] MT-08 prices
   }),
-  piece({
-    slug: 'foldover-short',
-    name: 'Foldover Short',
+  style({
+    slug: 'quilted-vest',
+    name: 'Quilted Vest',
+    styleNumber: 'MT-09',
+    category: 'Outerwear',
+    description:
+      'A lightweight quilted vest with a stand collar, a full zip and zip hand pockets. Worn over a quarter-zip or an oxford, it is the corporate team piece that people keep.',
+    fabric: 'Poly shell, synthetic insulation',
+    gsm: null,
+    fit: 'Classic, layering',
+    decorationMethods: ['Embroidery', 'Custom zipper pull', 'Woven neck label'],
+    colorways: [C.navy, C.black, C.olive, C.forest],
+    sizeChart: VEST_CHART,
+    careInstructions: 'Machine wash cold. Hang dry.',
+    tags: ['quilted', 'layering', SEG.company, SEG.social],
+    pricing: ladder(78, 71, 65, 60), // [CONFIRM] MT-09 prices
+  }),
+
+  // ── bottoms ─────────────────────────────────────────────────────────────
+  style({
+    slug: 'fleece-sweatpant',
+    name: 'Fleece Sweatpant',
     styleNumber: 'MT-10',
     category: 'Bottoms',
     description:
-      'A soft foldover-waist short, made to go with the baby tee as a set. Dyed to the same Pantone so the two read as one look.',
-    fabric: 'Cotton-modal French terry',
-    gsm: 240,
-    fit: 'Relaxed, foldover waist',
-    decorationMethods: ['Embroidery', 'Puff print'],
-    colorways: [cw('Sky', '#59C8FF'), cw('Blush', '#FFC2DD'), cw('Oat', '#E9E0C8')],
-    tags: ['matching set', 'pantone match'],
+      'Cut to pair with the hoodie: the same fleece and the same color, with a straight leg, a rib cuff, an elastic drawcord waist and a back patch pocket. Embroidery on the hip.',
+    fabric: '80/20 cotton-poly brushed-back fleece',
+    gsm: 380,
+    fit: 'Relaxed, straight leg, rib cuff',
+    decorationMethods: ['Embroidery', 'Screen printing', 'Puff print'],
+    colorways: [C.heather, C.navy, C.forest, C.black],
+    sizeChart: PANT_CHART,
+    tags: ['fleece', 'matching set', SEG.athletic, SEG.campus],
+    pricing: ladder(48, 43, 39, 36), // [CONFIRM] MT-10 prices
   }),
-  piece({
-    slug: 'ribbed-tank',
-    name: 'Ribbed Tank',
+  style({
+    slug: 'club-short',
+    name: 'Club Short',
     styleNumber: 'MT-11',
-    category: 'Tees & tanks',
-    description: 'A fitted rib tank for the pool day or the morning after, with a tiny embroidered mark at the neckline.',
-    fabric: 'Cotton rib',
-    gsm: 190,
-    fit: 'Fitted',
-    decorationMethods: ['Embroidery', 'Screen printing'],
-    colorways: [cw('White', '#FAFAF7'), cw('Blush', '#FFC2DD'), cw('Sky', '#59C8FF')],
-    tags: ['pool day'],
-  }),
-  piece({
-    slug: 'matching-set',
-    name: 'Matching Set',
-    styleNumber: 'MT-12',
-    category: 'Sets',
-    sticker: 'For the best friends',
+    category: 'Bottoms',
     description:
-      'Two pieces designed as one look: a baby tee and foldover short, or a hoodie and sweatpant, in one Pantone-matched color. Most families make these for the special-friend list.',
-    fabric: 'Matched to the pieces in the set',
-    fit: 'Per piece',
-    decorationMethods: ['Embroidery', 'Puff print', 'Chenille appliqué'],
-    colorways: [cw('Sky', '#59C8FF'), cw('Lemon', '#FFE600'), cw('Blush', '#FFC2DD'), cw('Cream', '#FFF3CF')],
-    tags: ['baby tee', 'friends section', 'color matched'],
+      'A French terry short with a 6.5 inch inseam, an elastic drawcord waist and side pockets. The run-club and studio piece, made to match the tee.',
+    fabric: 'Cotton French terry',
+    gsm: 300,
+    fit: 'Relaxed, 6.5" inseam', // [CONFIRM] inseam
+    decorationMethods: ['Embroidery', 'Screen printing'],
+    colorways: [C.heather, C.navy, C.black, C.cream],
+    sizeChart: SHORT_CHART,
+    tags: ['terry', 'run club', SEG.athletic, SEG.campus],
+    pricing: ladder(38, 34, 31, 28), // [CONFIRM] MT-11 prices
   }),
-  piece({
+
+  // ── headwear ────────────────────────────────────────────────────────────
+  style({
+    slug: 'dad-hat',
+    name: 'Dad Hat',
+    styleNumber: 'MT-12',
+    category: 'Headwear',
+    description:
+      'An unstructured six-panel cap in washed cotton twill, with a curved brim and a self-fabric strap with a brass buckle. Low profile, broken in from the first wear.',
+    fabric: 'Washed cotton twill',
+    gsm: null,
+    fit: 'Unstructured, low profile',
+    sizeMode: 'one_size',
+    sizes: [],
+    careInstructions: 'Spot clean.',
+    decorationMethods: ['Embroidery', '3D puff embroidery', 'Woven patches'],
+    colorways: [C.stone, C.navy, C.forest, C.burgundy, C.black],
+    tags: ['cap', 'six-panel', SEG.campus, SEG.athletic, SEG.social, SEG.nonprofit, SEG.company],
+    pricing: ladder(28, 25, 22, 20), // [CONFIRM] MT-12 prices
+  }),
+  style({
+    slug: 'five-panel-cap',
+    name: 'Five-Panel Cap',
+    styleNumber: 'MT-13',
+    category: 'Headwear',
+    description:
+      'A flat-brim five-panel in nylon or cotton ripstop, with a seamless front panel built for a woven label or a single line of embroidery, and a quick-release strap.',
+    fabric: 'Nylon or cotton ripstop',
+    gsm: null,
+    fit: 'Structured crown, flat brim',
+    sizeMode: 'one_size',
+    sizes: [],
+    careInstructions: 'Spot clean.',
+    decorationMethods: ['Embroidery', 'Woven patches', 'Screen printing'],
+    colorways: [C.navy, C.black, C.khaki, C.forest],
+    tags: ['cap', 'camp cap', 'run club', SEG.athletic, SEG.campus],
+    pricing: ladder(30, 27, 24, 22), // [CONFIRM] MT-13 prices
+  }),
+
+  // ── bags ────────────────────────────────────────────────────────────────
+  style({
     slug: 'canvas-tote',
     name: 'Canvas Tote',
-    styleNumber: 'MT-13',
-    category: 'Bags & packaging',
-    description:
-      'Heavy canvas, long handles, the collection mark embroidered or printed on the front. Carries the rest of the pieces home.',
-    fabric: 'Cotton canvas',
-    gsm: 340,
-    fit: 'Open top, long handles',
-    sizeMode: 'one_size',
-    sizes: [],
-    decorationMethods: ['Embroidery', 'Screen printing'],
-    colorways: [cw('Natural', '#ECE4D3'), cw('Navy', '#141B66'), cw('Kelly', '#0FA958')],
-    tags: ['carry-all'],
-  }),
-  piece({
-    slug: 'custom-packaging',
-    name: 'Custom Packaging',
     styleNumber: 'MT-14',
-    category: 'Bags & packaging',
-    sticker: 'Unboxing included',
+    category: 'Bags',
     description:
-      'Every guest piece arrives folded in its own box or pouch, with a printed tag, tissue and a ribbon in the event colors. Delivered sorted, ready to set out at the venue.',
-    fabric: 'Rigid board, printed tissue, ribbon',
-    fit: 'Sized to the pieces inside',
+      'A heavy cotton canvas tote with long handles and a gusseted base. The welcome-kit and event piece that keeps going to the grocery store for years.',
+    fabric: '100% cotton canvas',
+    gsm: 340,
+    fit: '16 × 15 × 4 in, long handles', // [CONFIRM] dimensions
     sizeMode: 'one_size',
     sizes: [],
-    careInstructions: null,
-    decorationMethods: ['Foil stamp', 'Printed tag', 'Custom ribbon'],
-    colorways: [cw('Cream', '#FFF3CF'), cw('Navy', '#141B66'), cw('Sky', '#59C8FF')],
-    tags: ['box', 'guest table'],
+    careInstructions: 'Spot clean or wash cold. Hang dry.',
+    decorationMethods: ['Screen printing', 'Embroidery'],
+    colorways: [C.natural, C.black, C.navy, C.forest],
+    tags: ['bag', 'welcome kit', SEG.company, SEG.nonprofit, SEG.campus],
+    pricing: ladder(22, 19, 17, 15), // [CONFIRM] MT-14 prices
   }),
 ];
 

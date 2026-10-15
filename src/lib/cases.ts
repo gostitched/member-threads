@@ -1,20 +1,20 @@
 /**
  * Case studies: one per collection in @/lib/work, matched by `caseId`.
  *
- * CONCEPT CONTENT. Each entry is a worked example of a Member Threads collection, not
- * a real family: no client names, photographs or quotes, because inventing those
- * would be fabricating credentials. When a real family agrees to be featured, swap
- * the concept out and add a `quote` only once they've cleared it.
+ * CONCEPT CONTENT. Each entry is a worked example of a Member Threads collection for an
+ * invented organization: no client names, photographs or quotes, because inventing
+ * those would be fabricating credentials. When a real organization agrees to be
+ * featured, swap the concept out and add a `quote` only once they've cleared it.
  *
- * Each title leads with what the family got; the ask and the collection back it up.
- * Lead times are the studio's standard [CONFIRM before launch].
+ * Metrics are the concept's own numbers (pieces and styles), never claims about the
+ * business. Lead times live in the FAQ in @/lib/site.
  */
 export type CaseStudy = {
   id: string;
   sector: string;
   brand: string;
   title: string;
-  /** The ask: what the family (or their planner) came in with. */
+  /** The ask: what the organization came in with. */
   challenge: string;
   /** The collection: what we designed and made. */
   approach: string;
@@ -25,59 +25,63 @@ export type CaseStudy = {
 
 export const CASES: CaseStudy[] = [
   {
-    id: 'sophie',
-    sector: 'Concept collection · Bat Mitzvah · Miami, Florida',
+    id: 'ashford',
+    sector: 'Concept collection · University club · Fall recruitment',
     brand: 'Member Threads',
-    title: '86 pieces in cream, navy and baby blue, boxed by name and waiting at the door',
-    challenge: 'Cream, navy and baby blue. She loves Aviator Nation and vintage country-club stuff. Something amazing for 80 kids, and a matching set for her closest friends.',
-    approach: 'A 420 GSM oversized hoodie with contrast rib and her name in satin script, a Pantone-matched baby tee and foldover short for the friends, sweats, dance-floor caps and PJ pants: one palette, one drop.',
+    title: 'A five-piece recruitment collection that looks like the campus store’s best shelf',
+    challenge: 'Recruitment week is the first thing new students see of the society. Members should look like they came from the best shelf in the campus store, not a career-fair table, with one piece just for the exec board.',
+    approach: 'An oatmeal hoodie with ASHFORD arched in burgundy tackle twill, a crest crewneck, a heather quarter-zip reserved for the board, a tee for every new member and a six-panel cap.',
     metrics: [
-      { k: 'Pieces', v: '86' },
-      { k: 'Guests', v: '80' },
-      { k: 'Lead time', v: '12 weeks' },
-      { k: 'Pieces by name', v: 'All 86' },
+      { k: 'Pieces', v: '438' },
+      { k: 'Styles', v: '5' },
     ],
   },
   {
-    id: 'jake',
-    sector: 'Concept collection · Bar Mitzvah · Scottsdale, Arizona',
+    id: 'halden',
+    sector: 'Concept collection · Company · New-hire kit',
     brand: 'Member Threads',
-    title: 'A 72-piece country-club collection built around one crest',
-    challenge: 'A golf weekend in Scottsdale that should feel like an old members’ club, not a party store. Forest green, cream and a little butter yellow.',
-    approach: 'JAKE in chenille on a forest hoodie, a crest polo, rope-brim caps for the dance floor, PJ pants with the crest on repeat, a tote for the parents and a box for every guest.',
+    title: 'A first-day kit people wear on weekends',
+    challenge: 'Most of what new hires had been handed ended up in a drawer. The kit had to be worn outside the office, with the logo small enough that it never feels like a uniform.',
+    approach: 'A tonal charcoal hoodie, a stone quarter-zip, a bone heavyweight tee with the one loud moment in ember, a cap and a canvas tote.',
     metrics: [
-      { k: 'Pieces', v: '72' },
-      { k: 'Guests', v: '64' },
-      { k: 'Lead time', v: '12 weeks' },
-      { k: 'Pieces by name', v: 'All 72' },
+      { k: 'Pieces', v: '328' },
+      { k: 'Styles', v: '5' },
     ],
   },
   {
-    id: 'levi-noa',
-    sector: 'Concept collection · B’nai Mitzvah · Westchester, New York',
+    id: 'riverbend',
+    sector: 'Concept collection · Nonprofit · Charity 5K',
     brand: 'Member Threads',
-    title: 'One racing team, two drivers, 118 numbered pieces',
-    challenge: 'Twins, one party and two very different kids, both into cars. Make it a vintage racing team without putting them in matching outfits.',
-    approach: 'A white jersey for Levi and a black one for Noa, each with their own number, a silver Grand Prix crewneck, caps and checker totes, with a woven label numbering every piece out of 118.',
+    title: 'Race-day apparel that funds the mission instead of costing it',
+    challenge: 'The 5K is the biggest fundraiser of the year. Runners need a shirt, volunteers need to be easy to spot, and the merch table needs something good enough to sell.',
+    approach: 'A linen race tee for every registrant, a teal volunteer crewneck, a supporter hoodie with a woven patch and a teal rope cap.',
     metrics: [
-      { k: 'Pieces', v: '118' },
-      { k: 'Guests', v: '110' },
-      { k: 'Lead time', v: '12 weeks' },
-      { k: 'Pieces by name', v: 'All 118' },
+      { k: 'Pieces', v: '528' },
+      { k: 'Styles', v: '4' },
     ],
   },
   {
-    id: 'ella',
-    sector: 'Concept collection · Bat Mitzvah · Los Angeles, California',
+    id: 'eastline',
+    sector: 'Concept collection · Run club · Members’ issue',
     brand: 'Member Threads',
-    title: 'A ballet-core collection her friends wear to the studio, long after the party',
-    challenge: 'She dances and wanted it to look like it: soft pink, ribbon, nothing loud. Pieces for the studio and for sleepovers.',
-    approach: 'An oat zip hoodie and a ribbed black tank with “Ella” in script, blush gingham PJ pants for the after-party and a tote, each boxed in blush with a satin ribbon.',
+    title: 'Race kit and everything after it, in one orange',
+    challenge: 'A club that runs three mornings a week wanted something to race in and something to wear to coffee after, in its orange, without looking like a fun-run giveaway.',
+    approach: 'An asphalt singlet and short, a chalk members’ tee, a heather crewneck with an arched wordmark and a safety-orange cap.',
     metrics: [
-      { k: 'Pieces', v: '64' },
-      { k: 'Guests', v: '58' },
-      { k: 'Lead time', v: '12 weeks' },
-      { k: 'Pieces by name', v: 'All 64' },
+      { k: 'Pieces', v: '396' },
+      { k: 'Styles', v: '5' },
+    ],
+  },
+  {
+    id: 'holloway',
+    sector: 'Concept collection · Members’ club · Spring capsule',
+    brand: 'Member Threads',
+    title: 'A capsule that sits next to what members already own',
+    challenge: 'Members of a private club already own good clothes, and pro-shop logo wear wasn’t getting worn. The brief: a small seasonal capsule, the crest and nothing else.',
+    approach: 'An ivory crest polo, a navy quarter-zip, an oxford-blue crewneck in navy script and an ivory rope cap, embroidered throughout.',
+    metrics: [
+      { k: 'Pieces', v: '276' },
+      { k: 'Styles', v: '4' },
     ],
   },
 ];

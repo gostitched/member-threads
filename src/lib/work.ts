@@ -1,23 +1,26 @@
+import { SEGMENTS } from './site';
+
 /**
  * Collections.
  *
- * Every entry here is a CONCEPT COLLECTION: a worked example of what The Mitzvah
- * Studio designs for one kid and one weekend. None of them is a real family, and each
- * says so in its `sector` ("Concept collection · …"). Swap a concept out for a real
- * collection, with the family's permission, as they arrive.
+ * Every entry here is a CONCEPT COLLECTION: a worked example of what Member Threads
+ * designs for one kind of organization. None of them is a real client, and each says
+ * so in its `sector` ("Concept collection · …"). Names are invented on purpose. Swap a
+ * concept out for a real collection, with the organization's permission, as they arrive.
  *
- * Slugs are a contract with the rest of the site: `jake`, `sophie`, `levi-noa`, `ella`
- * (the home chapter links to `/work?project=sophie`).
+ * Slugs are a contract with the rest of the site: `ashford-business-society`,
+ * `halden-works`, `riverbend-5k`, `eastline-run-club`, `holloway-club`
+ * (link to one as `/work?project=<slug>` to open it on the wall, or `/work/<slug>`).
  *
  * ── Assets ───────────────────────────────────────────────────────────────────
  * Every picture on the Collections wall is an asset that belongs to one collection.
  * The wall scatters a collection's assets through the collage, and hovering any one
  * of them pulls the rest of its collection forward, so each wants several:
  *
- *   photo     the drop laid out flat, on a coloured ground. Cropped to fit.
+ *   photo     the collection laid out flat, on a coloured ground. Cropped to fit.
  *   garment   one piece, cut out on a transparent background. Never cropped.
- *   detail    a macro of the decoration: chenille, satin stitch, puff print.
- *   artifact  something small from the collection: the box, a hang-tag, a label.
+ *   detail    a macro of the decoration: tackle twill, satin stitch, a print.
+ *   artifact  something small from the collection: a woven label, a hang-tag.
  *
  * An asset shows its photograph (`src`, under /public) when it has one and falls back
  * to its drawn version (`art`) until then. To publish a real photo, add `src` with its
@@ -28,57 +31,48 @@
 
 export type DrawnKind =
   | 'tee' | 'longsleeve' | 'hoodie' | 'ziphoodie' | 'crewneck' | 'quarterzip' | 'polo'
-  | 'jacket' | 'robe' | 'cap' | 'shorts' | 'pants' | 'pajama' | 'tote'
-  | 'babytee' | 'tank' | 'jersey' | 'box';
+  | 'jacket' | 'cap' | 'shorts' | 'pants' | 'tote' | 'tank';
 
 /** Decoration on a drawn piece. */
 export type Deco =
   | {
       t: 'type';
       lines: string[];
+      /** block: heavy sans. varsity: heavy collegiate caps with an outline. script: the brand script. chenille: felt-backed pile. */
       face: 'block' | 'varsity' | 'script' | 'chenille';
-      tech: 'embroidery' | 'print' | 'puff';
+      tech: 'embroidery' | 'print' | 'puff' | 'twill';
       ink: string;
-      /** Second colour: the outline on varsity, the felt on chenille, the last line on a block print. */
+      /** Second colour: the outline on varsity, the felt on chenille and twill, the last line on a block print. */
       ink2?: string;
       /** Set the first line on an arch. */
       arch?: boolean;
     }
+  /** A woven patch: a framed rectangle with a stitched edge. */
   | { t: 'patch'; lines: string[]; ground: string; ink: string }
-  /** A country-club crest: a shield with a monogram and, at size, a word over it. */
-  | { t: 'crest'; letter: string; ground: string; ink: string; words?: string }
-  /** Full-colour art, as direct-to-garment prints it. `photo` draws a photographic scene. */
-  | { t: 'art'; colors: string[]; photo?: boolean };
+  /** A club crest: a shield with a monogram and, at size, a word over it. */
+  | { t: 'crest'; letter: string; ground: string; ink: string; words?: string };
 
-/** An all-over pattern in the cloth: gingham, PJ stripe, racing checker, a repeat motif. */
-export type Pattern = {
-  t: 'check' | 'stripe' | 'checker' | 'scatter';
-  ink: string;
-  ink2?: string;
-  motif?: 'letter' | 'bow' | 'sparkle';
-  letter?: string;
-};
+/** An all-over pattern in the cloth. */
+export type Pattern = { t: 'check' | 'stripe'; ink: string; ink2?: string };
 
 export type Drawn = {
   kind: DrawnKind;
   color: string;
   deco?: Deco;
-  /** Where the decoration sits: full front, or left chest (left thigh on a pant). */
+  /** Where the decoration sits: full front, or left chest (left leg on a bottom). */
   place?: 'chest' | 'left';
-  /** Reflective tape, for hi-vis. */
-  tape?: boolean;
-  /** Contrast rib: cuffs, hem, collar, waistband, a cap's visor, a tote's base and handles, a box's ribbon. */
+  /** Contrast rib: cuffs, hem, collar, waistband, a cap's visor, a tote's base and handles. */
   trim?: string;
   /** The inside of the hood. */
   lining?: string;
   /** The rope across a cap's brim. */
   rope?: string;
   pattern?: Pattern;
-  /** Racing stripes: across the chest on a top, down the side seam on a pant. */
+  /** Stripes: across the chest on a top, down the side seam on a bottom. */
   stripes?: { ink: string; ink2?: string };
 };
 
-/** A sticker or hang-tag slapped on a flat lay. Butter by default. */
+/** A hang-tag or woven label laid on a flat lay. */
 export type Sticker = {
   lines: string[];
   x: number;
@@ -95,7 +89,7 @@ export type Art =
   | {
       t: 'plate';
       ground: string;
-      /** Cabana stripes across the ground, in this colour. */
+      /** Wide stripes across the ground, in this colour. */
       stripe?: string;
       tall?: boolean;
       items: { g: Drawn; x: number; y: number; s: number; r: number }[];
@@ -106,8 +100,6 @@ export type Art =
   | { t: 'swatch'; color: string; name: string }
   | { t: 'spool'; color: string }
   | { t: 'patch'; deco: Extract<Deco, { t: 'patch' }> }
-  /** The packaging, from above: the lid, the ribbon, the card. */
-  | { t: 'box'; lines: string[]; color?: string; ribbon?: string }
   /** A hang-tag on its string. */
   | { t: 'tag'; lines: string[]; color?: string; ink?: string }
   /** A woven neck label. */
@@ -159,14 +151,23 @@ export type Chapter = {
   captions?: string[];
 };
 
-export type WorkCategory = 'bar' | 'bat' | 'bnai' | 'family';
+/** The audience segments in @/lib/site double as the wall's categories. */
+export type WorkCategory = (typeof SEGMENTS)[number]['id'];
 
-export const CATEGORIES: { id: WorkCategory; label: string }[] = [
-  { id: 'bar', label: 'Bar Mitzvah' },
-  { id: 'bat', label: 'Bat Mitzvah' },
-  { id: 'bnai', label: 'B’nai Mitzvah' },
-  { id: 'family', label: 'Family & planners' },
-];
+/** Short labels for the wall's filter row; `title` is the segment's full name. */
+const SHORT: Record<WorkCategory, string> = {
+  campus: 'University',
+  company: 'Companies',
+  nonprofit: 'Nonprofits',
+  athletic: 'Teams',
+  social: 'Associations',
+};
+
+export const CATEGORIES: { id: WorkCategory; label: string; title: string }[] = SEGMENTS.map((s) => ({
+  id: s.id,
+  label: SHORT[s.id],
+  title: s.label,
+}));
 
 export type WorkItem = {
   id: string;
@@ -177,14 +178,14 @@ export type WorkItem = {
   /** Starts with "Concept collection" while the collection is a concept. */
   sector: string;
   category: WorkCategory;
-  /** Where the weekend is. */
+  /** Where the organization is, when it matters. */
   location?: string;
-  /** The look, in a few words ("Vintage golf / country club"). */
+  /** The look, in a few words ("Collegiate heritage"). */
   vibe?: string;
-  method: 'Chenille appliqué' | 'Embroidery' | 'Puff print' | 'Jacquard' | 'Screen printing';
-  /** Pieces in the collection ("86 pc"). */
+  method: 'Chenille appliqué' | 'Embroidery' | 'Tackle twill' | 'Puff print' | 'Screen printing';
+  /** Pieces in the collection ("438 pc"). */
   qty?: string;
-  /** What was in the collection, for the index ("Oversized hoodies", "Dance-floor caps"). */
+  /** What was in the collection, for the index ("Heavyweight hoodies", "Caps"). */
   made: string[];
   note?: string;
   /** The case study in @/lib/cases. */
@@ -212,444 +213,544 @@ export type WorkItem = {
   assets: WorkAsset[];
 };
 
-// ── palettes ─────────────────────────────────────────────────────────────────
+const PALETTE_NOTE = 'Concept palette. Every color is matched to Pantone before production.';
 
-const CREAM = '#F5EEDC';
-const NAVY = '#0E1A47';
-const SKY = '#A9CCF4';
-const POP = '#F9A8C9';
-const INK = '#0E1A47';
+// ── Ashford Business Society · university club ───────────────────────────────
 
-// Jake: vintage golf / country club
-const FOREST = '#2B5BD7';
-const BUTTER = '#F5EEDC';
+const BURGUNDY = '#5B1F2A';
+const OATMEAL = '#E6DCCB';
+const HEATHER = '#B7B4AE';
+const GOLD = '#B8924A';
+const NATURAL = '#F3EFE6';
 
-// Levi & Noa: vintage racing
-const BLACK = '#0E1A47';
-const CHERRY = '#FF2F2F';
-const WHITE = '#FFFFFF';
-const SILVER = '#C9CDD4';
+const ashArch: Deco = { t: 'type', lines: ['ASHFORD'], face: 'varsity', tech: 'twill', ink: BURGUNDY, ink2: GOLD, arch: true };
+const ashCrest: Deco = { t: 'crest', letter: 'A', ground: BURGUNDY, ink: OATMEAL, words: 'ASHFORD' };
+const ashMono = (ink: string): Deco => ({ t: 'type', lines: ['ABS'], face: 'block', tech: 'embroidery', ink });
 
-// Ella: ballet-core
-const BLUSH = '#F9A8C9';
-const BLUSH_LT = '#FFDCEA';
-const BLUSH_DK = '#F28DB8';
-const OAT = '#E9E0C8';
+const hoodieAsh: Drawn = { kind: 'hoodie', color: OATMEAL, deco: ashArch, trim: BURGUNDY, lining: BURGUNDY };
+const crewAsh: Drawn = { kind: 'crewneck', color: BURGUNDY, trim: OATMEAL, deco: { ...ashCrest, ground: OATMEAL, ink: BURGUNDY }, place: 'left' };
+const qzAsh: Drawn = { kind: 'quarterzip', color: HEATHER, deco: ashMono(BURGUNDY), place: 'left' };
+const teeAsh: Drawn = { kind: 'tee', color: NATURAL, deco: { t: 'type', lines: ['ASHFORD'], face: 'block', tech: 'print', ink: BURGUNDY }, place: 'left' };
+const capAsh: Drawn = { kind: 'cap', color: BURGUNDY, deco: ashMono(OATMEAL) };
 
-// ── Sophie ───────────────────────────────────────────────────────────────────
+// ── Halden Works · company ───────────────────────────────────────────────────
 
-const sophieScript: Deco = { t: 'type', lines: ['Sophie'], face: 'script', tech: 'embroidery', ink: NAVY };
-const sophieCap: Deco = { t: 'type', lines: ['SOPHIE'], face: 'block', tech: 'embroidery', ink: NAVY };
-const sophiePuff: Deco = { t: 'type', lines: ['SOPHIE', 'MIAMI'], face: 'varsity', tech: 'puff', ink: NAVY, ink2: CREAM, arch: true };
-const sophieS: Deco = { t: 'type', lines: ['S'], face: 'chenille', tech: 'embroidery', ink: CREAM, ink2: SKY };
+const CHARCOAL = '#2B2E33';
+const STONE = '#CFC7B8';
+const BONE = '#EDE7DC';
+const EMBER = '#C8562E';
 
-const hoodieSophie: Drawn = { kind: 'hoodie', color: CREAM, deco: sophieScript, trim: NAVY, lining: SKY };
-const babyteeSophie: Drawn = { kind: 'babytee', color: SKY, deco: sophiePuff, trim: NAVY };
-const shortSophie: Drawn = { kind: 'shorts', color: SKY, trim: NAVY, deco: { t: 'type', lines: ['S'], face: 'script', tech: 'embroidery', ink: NAVY } };
-const sweatSophie: Drawn = { kind: 'pants', color: NAVY, stripes: { ink: SKY, ink2: CREAM }, deco: sophieS, place: 'left' };
-const capSophie: Drawn = { kind: 'cap', color: CREAM, trim: NAVY, deco: sophieCap };
-const pjSophie: Drawn = { kind: 'pajama', color: CREAM, trim: NAVY, pattern: { t: 'stripe', ink: SKY, ink2: NAVY } };
+const haldenTonal: Deco = { t: 'type', lines: ['HALDEN'], face: 'block', tech: 'embroidery', ink: '#454A52' };
 
-// ── Jake ─────────────────────────────────────────────────────────────────────
+const hoodieHalden: Drawn = { kind: 'hoodie', color: CHARCOAL, deco: haldenTonal, place: 'left', lining: EMBER };
+const qzHalden: Drawn = { kind: 'quarterzip', color: STONE, deco: { ...haldenTonal, ink: CHARCOAL }, place: 'left' };
+const teeHalden: Drawn = { kind: 'tee', color: BONE, deco: { t: 'type', lines: ['HALDEN', 'WORKS'], face: 'block', tech: 'print', ink: CHARCOAL, ink2: EMBER } };
+const capHalden: Drawn = { kind: 'cap', color: CHARCOAL, deco: { t: 'type', lines: ['HALDEN'], face: 'block', tech: 'embroidery', ink: EMBER } };
+const toteHalden: Drawn = { kind: 'tote', color: BONE, trim: CHARCOAL, deco: { t: 'type', lines: ['HALDEN', 'WORKS'], face: 'block', tech: 'print', ink: CHARCOAL } };
 
-const jakeChenille: Deco = { t: 'type', lines: ['JAKE'], face: 'chenille', tech: 'embroidery', ink: CREAM, ink2: NAVY, arch: true };
-const jakeCrest: Deco = { t: 'crest', letter: 'J', ground: FOREST, ink: BUTTER, words: 'JAKE' };
-const jakeCrestCap: Deco = { t: 'crest', letter: 'J', ground: CREAM, ink: FOREST };
+// ── Riverbend Literacy Fund · nonprofit ──────────────────────────────────────
 
-const hoodieJake: Drawn = { kind: 'hoodie', color: FOREST, deco: jakeChenille, lining: CREAM, trim: '#0B7A40' };
-const poloJake: Drawn = { kind: 'polo', color: CREAM, trim: FOREST, deco: jakeCrest, place: 'left' };
-const capJake: Drawn = { kind: 'cap', color: FOREST, trim: CREAM, rope: BUTTER, deco: jakeCrestCap };
-const pjJake: Drawn = { kind: 'pajama', color: FOREST, trim: NAVY, pattern: { t: 'scatter', motif: 'letter', letter: 'J', ink: BUTTER } };
-const toteJake: Drawn = { kind: 'tote', color: CREAM, trim: FOREST, deco: { t: 'type', lines: ['Jake'], face: 'script', tech: 'embroidery', ink: FOREST } };
+const TEAL = '#1F4E52';
+const MARIGOLD = '#DDA03A';
+const LINEN = '#F0EADD';
 
-// ── Levi & Noa ───────────────────────────────────────────────────────────────
+const riverTee: Deco = { t: 'type', lines: ['READ THE', 'RIVER', '5K'], face: 'block', tech: 'print', ink: TEAL, ink2: MARIGOLD };
+const riverScript: Deco = { t: 'type', lines: ['Riverbend'], face: 'script', tech: 'embroidery', ink: MARIGOLD };
+const riverPatch: Deco = { t: 'patch', lines: ['READ THE', 'RIVER'], ground: TEAL, ink: LINEN };
 
-const jerseyLevi: Drawn = {
-  kind: 'jersey', color: WHITE, trim: CHERRY, stripes: { ink: CHERRY, ink2: BLACK },
-  deco: { t: 'type', lines: ['LEVI', '01'], face: 'block', tech: 'puff', ink: BLACK, ink2: CHERRY },
-};
-const jerseyNoa: Drawn = {
-  kind: 'jersey', color: BLACK, trim: CHERRY, stripes: { ink: CHERRY, ink2: WHITE },
-  deco: { t: 'type', lines: ['NOA', '02'], face: 'block', tech: 'puff', ink: WHITE, ink2: CHERRY },
-};
-const capLN: Drawn = { kind: 'cap', color: BLACK, trim: CHERRY, deco: { t: 'type', lines: ['L&N'], face: 'block', tech: 'embroidery', ink: WHITE } };
-const crewLN: Drawn = {
-  kind: 'crewneck', color: SILVER, trim: BLACK,
-  deco: { t: 'type', lines: ['LEVI & NOA', 'GRAND PRIX'], face: 'block', tech: 'print', ink: BLACK, ink2: CHERRY },
-};
-const toteLN: Drawn = { kind: 'tote', color: WHITE, trim: CHERRY, pattern: { t: 'checker', ink: BLACK } };
+const teeRiver: Drawn = { kind: 'tee', color: LINEN, deco: riverTee };
+const crewRiver: Drawn = { kind: 'crewneck', color: TEAL, trim: TEAL, deco: riverScript };
+const hoodieRiver: Drawn = { kind: 'hoodie', color: LINEN, trim: TEAL, lining: MARIGOLD, deco: riverPatch };
+const capRiver: Drawn = { kind: 'cap', color: TEAL, rope: MARIGOLD, deco: { t: 'type', lines: ['RIVER 5K'], face: 'block', tech: 'embroidery', ink: MARIGOLD } };
 
-// ── Ella ─────────────────────────────────────────────────────────────────────
+// ── Eastline Run Club · teams & fitness ──────────────────────────────────────
 
-const ellaScript = (ink: string): Deco => ({ t: 'type', lines: ['Ella'], face: 'script', tech: 'embroidery', ink });
+const ORANGE = '#E2572B';
+const ASPHALT = '#1D1F22';
+const CHALK = '#ECE6DA';
+const GREY = '#B4B5B1';
 
-const zipElla: Drawn = { kind: 'ziphoodie', color: OAT, trim: BLUSH, lining: BLUSH, deco: ellaScript(BLUSH_DK), place: 'left' };
-const tankElla: Drawn = { kind: 'tank', color: INK, trim: INK, deco: ellaScript(BLUSH) };
-const pjElla: Drawn = { kind: 'pajama', color: BLUSH_LT, trim: BLUSH, pattern: { t: 'check', ink: BLUSH_DK } };
-const toteElla: Drawn = { kind: 'tote', color: OAT, trim: BLUSH, deco: ellaScript(BLUSH_DK) };
-const boxElla: Drawn = { kind: 'box', color: BLUSH, trim: INK, deco: { t: 'patch', lines: ['ELLA'], ground: OAT, ink: INK } };
+const tankEast: Drawn = { kind: 'tank', color: ASPHALT, trim: ORANGE, deco: { t: 'type', lines: ['EASTLINE', 'RC'], face: 'block', tech: 'print', ink: ORANGE } };
+const shortEast: Drawn = { kind: 'shorts', color: ASPHALT, trim: ORANGE, deco: { t: 'type', lines: ['ERC'], face: 'block', tech: 'print', ink: ORANGE }, place: 'left' };
+const teeEast: Drawn = { kind: 'tee', color: CHALK, deco: { t: 'type', lines: ['EASTLINE', 'RUN CLUB'], face: 'block', tech: 'print', ink: ASPHALT, ink2: ORANGE } };
+const crewEast: Drawn = { kind: 'crewneck', color: GREY, trim: ASPHALT, deco: { t: 'type', lines: ['EASTLINE'], face: 'varsity', tech: 'twill', ink: ORANGE, ink2: ASPHALT, arch: true } };
+const capEast: Drawn = { kind: 'cap', color: ORANGE, trim: ASPHALT, deco: { t: 'type', lines: ['ERC'], face: 'block', tech: 'embroidery', ink: ASPHALT } };
+
+// ── The Holloway Club · social club ──────────────────────────────────────────
+
+const NAVY = '#1F2A44';
+const IVORY = '#F2ECDF';
+const CLARET = '#7A2632';
+const OXFORD = '#B8C7D6';
+
+const hollCrest = (ground: string, ink: string): Deco => ({ t: 'crest', letter: 'H', ground, ink, words: 'HOLLOWAY' });
+
+const poloHoll: Drawn = { kind: 'polo', color: IVORY, trim: NAVY, deco: hollCrest(NAVY, IVORY), place: 'left' };
+const qzHoll: Drawn = { kind: 'quarterzip', color: NAVY, deco: hollCrest(CLARET, IVORY), place: 'left' };
+const crewHoll: Drawn = { kind: 'crewneck', color: OXFORD, trim: NAVY, deco: { t: 'type', lines: ['Holloway'], face: 'script', tech: 'embroidery', ink: NAVY } };
+const capHoll: Drawn = { kind: 'cap', color: IVORY, trim: NAVY, rope: CLARET, deco: hollCrest(NAVY, IVORY) };
 
 /** Every collection written up, published or not. */
 const ARCHIVE: WorkItem[] = [
   {
-    id: 'sophie', slug: 'sophie', no: 1,
-    title: 'The Sophie Collection', sector: 'Concept collection · Bat Mitzvah', category: 'bat',
-    location: 'Miami, Florida', vibe: 'Aviator Nation × country club',
-    method: 'Embroidery', qty: '86 pc',
-    made: ['Oversized hoodies', 'Baby tee + short sets', 'Sweatpants', 'Dance-floor caps', 'PJ pants', 'Packaging'],
-    note: 'A cream, navy and baby blue collection for a Miami Bat Mitzvah: an oversized hoodie with contrast rib, a friends’ matching set, sweats, caps and PJ pants, boxed by name.',
-    caseId: 'sophie',
+    id: 'ashford', slug: 'ashford-business-society', no: 1,
+    title: 'Ashford Business Society', sector: 'Concept collection · Fall recruitment', category: 'campus',
+    vibe: 'Collegiate heritage',
+    method: 'Tackle twill', qty: '438 pc',
+    made: ['Arched hoodies', 'Crest crewnecks', 'Exec quarter-zips', 'Heavyweight tees', 'Caps'],
+    note: 'Burgundy, oatmeal and heather for a business society’s fall recruitment: an arched tackle-twill hoodie, crest crewnecks, a quarter-zip for the exec board, a tee for every new member and caps.',
+    caseId: 'ashford',
     brief: [
       {
         label: 'The ask',
-        text: 'Her colors are cream, navy and baby blue. She lives in Aviator Nation and loves vintage country-club stuff. Something amazing for 80 kids, and a matching set for her closest friends.',
+        text: 'Recruitment week is the first thing new students see of us. Members should look like they came from the best shelf in the campus store, not a career-fair table. School colors, nothing loud, and one piece just for the exec board.',
       },
       {
         label: 'The collection',
-        text: 'One drop of 86 pieces: a 420 GSM hoodie with her name in satin script, a Pantone-matched baby tee and foldover short for the friends section, sweats, dance-floor caps and PJ pants, all in one palette.',
+        text: '438 pieces across five styles: an oatmeal hoodie with ASHFORD arched in burgundy tackle twill, a burgundy crewneck with a small crest, a heather quarter-zip reserved for the board, a natural tee for every new member and a six-panel cap.',
       },
     ],
     pieces: [
-      { name: 'Hoodie', details: ['420 GSM, oversized, cream fleece', 'Navy contrast rib at the cuffs and hem, baby blue inside the hood', '“Sophie” in navy satin-stitch script across the chest', 'Woven neck label'] },
-      { name: 'Friends set', details: ['Baby tee and foldover short, Pantone-matched in baby blue', 'Navy ringer rib on the tee, navy foldover on the short', 'SOPHIE / MIAMI in navy puff print'] },
-      { name: 'Sweatpant', details: ['Navy, relaxed', 'Baby blue and cream side stripe', 'Chenille S on the left thigh'] },
-      { name: 'Dance-floor cap', details: ['Cream crown, navy brim', 'SOPHIE embroidered in navy'] },
-      { name: 'PJ pant', details: ['Cream with a baby blue and navy pajama stripe', 'Navy waistband and drawcord'] },
-      { name: 'Packaging', details: ['Navy box, baby blue ribbon', 'Sorted and labelled by guest name, sizes collected in advance'] },
+      { name: 'Hoodie', details: ['120 pieces', 'Heavyweight brushed fleece in oatmeal, burgundy rib and hood lining', 'ASHFORD arched across the chest in burgundy tackle twill with an old-gold edge'] },
+      { name: 'Crewneck', details: ['72 pieces', 'Burgundy fleece, oatmeal rib', 'The society crest embroidered on the left chest'] },
+      { name: 'Exec quarter-zip', details: ['36 pieces', 'Heather grey', 'ABS embroidered in burgundy on the left chest', 'Made only for the executive board'] },
+      { name: 'Recruitment tee', details: ['150 pieces', 'Heavyweight cotton, natural', 'ASHFORD printed small on the left chest in water-based ink'] },
+      { name: 'Cap', details: ['60 pieces', 'Burgundy six-panel, unstructured', 'ABS embroidered in oatmeal'] },
     ],
     palette: [
-      { name: 'Miami blue', hex: SKY, use: 'Friends set, hood, ribbon' },
-      { name: 'Cream', hex: CREAM, use: 'Hoodie, cap, PJ pant' },
-      { name: 'Navy', hex: NAVY, use: 'Rib, script, sweats, box' },
+      { name: 'Burgundy', hex: BURGUNDY, use: 'Twill, crewneck, cap' },
+      { name: 'Oatmeal', hex: OATMEAL, use: 'Hoodie, crest' },
+      { name: 'Heather', hex: HEATHER, use: 'Exec quarter-zip' },
+      { name: 'Old gold', hex: GOLD, use: 'Twill edge stitch' },
     ],
-    paletteNote: 'Concept palette. Every color is matched to Pantone before production.',
+    paletteNote: PALETTE_NOTE,
     story: [
       {
-        label: 'How it arrives',
+        label: 'The thinking',
         after: 'Up close',
         body: [
-          'Sizes are collected from the guest list weeks ahead, so nobody is guessing on the day. Every piece is folded, sorted by name and boxed in navy with a baby blue ribbon.',
-          'It arrives at the venue ready to hand out: the friends’ sets in their own boxes, the hoodies on the welcome table, the caps for the dance floor.',
+          'One wordmark and one crest, used the same way on every piece. The arched hoodie is what members wear to info sessions; the quarter-zip is the only piece not made for everyone, which is why the board wants it. Next fall’s run starts from the same saved artwork.',
         ],
       },
     ],
-    cover: ['s-plate', 's-hoodie', 's-set', 's-macro', 's-cap'],
+    cover: ['a-plate', 'a-hoodie', 'a-macro', 'a-cap', 'a-label'],
     chapters: [
-      { label: 'The drop', assets: ['s-plate'] },
-      { label: 'The friends section', assets: ['s-set'] },
-      { label: 'The pieces', assets: ['s-hoodie', 's-sweat', 's-pj'], captions: ['Oversized hoodie', 'Sweatpant', 'PJ pant'] },
-      { label: 'Up close', assets: ['s-macro', 's-box'], captions: ['Satin-stitch script', 'The box'] },
+      { label: 'The collection', assets: ['a-plate'] },
+      { label: 'Exec board', assets: ['a-tall'] },
+      { label: 'The pieces', assets: ['a-hoodie', 'a-crew', 'a-tee'], captions: ['Arched hoodie · 120', 'Crest crewneck · 72', 'Recruitment tee · 150'] },
+      { label: 'Up close', assets: ['a-macro', 'a-label'], captions: ['Tackle twill, edge-stitched', 'Woven neck label'] },
       { label: 'Palette', kind: 'swatches', assets: [] },
     ],
     assets: [
-      { id: 's-plate', kind: 'photo', orientation: 'landscape', priority: 1,
-        alt: 'The Sophie Collection laid flat on baby blue: cream hoodie, navy sweatpant and a cream cap with a navy brim',
-        art: { t: 'plate', ground: SKY, stripe: '#A6E0FF', items: [
-          { g: sweatSophie, x: 590, y: 330, s: 1.25, r: 14 },
-          { g: hoodieSophie, x: 300, y: 320, s: 1.45, r: -7 },
-          { g: capSophie, x: 640, y: 150, s: 0.9, r: 10 },
+      { id: 'a-plate', kind: 'photo', orientation: 'landscape', priority: 1,
+        alt: 'The Ashford collection laid flat on oatmeal: arched hoodie, burgundy crest crewneck and a burgundy cap',
+        art: { t: 'plate', ground: '#D9CDB8', items: [
+          { g: crewAsh, x: 575, y: 335, s: 1.3, r: 4 },
+          { g: hoodieAsh, x: 285, y: 318, s: 1.45, r: -3 },
+          { g: capAsh, x: 655, y: 140, s: 0.85, r: 6 },
         ], stickers: [
-          { lines: ['SOPHIE', "’26"], x: 120, y: 92, r: -9, shape: 'tag' },
-          { lines: ['86', 'PIECES'], x: 700, y: 512, r: 8, shape: 'round', color: CREAM, ink: NAVY },
+          { lines: ['ASHFORD', 'FALL RECRUITMENT'], x: 150, y: 538, r: -2, shape: 'tag', color: IVORY, ink: BURGUNDY },
+          { lines: ['438', 'PIECES'], x: 440, y: 84, r: 0, shape: 'round' },
         ] } },
-      { id: 's-set', kind: 'photo', orientation: 'portrait', priority: 2,
-        annotation: 'the friends section',
-        alt: 'The matching set on navy: a baby blue baby tee with navy puff print over a baby blue foldover short',
-        art: { t: 'plate', ground: NAVY, tall: true, items: [
-          { g: babyteeSophie, x: 300, y: 270, s: 1.35, r: -4 },
-          { g: shortSophie, x: 310, y: 590, s: 1.15, r: 5 },
+      { id: 'a-tall', kind: 'photo', orientation: 'portrait', priority: 2,
+        alt: 'The exec quarter-zip in heather grey over a natural recruitment tee, on burgundy',
+        art: { t: 'plate', ground: BURGUNDY, tall: true, items: [
+          { g: qzAsh, x: 300, y: 270, s: 1.3, r: -2 },
+          { g: teeAsh, x: 305, y: 600, s: 1.1, r: 3 },
         ], stickers: [
-          { lines: ['MATCHING', 'SET'], x: 470, y: 690, r: -8, shape: 'tag' },
+          { lines: ['EXEC', 'BOARD'], x: 470, y: 455, r: 0, shape: 'round', color: OATMEAL, ink: BURGUNDY },
         ] } },
-      { id: 's-hoodie', kind: 'garment', orientation: 'square', garment: 'hoodie', priority: 1,
-        annotation: 'baby blue inside the hood',
-        alt: 'Cream oversized hoodie, navy contrast rib, baby blue hood lining, Sophie in navy script',
-        art: { t: 'garment', g: hoodieSophie } },
-      { id: 's-cap', kind: 'garment', orientation: 'square', garment: 'cap', priority: 2,
-        annotation: 'dance-floor issue',
-        alt: 'Cream cap with a navy brim, SOPHIE embroidered in navy',
-        art: { t: 'garment', g: capSophie } },
-      { id: 's-sweat', kind: 'garment', orientation: 'square', garment: 'pants',
-        alt: 'Navy sweatpant with a baby blue and cream side stripe and a chenille S',
-        art: { t: 'garment', g: sweatSophie } },
-      { id: 's-pj', kind: 'garment', orientation: 'square', garment: 'pajama',
-        alt: 'Cream PJ pant with a baby blue and navy pajama stripe',
-        art: { t: 'garment', g: pjSophie } },
-      { id: 's-macro', kind: 'detail', orientation: 'landscape', priority: 1,
-        alt: 'Close-up of Sophie in navy satin-stitch script on cream fleece',
-        art: { t: 'macro', cloth: CREAM, deco: sophieScript } },
-      { id: 's-box', kind: 'artifact', orientation: 'square',
-        alt: 'Navy collection box tied with baby blue ribbon, card reading The Sophie Collection',
-        art: { t: 'box', lines: ['THE COLLECTION', 'SOPHIE', 'MIAMI · 05.16.26'], color: NAVY, ribbon: SKY } },
+      { id: 'a-hoodie', kind: 'garment', orientation: 'square', garment: 'hoodie', priority: 1,
+        alt: 'Oatmeal hoodie with ASHFORD arched across the chest in burgundy tackle twill',
+        art: { t: 'garment', g: hoodieAsh } },
+      { id: 'a-cap', kind: 'garment', orientation: 'square', garment: 'cap', priority: 1,
+        alt: 'Burgundy six-panel cap with ABS embroidered in oatmeal',
+        art: { t: 'garment', g: capAsh } },
+      { id: 'a-crew', kind: 'garment', orientation: 'square', garment: 'crewneck', priority: 2,
+        alt: 'Burgundy crewneck with a small oatmeal crest on the left chest',
+        art: { t: 'garment', g: crewAsh } },
+      { id: 'a-qz', kind: 'garment', orientation: 'square', garment: 'quarterzip', wall: false,
+        alt: 'Heather grey quarter-zip with ABS embroidered in burgundy on the left chest',
+        art: { t: 'garment', g: qzAsh } },
+      { id: 'a-tee', kind: 'garment', orientation: 'square', garment: 'tee', wall: false,
+        alt: 'Natural heavyweight tee with ASHFORD printed small on the left chest',
+        art: { t: 'garment', g: teeAsh } },
+      { id: 'a-macro', kind: 'detail', orientation: 'landscape', priority: 1,
+        alt: 'Close-up of burgundy tackle-twill lettering with an old-gold edge stitch on oatmeal fleece',
+        art: { t: 'macro', cloth: OATMEAL, deco: { ...ashArch, arch: false } } },
+      { id: 'a-crest', kind: 'detail', orientation: 'portrait',
+        alt: 'Close-up of the embroidered Ashford crest on burgundy fleece',
+        art: { t: 'macro', cloth: BURGUNDY, deco: { ...ashCrest, ground: OATMEAL, ink: BURGUNDY } } },
+      { id: 'a-label', kind: 'artifact', orientation: 'square',
+        alt: 'Burgundy woven neck label reading Ashford Business Society',
+        art: { t: 'label', lines: ['ASHFORD', 'BUSINESS SOCIETY'], ground: BURGUNDY, ink: OATMEAL } },
     ],
   },
   {
-    id: 'jake', slug: 'jake', no: 2,
-    title: 'The Jake Collection', sector: 'Concept collection · Bar Mitzvah', category: 'bar',
-    location: 'Scottsdale, Arizona', vibe: 'Vintage golf / country club',
-    method: 'Chenille appliqué', qty: '72 pc',
-    made: ['Chenille hoodies', 'Polos', 'Rope-brim caps', 'Crest PJ pants', 'Totes', 'Packaging'],
-    note: 'Kelly green, cream and lemon for a Scottsdale Bar Mitzvah: chenille hoodies, crest polos, rope-brim caps and PJ pants with his crest on repeat.',
-    caseId: 'jake',
+    id: 'halden', slug: 'halden-works', no: 2,
+    title: 'Halden Works', sector: 'Concept collection · New-hire kit', category: 'company',
+    vibe: 'Quiet, tonal workwear',
+    method: 'Embroidery', qty: '328 pc',
+    made: ['Tonal hoodies', 'Quarter-zips', 'Heavyweight tees', 'Caps', 'Canvas totes'],
+    note: 'Charcoal, stone and ember for a growing software company’s first-day kit: a tonal hoodie, a quarter-zip, a heavyweight tee, a cap and a canvas tote to carry it home.',
+    caseId: 'halden',
     brief: [
       {
         label: 'The ask',
-        text: 'Golf weekend in Scottsdale. He wanted it to feel like an old members’ club, not a party store. Kelly green, cream, a hit of lemon yellow.',
+        text: 'Every new hire gets a kit on day one, and most of what we’ve handed out ends up in a drawer. We want pieces people wear on weekends, with the logo small enough that it never feels like a uniform.',
       },
       {
         label: 'The collection',
-        text: '72 pieces around one crest: a kelly green hoodie with JAKE in chenille, a cream polo, a rope-brim cap, PJ pants with the crest on repeat, a tote for the parents and a box for every guest.',
+        text: '328 pieces across five styles, built around a tonal wordmark: a charcoal hoodie embroidered charcoal on charcoal, a stone quarter-zip, a bone tee that carries the one loud moment in ember, a cap and a canvas tote.',
       },
     ],
     pieces: [
-      { name: 'Hoodie', details: ['420 GSM kelly green fleece, cream inside the hood', 'JAKE in cream chenille on navy felt, arched across the chest'] },
-      { name: 'Polo', details: ['Cream piqué, kelly collar', 'The J crest embroidered on the left chest'] },
-      { name: 'Rope-brim cap', details: ['Kelly crown, cream brim, lemon rope', 'Embroidered crest on the front'] },
-      { name: 'PJ pant', details: ['Kelly green, with the J crest woven on repeat', 'Navy waistband and drawcord'] },
-      { name: 'Tote', details: ['Cream canvas, kelly base and handles', '“Jake” in kelly script'] },
-      { name: 'Packaging', details: ['Kelly box, lemon ribbon', 'Boxed by guest name, caps packed separately for the dance floor'] },
+      { name: 'Hoodie', details: ['80 pieces', 'Heavyweight fleece in charcoal, ember inside the hood', 'HALDEN embroidered tonally on the left chest'] },
+      { name: 'Quarter-zip', details: ['48 pieces', 'Stone, midweight', 'HALDEN embroidered in charcoal on the left chest'] },
+      { name: 'Tee', details: ['80 pieces', 'Heavyweight cotton, bone', 'HALDEN WORKS printed in charcoal and ember'] },
+      { name: 'Cap', details: ['60 pieces', 'Charcoal, unstructured', 'HALDEN embroidered in ember'] },
+      { name: 'Tote', details: ['60 pieces', 'Natural canvas, charcoal base and handles', 'HALDEN WORKS printed in charcoal'] },
     ],
     palette: [
-      { name: 'Kelly', hex: FOREST, use: 'Hoodie, PJ pant, box' },
-      { name: 'Cream', hex: CREAM, use: 'Polo, chenille, tote' },
-      { name: 'Navy', hex: NAVY, use: 'Felt, waistband' },
-      { name: 'Lemon', hex: BUTTER, use: 'Crest, rope, ribbon' },
+      { name: 'Charcoal', hex: CHARCOAL, use: 'Hoodie, cap, handles' },
+      { name: 'Stone', hex: STONE, use: 'Quarter-zip' },
+      { name: 'Bone', hex: BONE, use: 'Tee, tote' },
+      { name: 'Ember', hex: EMBER, use: 'Hood lining, cap, one line of print' },
     ],
-    paletteNote: 'Concept palette. Every color is matched to Pantone before production.',
+    paletteNote: PALETTE_NOTE,
     story: [
       {
-        label: 'How it arrives',
+        label: 'The thinking',
         after: 'Up close',
         body: [
-          'Every guest gets a kelly box with a lemon ribbon and their name on the card, sized from the RSVP list. The caps travel separately and go out at the start of the party.',
+          'The logo never gets bigger than a thumbnail except once, on the tee, and even there it keeps to two colors. That restraint is what gets a company hoodie worn outside the office. Each new cohort reorders the same kit from saved artwork.',
         ],
       },
     ],
-    cover: ['j-plate', 'j-hoodie', 'j-macro', 'j-cap', 'j-box'],
+    cover: ['h-plate', 'h-hoodie', 'h-macro', 'h-cap', 'h-label'],
     chapters: [
-      { label: 'The drop', assets: ['j-plate'] },
-      { label: 'Clubhouse', assets: ['j-tall'] },
-      { label: 'The pieces', assets: ['j-hoodie', 'j-polo', 'j-pj'], captions: ['Chenille hoodie', 'Crest polo', 'PJ pant'] },
-      { label: 'Up close', assets: ['j-macro', 'j-box'], captions: ['Chenille on felt', 'The box'] },
+      { label: 'The collection', assets: ['h-plate'] },
+      { label: 'Day one', assets: ['h-tall'] },
+      { label: 'The pieces', assets: ['h-hoodie', 'h-qz', 'h-tee'], captions: ['Tonal hoodie · 80', 'Quarter-zip · 48', 'Heavyweight tee · 80'] },
+      { label: 'Up close', assets: ['h-macro', 'h-label'], captions: ['Tonal embroidery', 'Woven neck label'] },
       { label: 'Palette', kind: 'swatches', assets: [] },
     ],
     assets: [
-      { id: 'j-plate', kind: 'photo', orientation: 'landscape', priority: 1,
-        alt: 'The Jake Collection laid flat on lemon yellow: kelly chenille hoodie, crest PJ pant and a rope-brim cap',
-        art: { t: 'plate', ground: BUTTER, items: [
-          { g: pjJake, x: 600, y: 350, s: 1.3, r: 12 },
-          { g: hoodieJake, x: 290, y: 315, s: 1.45, r: -8 },
-          { g: capJake, x: 650, y: 140, s: 0.9, r: -12 },
+      { id: 'h-plate', kind: 'photo', orientation: 'landscape', priority: 1,
+        alt: 'The Halden Works kit laid flat on stone: charcoal hoodie, bone tee and a charcoal cap',
+        art: { t: 'plate', ground: STONE, items: [
+          { g: teeHalden, x: 590, y: 340, s: 1.25, r: 3 },
+          { g: hoodieHalden, x: 290, y: 318, s: 1.45, r: -3 },
+          { g: capHalden, x: 650, y: 132, s: 0.85, r: -5 },
         ], stickers: [
-          { lines: ['JAKE', "’26"], x: 112, y: 520, r: 7, shape: 'tag', color: CREAM, ink: FOREST },
-          { lines: ['72', 'PIECES'], x: 470, y: 88, r: -8, shape: 'round', color: FOREST, ink: BUTTER },
+          { lines: ['HALDEN', 'NEW-HIRE KIT'], x: 140, y: 540, r: -2, shape: 'tag', color: BONE, ink: CHARCOAL },
+          { lines: ['328', 'PIECES'], x: 450, y: 84, r: 0, shape: 'round' },
         ] } },
-      { id: 'j-tall', kind: 'photo', orientation: 'portrait', priority: 2,
-        annotation: 'members only',
-        alt: 'A cream crest polo over a cream and kelly tote, on kelly green',
-        art: { t: 'plate', ground: FOREST, tall: true, items: [
-          { g: poloJake, x: 290, y: 270, s: 1.3, r: -5 },
-          { g: toteJake, x: 320, y: 600, s: 1.05, r: 6 },
+      { id: 'h-tall', kind: 'photo', orientation: 'portrait', priority: 2,
+        alt: 'A stone quarter-zip over a canvas tote with charcoal handles, on charcoal',
+        art: { t: 'plate', ground: CHARCOAL, tall: true, items: [
+          { g: qzHalden, x: 300, y: 265, s: 1.3, r: -2 },
+          { g: toteHalden, x: 305, y: 600, s: 1.05, r: 3 },
         ], stickers: [
-          { lines: ['MEMBERS', 'ONLY'], x: 150, y: 470, r: -10, shape: 'tag' },
+          { lines: ['DAY', 'ONE'], x: 470, y: 455, r: 0, shape: 'round', color: EMBER, ink: BONE },
         ] } },
-      { id: 'j-hoodie', kind: 'garment', orientation: 'square', garment: 'hoodie', priority: 1,
-        annotation: 'chenille, not a print',
-        alt: 'Kelly hoodie with JAKE arched across the chest in cream chenille on navy felt',
-        art: { t: 'garment', g: hoodieJake } },
-      { id: 'j-cap', kind: 'garment', orientation: 'square', garment: 'cap', priority: 1,
-        annotation: 'rope brim',
-        alt: 'Kelly rope-brim cap with a cream brim, lemon rope and an embroidered crest',
-        art: { t: 'garment', g: capJake } },
-      { id: 'j-polo', kind: 'garment', orientation: 'square', garment: 'polo',
-        alt: 'Cream polo with a kelly collar and the J crest on the left chest',
-        art: { t: 'garment', g: poloJake } },
-      { id: 'j-pj', kind: 'garment', orientation: 'square', garment: 'pajama',
-        annotation: 'the crest, on repeat',
-        alt: 'Kelly PJ pant with a lemon J crest on repeat',
-        art: { t: 'garment', g: pjJake } },
-      { id: 'j-macro', kind: 'detail', orientation: 'portrait', priority: 1,
-        alt: 'Close-up of cream chenille lettering on navy felt, sewn onto kelly green fleece',
-        art: { t: 'macro', cloth: FOREST, deco: { t: 'type', lines: ['JAKE'], face: 'chenille', tech: 'embroidery', ink: CREAM, ink2: NAVY } } },
-      { id: 'j-box', kind: 'artifact', orientation: 'square',
-        alt: 'Kelly collection box with a lemon ribbon and a card reading The Jake Collection',
-        art: { t: 'box', lines: ['THE COLLECTION', 'JAKE', 'SCOTTSDALE, AZ'], color: FOREST, ribbon: BUTTER } },
+      { id: 'h-hoodie', kind: 'garment', orientation: 'square', garment: 'hoodie', priority: 1,
+        alt: 'Charcoal hoodie with HALDEN embroidered tonally on the left chest and an ember hood lining',
+        art: { t: 'garment', g: hoodieHalden } },
+      { id: 'h-cap', kind: 'garment', orientation: 'square', garment: 'cap', priority: 1,
+        alt: 'Charcoal cap with HALDEN embroidered in ember',
+        art: { t: 'garment', g: capHalden } },
+      { id: 'h-tee', kind: 'garment', orientation: 'square', garment: 'tee', priority: 2,
+        alt: 'Bone heavyweight tee printed HALDEN WORKS in charcoal and ember',
+        art: { t: 'garment', g: teeHalden } },
+      { id: 'h-qz', kind: 'garment', orientation: 'square', garment: 'quarterzip', wall: false,
+        alt: 'Stone quarter-zip with HALDEN embroidered in charcoal on the left chest',
+        art: { t: 'garment', g: qzHalden } },
+      { id: 'h-tote', kind: 'garment', orientation: 'square', garment: 'tote', wall: false,
+        alt: 'Canvas tote with charcoal base and handles, HALDEN WORKS printed in charcoal',
+        art: { t: 'garment', g: toteHalden } },
+      { id: 'h-macro', kind: 'detail', orientation: 'portrait', priority: 1,
+        alt: 'Close-up of tonal satin-stitch embroidery, charcoal on charcoal fleece',
+        art: { t: 'macro', cloth: CHARCOAL, deco: { ...haldenTonal, ink: '#4A5058' } } },
+      { id: 'h-spool', kind: 'artifact', orientation: 'square',
+        alt: 'A spool of ember embroidery thread',
+        art: { t: 'spool', color: EMBER } },
+      { id: 'h-label', kind: 'artifact', orientation: 'square',
+        alt: 'Charcoal woven neck label reading Halden Works',
+        art: { t: 'label', lines: ['HALDEN WORKS', 'MEMBER ISSUE'], ground: CHARCOAL, ink: BONE } },
     ],
   },
   {
-    id: 'levi-noa', slug: 'levi-noa', no: 3,
-    title: 'The Levi & Noa Collection', sector: 'Concept collection · B’nai Mitzvah', category: 'bnai',
-    location: 'Westchester, New York', vibe: 'Vintage racing',
-    method: 'Puff print', qty: '118 pc',
-    made: ['Racing jerseys', 'Crewnecks', 'Caps', 'Checker totes', 'Numbered pieces', 'Packaging'],
-    note: 'Black, cherry, white and silver for twins: numbered racing jerseys, a Grand Prix crewneck, caps and checker totes, every piece numbered out of 118.',
-    caseId: 'levi-noa',
+    id: 'riverbend', slug: 'riverbend-5k', no: 3,
+    title: 'Riverbend Literacy Fund', sector: 'Concept collection · Charity 5K', category: 'nonprofit',
+    vibe: 'Riverside, warm and plain-spoken',
+    method: 'Screen printing', qty: '528 pc',
+    made: ['Race tees', 'Volunteer crewnecks', 'Supporter hoodies', 'Rope caps'],
+    note: 'Deep teal, marigold and linen for a literacy nonprofit’s annual 5K: a race tee for every runner, a crewneck that marks the volunteers, a supporter hoodie to sell at the finish and caps.',
+    caseId: 'riverbend',
     brief: [
       {
         label: 'The ask',
-        text: 'Twins, one party, two very different kids. Both into cars. Make it feel like a vintage racing team, and make sure neither one gets the “matching outfit” treatment.',
+        text: 'Our 5K is the biggest fundraiser of the year. Runners need a shirt, volunteers need to be easy to spot, and we want something good enough to sell at the merch table, so the apparel funds books instead of costing us.',
       },
       {
         label: 'The collection',
-        text: '118 pieces for one team with two drivers: Levi’s white jersey and Noa’s black one, each with their own number, a silver Grand Prix crewneck, caps, checker totes and a numbered woven label in every piece.',
+        text: '528 pieces across four styles: a linen race tee for every registrant, a teal crewneck that marks volunteers on the course, a supporter hoodie with a woven patch for the merch table and a teal cap with a marigold rope.',
       },
     ],
     pieces: [
-      { name: 'Racing jersey', details: ['Two colorways: white for Levi, black for Noa', 'Cherry collar and cuffs, racing stripes across the chest and sleeves', 'Name and number in puff print'] },
-      { name: 'Crewneck', details: ['Silver heather, black rib', 'LEVI & NOA / GRAND PRIX, two-color screen print'] },
-      { name: 'Cap', details: ['Black crown, cherry brim', 'L&N embroidered in white'] },
-      { name: 'Tote', details: ['Black and white checker', 'Cherry base and handles'] },
-      { name: 'Numbered pieces', details: ['A woven label in every piece, numbered 001 to 118'] },
-      { name: 'Packaging', details: ['Black boxes with cherry ribbon, split by team: Levi’s guests and Noa’s'] },
+      { name: 'Race tee', details: ['300 pieces', 'Heavyweight cotton, linen', 'READ THE RIVER 5K printed in teal and marigold, water-based ink'] },
+      { name: 'Volunteer crewneck', details: ['60 pieces', 'Teal fleece', 'Riverbend embroidered in marigold script across the chest'] },
+      { name: 'Supporter hoodie', details: ['120 pieces', 'Heavyweight fleece in linen, teal rib, marigold hood lining', 'A woven READ THE RIVER patch on the chest'] },
+      { name: 'Rope cap', details: ['48 pieces', 'Teal, marigold rope across the brim', 'RIVER 5K embroidered in marigold'] },
     ],
     palette: [
-      { name: 'Cherry', hex: CHERRY, use: 'Stripes, collars, brims' },
-      { name: 'Black', hex: BLACK, use: 'Noa’s jersey, caps, checker' },
-      { name: 'White', hex: WHITE, use: 'Levi’s jersey, checker' },
-      { name: 'Silver', hex: SILVER, use: 'Crewneck' },
+      { name: 'Teal', hex: TEAL, use: 'Crewneck, cap, print' },
+      { name: 'Marigold', hex: MARIGOLD, use: 'Script, rope, lining' },
+      { name: 'Linen', hex: LINEN, use: 'Race tee, hoodie' },
     ],
-    paletteNote: 'Concept palette. Every color is matched to Pantone before production.',
+    paletteNote: PALETTE_NOTE,
     story: [
       {
-        label: 'How it arrives',
+        label: 'The thinking',
         after: 'Up close',
         body: [
-          'Two teams, two sets of boxes. Guests pick a driver on the RSVP, sizes come in with it, and every box is labelled by name and number so the pit crew at the door just hands them out.',
+          'The race tee does the volume; the hoodie does the fundraising. Volunteers wear the only teal crewneck on the course, so runners always know who to ask. Next year’s race starts from the same saved artwork.',
         ],
       },
     ],
-    cover: ['ln-plate', 'ln-levi', 'ln-macro', 'ln-noa', 'ln-label'],
+    cover: ['r-plate', 'r-hoodie', 'r-macro', 'r-cap', 'r-patch'],
     chapters: [
-      { label: 'The drop', assets: ['ln-plate'] },
-      { label: 'Two drivers', assets: ['ln-levi', 'ln-noa'], captions: ['Levi, #01', 'Noa, #02'] },
-      { label: 'The pit crew', assets: ['ln-tall'] },
-      { label: 'Up close', assets: ['ln-macro', 'ln-label'], captions: ['Puff print', 'Numbered label'] },
+      { label: 'The collection', assets: ['r-plate'] },
+      { label: 'Race morning', assets: ['r-tall'] },
+      { label: 'The pieces', assets: ['r-tee', 'r-crew', 'r-hoodie'], captions: ['Race tee · 300', 'Volunteer crewneck · 60', 'Supporter hoodie · 120'] },
+      { label: 'Up close', assets: ['r-macro', 'r-patch'], captions: ['Script embroidery', 'Woven patch'] },
       { label: 'Palette', kind: 'swatches', assets: [] },
     ],
     assets: [
-      { id: 'ln-plate', kind: 'photo', orientation: 'landscape', priority: 1,
-        alt: 'Two racing jerseys crossed on cherry red, one white numbered 01, one black numbered 02, with a black cap',
-        art: { t: 'plate', ground: CHERRY, items: [
-          { g: jerseyNoa, x: 560, y: 330, s: 1.35, r: 11 },
-          { g: jerseyLevi, x: 270, y: 320, s: 1.4, r: -9 },
-          { g: capLN, x: 690, y: 120, s: 0.85, r: 14 },
+      { id: 'r-plate', kind: 'photo', orientation: 'landscape', priority: 1,
+        alt: 'The Riverbend collection laid flat on teal: linen race tee, linen supporter hoodie and a teal rope cap',
+        art: { t: 'plate', ground: TEAL, items: [
+          { g: teeRiver, x: 585, y: 345, s: 1.25, r: 4 },
+          { g: hoodieRiver, x: 285, y: 318, s: 1.45, r: -3 },
+          { g: capRiver, x: 660, y: 130, s: 0.85, r: 5 },
         ], stickers: [
-          { lines: ['LEVI & NOA', "’26"], x: 150, y: 540, r: -6, shape: 'tag', color: WHITE, ink: BLACK },
-          { lines: ['118', 'PIECES'], x: 470, y: 86, r: 9, shape: 'round', color: POP, ink: BLACK },
+          { lines: ['RIVERBEND', 'READ THE RIVER 5K'], x: 160, y: 540, r: -2, shape: 'tag', color: LINEN, ink: TEAL },
+          { lines: ['528', 'PIECES'], x: 450, y: 84, r: 0, shape: 'round', color: LINEN, ink: TEAL },
         ] } },
-      { id: 'ln-tall', kind: 'photo', orientation: 'portrait', priority: 2,
-        alt: 'A silver Grand Prix crewneck over a black and white checker tote, on black',
-        art: { t: 'plate', ground: BLACK, tall: true, items: [
-          { g: crewLN, x: 300, y: 270, s: 1.3, r: 4 },
-          { g: toteLN, x: 290, y: 600, s: 1.05, r: -6 },
+      { id: 'r-tall', kind: 'photo', orientation: 'portrait', priority: 2,
+        alt: 'The teal volunteer crewneck over a linen race tee, on marigold',
+        art: { t: 'plate', ground: MARIGOLD, tall: true, items: [
+          { g: crewRiver, x: 300, y: 265, s: 1.3, r: -2 },
+          { g: teeRiver, x: 305, y: 600, s: 1.1, r: 3 },
         ], stickers: [
-          { lines: ['PIT', 'CREW'], x: 470, y: 470, r: 10, shape: 'round', color: CHERRY, ink: WHITE },
+          { lines: ['VOLUNTEER', 'CREW'], x: 445, y: 455, r: 0, shape: 'round', color: TEAL, ink: LINEN },
         ] } },
-      { id: 'ln-levi', kind: 'garment', orientation: 'square', garment: 'jersey', priority: 1,
-        annotation: 'one team, two drivers',
-        alt: 'White racing jersey with cherry and black stripes, LEVI 01 in puff print',
-        art: { t: 'garment', g: jerseyLevi } },
-      { id: 'ln-noa', kind: 'garment', orientation: 'square', garment: 'jersey', priority: 1,
-        alt: 'Black racing jersey with cherry and white stripes, NOA 02 in puff print',
-        art: { t: 'garment', g: jerseyNoa } },
-      { id: 'ln-cap', kind: 'garment', orientation: 'square', garment: 'cap', priority: 2,
-        alt: 'Black cap with a cherry brim, L&N in white embroidery',
-        art: { t: 'garment', g: capLN } },
-      { id: 'ln-macro', kind: 'detail', orientation: 'landscape', priority: 1,
-        alt: 'Close-up of a raised cherry puff-print number on white jersey knit',
-        art: { t: 'macro', cloth: WHITE, deco: { t: 'type', lines: ['01'], face: 'block', tech: 'puff', ink: CHERRY } } },
-      { id: 'ln-label', kind: 'artifact', orientation: 'square',
-        annotation: 'numbered 001–118',
-        alt: 'Woven neck label reading Levi & Noa, No. 047 of 118',
-        art: { t: 'label', lines: ['LEVI & NOA', 'NO. 047 / 118'], ground: BLACK, ink: WHITE } },
+      { id: 'r-hoodie', kind: 'garment', orientation: 'square', garment: 'hoodie', priority: 1,
+        alt: 'Linen hoodie with teal rib, marigold hood lining and a teal woven patch reading Read the River',
+        art: { t: 'garment', g: hoodieRiver } },
+      { id: 'r-cap', kind: 'garment', orientation: 'square', garment: 'cap', priority: 1,
+        alt: 'Teal cap with a marigold rope and RIVER 5K embroidered in marigold',
+        art: { t: 'garment', g: capRiver } },
+      { id: 'r-tee', kind: 'garment', orientation: 'square', garment: 'tee', priority: 2, wall: false,
+        alt: 'Linen race tee printed READ THE RIVER 5K in teal and marigold',
+        art: { t: 'garment', g: teeRiver } },
+      { id: 'r-crew', kind: 'garment', orientation: 'square', garment: 'crewneck',
+        alt: 'Teal crewneck with Riverbend embroidered in marigold script',
+        art: { t: 'garment', g: crewRiver } },
+      { id: 'r-macro', kind: 'detail', orientation: 'landscape', priority: 1,
+        alt: 'Close-up of Riverbend in marigold satin-stitch script on teal fleece',
+        art: { t: 'macro', cloth: TEAL, deco: riverScript } },
+      { id: 'r-print', kind: 'detail', orientation: 'portrait',
+        alt: 'Close-up of the teal and marigold race print on linen jersey',
+        art: { t: 'macro', cloth: LINEN, deco: riverTee } },
+      { id: 'r-patch', kind: 'artifact', orientation: 'square',
+        alt: 'Teal woven patch with a stitched edge reading Read the River',
+        art: { t: 'patch', deco: riverPatch } },
     ],
   },
   {
-    id: 'ella', slug: 'ella', no: 4,
-    title: 'The Ella Collection', sector: 'Concept collection · Bat Mitzvah', category: 'bat',
-    location: 'Los Angeles, California', vibe: 'Ballet-core',
-    method: 'Embroidery', qty: '64 pc',
-    made: ['Zip hoodies', 'Ribbed tanks', 'Gingham PJ pants', 'Totes', 'Satin-ribbon boxes'],
-    note: 'Blush, oat and ink for an LA Bat Mitzvah: zip hoodies, ribbed tanks and gingham PJ pants with her name in script, boxed in satin ribbon.',
-    caseId: 'ella',
+    id: 'eastline', slug: 'eastline-run-club', no: 4,
+    title: 'Eastline Run Club', sector: 'Concept collection · Members’ issue', category: 'athletic',
+    vibe: 'Road running, safety orange',
+    method: 'Screen printing', qty: '396 pc',
+    made: ['Singlets', 'Run shorts', 'Members’ tees', 'Arched crewnecks', 'Caps'],
+    note: 'Safety orange, asphalt and chalk for a city run club: a singlet and short for race day, a members’ tee, a crewneck for coffee after the long run and an orange cap.',
+    caseId: 'eastline',
     brief: [
       {
         label: 'The ask',
-        text: 'She dances, and she wanted it to look like it: soft pink, ribbon, nothing loud. Pieces her friends would wear to the studio and to sleepovers, long after the party.',
+        text: 'We run three mornings a week and race a few times a year. Members want something to race in and something to wear to coffee after, in our orange, without it looking like a fun-run giveaway.',
       },
       {
         label: 'The collection',
-        text: '64 pieces in blush, oat and ink: an oat zip hoodie and a ribbed black tank with “Ella” in script, gingham PJ pants for the after-party and a tote, each boxed with a satin ribbon.',
+        text: '396 pieces across five styles: an asphalt singlet and short with the club mark in orange, a chalk members’ tee, a heather crewneck with EASTLINE arched across the chest and an orange cap you can spot from the back of the pack.',
       },
     ],
     pieces: [
-      { name: 'Zip hoodie', details: ['Oat fleece, blush rib and hood lining', '“Ella” in blush script on the left chest', 'Custom zipper pull'] },
-      { name: 'Tank', details: ['Ink rib-knit, fitted', '“Ella” in blush script'] },
-      { name: 'PJ pant', details: ['Blush gingham', 'Blush waistband and drawcord'] },
-      { name: 'Tote', details: ['Oat canvas, blush base and handles', 'Ties with a scrunchie'] },
-      { name: 'Packaging', details: ['Blush box, ink satin ribbon, a woven card with each guest’s name'] },
+      { name: 'Singlet', details: ['72 pieces', 'Lightweight knit, asphalt, orange binding', 'EASTLINE RC printed in safety orange'] },
+      { name: 'Run short', details: ['72 pieces', 'Asphalt, orange waistband', 'ERC printed on the left leg'] },
+      { name: 'Members’ tee', details: ['120 pieces', 'Heavyweight cotton, chalk', 'EASTLINE RUN CLUB printed in asphalt and orange'] },
+      { name: 'Crewneck', details: ['60 pieces', 'Heather grey fleece, asphalt rib', 'EASTLINE arched in orange twill with an asphalt outline'] },
+      { name: 'Cap', details: ['72 pieces', 'Safety orange, asphalt brim', 'ERC embroidered in asphalt'] },
     ],
     palette: [
-      { name: 'Blush', hex: BLUSH, use: 'Rib, box, script' },
-      { name: 'Oat', hex: OAT, use: 'Zip hoodie, tote' },
-      { name: 'Ink', hex: INK, use: 'Tank, ribbon' },
+      { name: 'Safety orange', hex: ORANGE, use: 'Print, cap, binding' },
+      { name: 'Asphalt', hex: ASPHALT, use: 'Singlet, short, outline' },
+      { name: 'Chalk', hex: CHALK, use: 'Members’ tee' },
+      { name: 'Heather', hex: GREY, use: 'Crewneck' },
     ],
-    paletteNote: 'Concept palette. Every color is matched to Pantone before production.',
+    paletteNote: PALETTE_NOTE,
     story: [
       {
-        label: 'How it arrives',
+        label: 'The thinking',
         after: 'Up close',
         body: [
-          'Each guest’s pieces are folded in tissue, boxed in blush and tied with an ink satin ribbon, with their name on a woven card. The PJ pants are packed on top, for the after-party.',
+          'Race kit and everything after it, in one palette. The orange is the club’s, so it does the identifying; asphalt and chalk keep the rest quiet enough to wear every day. New members order into the same saved styles each season.',
         ],
       },
     ],
-    cover: ['e-plate', 'e-zip', 'e-macro', 'e-tank', 'e-box'],
+    cover: ['e-plate', 'e-crew', 'e-macro', 'e-cap', 'e-tag'],
     chapters: [
-      { label: 'The drop', assets: ['e-plate'] },
-      { label: 'After-party', assets: ['e-tall'] },
-      { label: 'The pieces', assets: ['e-zip', 'e-tank', 'e-tote'], captions: ['Zip hoodie', 'Ribbed tank', 'Tote'] },
-      { label: 'Up close', assets: ['e-macro', 'e-box'], captions: ['Satin-stitch script', 'The box'] },
+      { label: 'The collection', assets: ['e-plate'] },
+      { label: 'Race day', assets: ['e-tall'] },
+      { label: 'The pieces', assets: ['e-crew', 'e-tee', 'e-cap'], captions: ['Arched crewneck · 60', 'Members’ tee · 120', 'Cap · 72'] },
+      { label: 'Up close', assets: ['e-macro', 'e-tag'], captions: ['Twill, outlined', 'Hang-tag'] },
       { label: 'Palette', kind: 'swatches', assets: [] },
     ],
     assets: [
       { id: 'e-plate', kind: 'photo', orientation: 'landscape', priority: 1,
-        alt: 'The Ella Collection laid flat on blush: oat zip hoodie, black ribbed tank and a blush box with ink ribbon',
-        art: { t: 'plate', ground: '#F7A8C8', items: [
-          { g: tankElla, x: 580, y: 330, s: 1.3, r: 10 },
-          { g: zipElla, x: 290, y: 320, s: 1.45, r: -7 },
-          { g: boxElla, x: 690, y: 120, s: 0.75, r: -8 },
+        alt: 'The Eastline collection laid flat on chalk: heather crewneck, asphalt singlet and an orange cap',
+        art: { t: 'plate', ground: '#DDD6C8', items: [
+          { g: tankEast, x: 585, y: 335, s: 1.3, r: 4 },
+          { g: crewEast, x: 285, y: 318, s: 1.45, r: -3 },
+          { g: capEast, x: 660, y: 130, s: 0.85, r: -5 },
         ], stickers: [
-          { lines: ['ELLA', "’26"], x: 120, y: 528, r: -7, shape: 'tag', color: INK, ink: BLUSH_LT },
+          { lines: ['EASTLINE', 'MEMBERS’ ISSUE'], x: 150, y: 540, r: -2, shape: 'tag', color: ORANGE, ink: ASPHALT },
+          { lines: ['396', 'PIECES'], x: 450, y: 84, r: 0, shape: 'round', color: ASPHALT, ink: CHALK },
         ] } },
       { id: 'e-tall', kind: 'photo', orientation: 'portrait', priority: 2,
-        annotation: 'after-party approved',
-        alt: 'The PJ set on oat: a black ribbed tank over blush gingham PJ pants',
-        art: { t: 'plate', ground: OAT, tall: true, items: [
-          { g: tankElla, x: 300, y: 250, s: 1.25, r: -4 },
-          { g: pjElla, x: 300, y: 590, s: 1.2, r: 4 },
+        alt: 'The race kit on safety orange: an asphalt singlet over an asphalt run short',
+        art: { t: 'plate', ground: ORANGE, tall: true, items: [
+          { g: tankEast, x: 300, y: 260, s: 1.25, r: -2 },
+          { g: shortEast, x: 305, y: 590, s: 1.15, r: 3 },
         ], stickers: [
-          { lines: ['AFTER', 'PARTY'], x: 470, y: 420, r: 9, shape: 'round', color: POP, ink: INK },
+          { lines: ['RACE', 'KIT'], x: 470, y: 440, r: 0, shape: 'round', color: ASPHALT, ink: CHALK },
         ] } },
-      { id: 'e-zip', kind: 'garment', orientation: 'square', garment: 'ziphoodie', priority: 1,
-        annotation: 'the one they’ll actually wear',
-        alt: 'Oat zip hoodie with blush rib and hood lining, Ella in blush script on the left chest',
-        art: { t: 'garment', g: zipElla } },
-      { id: 'e-tank', kind: 'garment', orientation: 'square', garment: 'tank', priority: 2,
-        alt: 'Black ribbed tank with Ella in blush script',
-        art: { t: 'garment', g: tankElla } },
-      { id: 'e-pj', kind: 'garment', orientation: 'square', garment: 'pajama', wall: false,
-        alt: 'Blush gingham PJ pant',
-        art: { t: 'garment', g: pjElla } },
-      { id: 'e-tote', kind: 'garment', orientation: 'square', garment: 'tote',
-        alt: 'Oat canvas tote with blush base and handles, Ella in blush script',
-        art: { t: 'garment', g: toteElla } },
-      { id: 'e-macro', kind: 'detail', orientation: 'portrait', priority: 1,
-        alt: 'Close-up of Ella in ivory satin-stitch script on blush satin',
-        art: { t: 'macro', cloth: BLUSH, deco: ellaScript(WHITE), satin: true } },
-      { id: 'e-box', kind: 'artifact', orientation: 'square',
-        alt: 'Blush collection box tied with an ink satin ribbon, card reading The Ella Collection',
-        art: { t: 'box', lines: ['THE COLLECTION', 'ELLA', 'LOS ANGELES'], color: BLUSH, ribbon: INK } },
+      { id: 'e-crew', kind: 'garment', orientation: 'square', garment: 'crewneck', priority: 1,
+        alt: 'Heather grey crewneck with EASTLINE arched across the chest in orange outlined in asphalt',
+        art: { t: 'garment', g: crewEast } },
+      { id: 'e-cap', kind: 'garment', orientation: 'square', garment: 'cap', priority: 1,
+        alt: 'Safety orange cap with an asphalt brim and ERC embroidered in asphalt',
+        art: { t: 'garment', g: capEast } },
+      { id: 'e-tee', kind: 'garment', orientation: 'square', garment: 'tee', priority: 2, wall: false,
+        alt: 'Chalk members’ tee printed EASTLINE RUN CLUB in asphalt and orange',
+        art: { t: 'garment', g: teeEast } },
+      { id: 'e-tank', kind: 'garment', orientation: 'square', garment: 'tank',
+        alt: 'Asphalt singlet with orange binding, EASTLINE RC printed in orange',
+        art: { t: 'garment', g: tankEast } },
+      { id: 'e-short', kind: 'garment', orientation: 'square', garment: 'shorts', wall: false,
+        alt: 'Asphalt run short with an orange waistband and ERC on the left leg',
+        art: { t: 'garment', g: shortEast } },
+      { id: 'e-macro', kind: 'detail', orientation: 'landscape', priority: 1,
+        alt: 'Close-up of orange twill lettering outlined in asphalt on heather fleece',
+        art: { t: 'macro', cloth: GREY, deco: { t: 'type', lines: ['EAST'], face: 'varsity', tech: 'twill', ink: ORANGE, ink2: ASPHALT } } },
+      { id: 'e-swatch', kind: 'artifact', orientation: 'square',
+        alt: 'Color card in safety orange',
+        art: { t: 'swatch', color: ORANGE, name: 'Safety orange' } },
+      { id: 'e-tag', kind: 'artifact', orientation: 'square',
+        alt: 'Orange hang-tag reading Eastline, Members’ issue',
+        art: { t: 'tag', lines: ['EASTLINE', 'MEMBERS’ ISSUE'], color: ORANGE, ink: ASPHALT } },
+    ],
+  },
+  {
+    id: 'holloway', slug: 'holloway-club', no: 5,
+    title: 'The Holloway Club', sector: 'Concept collection · Spring capsule', category: 'social',
+    vibe: 'Embroidered, members only',
+    method: 'Embroidery', qty: '276 pc',
+    made: ['Crest polos', 'Quarter-zips', 'Script crewnecks', 'Rope caps'],
+    note: 'Navy, ivory and claret for a private members’ club: a crest polo, a navy quarter-zip, an oxford-blue crewneck with the club’s name in script and a rope cap, embroidered throughout.',
+    caseId: 'holloway',
+    brief: [
+      {
+        label: 'The ask',
+        text: 'Our members already own good clothes, and pro-shop logo wear doesn’t get worn. We want a small seasonal capsule that looks at home next to what they already buy, with the crest and nothing else.',
+      },
+      {
+        label: 'The collection',
+        text: '276 pieces across four styles, all embroidered: an ivory piqué polo with the crest on the chest, a navy quarter-zip, an oxford-blue crewneck with Holloway in navy script and an ivory rope cap.',
+      },
+    ],
+    pieces: [
+      { name: 'Polo', details: ['96 pieces', 'Ivory piqué, navy collar and cuffs', 'The H crest embroidered on the left chest'] },
+      { name: 'Quarter-zip', details: ['48 pieces', 'Navy, midweight', 'Claret crest embroidered on the left chest'] },
+      { name: 'Crewneck', details: ['60 pieces', 'Oxford-blue fleece, navy rib', 'Holloway in navy script embroidery'] },
+      { name: 'Rope cap', details: ['72 pieces', 'Ivory crown, navy brim, claret rope', 'The crest embroidered on the front'] },
+    ],
+    palette: [
+      { name: 'Club navy', hex: NAVY, use: 'Quarter-zip, crest, script' },
+      { name: 'Ivory', hex: IVORY, use: 'Polo, cap' },
+      { name: 'Claret', hex: CLARET, use: 'Crest, rope' },
+      { name: 'Oxford', hex: OXFORD, use: 'Crewneck' },
+    ],
+    paletteNote: PALETTE_NOTE,
+    story: [
+      {
+        label: 'The thinking',
+        after: 'Up close',
+        body: [
+          'Nothing in the capsule is printed. The crest stays the size of a coin, and the one piece with the club’s name on it uses a script quiet enough to pass for a heritage label. Autumn’s capsule picks up from the same saved crest.',
+        ],
+      },
+    ],
+    cover: ['o-plate', 'o-polo', 'o-macro', 'o-cap', 'o-label'],
+    chapters: [
+      { label: 'The collection', assets: ['o-plate'] },
+      { label: 'The clubhouse', assets: ['o-tall'] },
+      { label: 'The pieces', assets: ['o-polo', 'o-qz', 'o-crew'], captions: ['Crest polo · 96', 'Quarter-zip · 48', 'Script crewneck · 60'] },
+      { label: 'Up close', assets: ['o-macro', 'o-label'], captions: ['The crest, embroidered', 'Woven neck label'] },
+      { label: 'Palette', kind: 'swatches', assets: [] },
+    ],
+    assets: [
+      { id: 'o-plate', kind: 'photo', orientation: 'landscape', priority: 1,
+        alt: 'The Holloway capsule laid flat on club navy: oxford-blue script crewneck, ivory crest polo and an ivory rope cap',
+        art: { t: 'plate', ground: NAVY, items: [
+          { g: poloHoll, x: 585, y: 345, s: 1.25, r: 4 },
+          { g: crewHoll, x: 285, y: 318, s: 1.45, r: -3 },
+          { g: capHoll, x: 655, y: 130, s: 0.85, r: -4 },
+        ], stickers: [
+          { lines: ['HOLLOWAY', 'SPRING CAPSULE'], x: 150, y: 540, r: -2, shape: 'tag', color: IVORY, ink: NAVY },
+          { lines: ['276', 'PIECES'], x: 450, y: 84, r: 0, shape: 'round', color: IVORY, ink: NAVY },
+        ] } },
+      { id: 'o-tall', kind: 'photo', orientation: 'portrait', priority: 2,
+        alt: 'A navy quarter-zip over an ivory crest polo, on oxford blue',
+        art: { t: 'plate', ground: OXFORD, tall: true, items: [
+          { g: qzHoll, x: 300, y: 265, s: 1.3, r: -2 },
+          { g: poloHoll, x: 305, y: 600, s: 1.1, r: 3 },
+        ], stickers: [
+          { lines: ['MEMBERS', 'ONLY'], x: 465, y: 455, r: 0, shape: 'round', color: NAVY, ink: IVORY },
+        ] } },
+      { id: 'o-polo', kind: 'garment', orientation: 'square', garment: 'polo', priority: 1,
+        alt: 'Ivory piqué polo with a navy collar and the H crest on the left chest',
+        art: { t: 'garment', g: poloHoll } },
+      { id: 'o-cap', kind: 'garment', orientation: 'square', garment: 'cap', priority: 1,
+        alt: 'Ivory rope cap with a navy brim, claret rope and an embroidered crest',
+        art: { t: 'garment', g: capHoll } },
+      { id: 'o-crew', kind: 'garment', orientation: 'square', garment: 'crewneck', priority: 2,
+        alt: 'Oxford-blue crewneck with Holloway in navy script embroidery',
+        art: { t: 'garment', g: crewHoll } },
+      { id: 'o-qz', kind: 'garment', orientation: 'square', garment: 'quarterzip', wall: false,
+        alt: 'Navy quarter-zip with a claret crest on the left chest',
+        art: { t: 'garment', g: qzHoll } },
+      { id: 'o-macro', kind: 'detail', orientation: 'portrait', priority: 1,
+        alt: 'Close-up of the embroidered Holloway crest, ivory on navy',
+        art: { t: 'macro', cloth: IVORY, deco: hollCrest(NAVY, IVORY) } },
+      { id: 'o-script', kind: 'detail', orientation: 'landscape',
+        alt: 'Close-up of Holloway in navy satin-stitch script on oxford-blue fleece',
+        art: { t: 'macro', cloth: OXFORD, deco: { t: 'type', lines: ['Holloway'], face: 'script', tech: 'embroidery', ink: NAVY } } },
+      { id: 'o-label', kind: 'artifact', orientation: 'square',
+        alt: 'Navy woven neck label reading The Holloway Club',
+        art: { t: 'label', lines: ['HOLLOWAY', 'THE CLUB · SPRING'], ground: NAVY, ink: IVORY } },
     ],
   },
 ];
@@ -658,20 +759,20 @@ const ARCHIVE: WorkItem[] = [
  * What the site shows, in this order. To publish another, add its id here; the wall
  * grows a band for every few collections.
  */
-const PUBLISHED = ['sophie', 'jake', 'levi-noa', 'ella'];
+const PUBLISHED = ['ashford', 'halden', 'riverbend', 'eastline', 'holloway'];
 
 export const WORK: WorkItem[] = PUBLISHED.map((id) => ARCHIVE.find((w) => w.id === id)).filter((w): w is WorkItem => !!w);
 
 export const pad3 = (n: number) => String(n).padStart(3, '0');
 
-/** A collection's archive label, "Drop 001". The kid's own is always the next one. */
-export const drop = (n: number) => `Drop ${pad3(n)}`;
+/** A collection's archive label, "No. 001". */
+export const drop = (n: number) => `No. ${pad3(n)}`;
 
 export function projectBySlug(slug: string) {
   return WORK.find((w) => w.slug === slug);
 }
 
-/** Pieces as a bare number for the index ("86"), from qty ("86 pc"). */
+/** Pieces as a bare number for the index ("438"), from qty ("438 pc"). */
 export function pieces(w: WorkItem) {
   return w.qty?.replace(/\s*pc$/, '');
 }

@@ -6,9 +6,9 @@ import { pieces, type WorkItem } from '@/lib/work';
 export { bandStyle, bandTheme, type BandTheme } from './band';
 
 /**
- * The kid-energy bits shared by the wall, the dossier and the collection pages:
- * the collection's own colour as a hero band, the piece-count chip, and the
- * "send to the group chat" button.
+ * Small pieces shared by the wall, the dossier and the collection pages: the
+ * collection's own colour as a hero band, the piece-count chip, and a share button
+ * (the buyer usually needs a committee, a board or a manager to see it too).
  */
 
 const CHIP = {
@@ -18,7 +18,7 @@ const CHIP = {
 };
 
 /**
- * "86 PIECES": a production fact, set as a flat navy pill, straight. (`rotate`
+ * "438 PIECES": a production fact, set as a flat green pill, straight. (`rotate`
  * is accepted for older callers and ignored: the trims sit square now.)
  */
 export function PieceStamp({
@@ -58,7 +58,7 @@ export function ShareButton({ w, tone = 'ink', className = '' }: { w: WorkItem; 
 
   const share = async () => {
     const url = `${window.location.origin}/work/${w.slug}`;
-    const text = `${w.title}. ${pieces(w) ? `${pieces(w)} pieces, ` : ''}designed by Member Threads.`;
+    const text = `${w.title}, a concept collection by Member Threads.`;
     if (typeof navigator.share === 'function') {
       try {
         await navigator.share({ title: w.title, text, url });
@@ -100,11 +100,11 @@ export function ShareButton({ w, tone = 'ink', className = '' }: { w: WorkItem; 
       </svg>
       <span aria-live="polite">
         {state === 'copied' ? (
-          <span key="c">Copied. Paste it in the chat</span>
+          <span key="c">Link copied</span>
         ) : state === 'failed' ? (
           'Copy the address bar instead'
         ) : (
-          'Send to the group chat'
+          'Share this collection'
         )}
       </span>
     </button>

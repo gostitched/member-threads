@@ -4,7 +4,7 @@ import { WORK } from '@/lib/work';
 
 export const metadata: Metadata = {
   title: 'Collections',
-  description: 'Concept collections for Bar and Bat Mitzvahs: the pieces, the palette, the piece count and how it all arrives.',
+  description: 'Concept collections from Member Threads for university clubs, companies, nonprofits, run clubs and members’ clubs: the pieces, the palette, the finishes and the piece count.',
 };
 
 export default function WorkPage() {

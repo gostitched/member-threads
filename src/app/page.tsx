@@ -2,12 +2,14 @@ import Faq from '@/components/Faq';
 import Hero from '@/components/Hero';
 import Intro from '@/components/Intro';
 import HowItWorks from '@/components/HowItWorks';
+import Segments from '@/components/home/Segments';
 import Chapter from '@/components/chapter/Chapter';
 
 /**
- * White, less is more: the hero, the chapter (the toy hoodie, the
- * three-piece row, the finale), what we are, three steps, four questions. Every ground is
- * paper; cards are white with a hairline, accents baby blue and pink.
+ * The home page, in order: the hero (one sample collection, laid flat), the
+ * chapter (the interactive hoodie), what we do, who we make it for (the one
+ * dusty-blue band), how it works, and the questions. Every other ground is
+ * paper; one frame (max 1536px, the header's) so every left edge lines up.
  */
 export default function HomePage() {
   return (
@@ -15,6 +17,7 @@ export default function HomePage() {
       <Hero />
       <Chapter />
       <Intro />
+      <Segments />
       <HowItWorks />
       <Faq />
     </>

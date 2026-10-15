@@ -2,19 +2,19 @@
 
 import Link from 'next/link';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { Star } from '@/components/Sticker';
 import { register } from '@/lib/reveal';
-import { possessive, useKidName } from '@/lib/name';
+import { useOrgName } from '@/lib/name';
 import { FINALE, named } from '@/lib/chapter';
 
 /**
- * The chapter's close: one rounded pale-blue panel, three navy lines at d1
- * ("{NAME}'S NAME. / COLORS. / COLLECTION.") with the name in raspberry, one
- * line under it, the navy pill, and one outlined pink star. It settles in as it
- * arrives; with reduced motion it is simply there.
+ * The chapter’s close: one full-bleed green band. The cream logo, three
+ * lines at d1 ("YOUR NAME. / YOUR COLORS. / YOUR COLLECTION.") with "Your" in
+ * beige, the organization's name signed under them in the script once it's
+ * typed, one line, and the cream pill. It settles in as it arrives; with
+ * reduced motion it is simply there.
  */
 export default function Finale() {
-  const { name, isDefault } = useKidName();
+  const { name, isDefault } = useOrgName();
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(true);
 
@@ -26,32 +26,32 @@ export default function Finale() {
     return register({ el, show: () => setShown(true) });
   }, []);
 
-  const who = isDefault ? 'YOUR' : possessive(name).replace("'", '’').toUpperCase();
-
   return (
-    <section aria-labelledby="finale-title" className="bg-paper py-12 text-ink sm:py-16">
-      <div className="shell">
-        <div
-          ref={ref}
-          data-in={shown}
-          className="chapter-finale relative overflow-hidden rounded-[32px] bg-electric-lit px-4 pb-14 pt-20 text-center sm:px-10 sm:py-20"
-        >
-          <Star
-            variant="outline"
-            rotate={15}
-            className="pointer-events-none absolute right-5 top-5 h-11 w-11 text-uv-lit sm:right-[9%] sm:top-12 sm:h-20 sm:w-20"
-          />
-          <h2 id="finale-title" className="caps chapter-finale-title text-[clamp(1.5rem,6.8vw,2.25rem)] leading-[0.95] sm:text-d1">
-            {FINALE.lines.map((l, i) => (
-              <span key={i} className="block">
-                <span key={who} className="chapter-name-slap text-uv">{who}</span>
-                {l.replace('{name’s}', '').toUpperCase()}
-              </span>
-            ))}
-          </h2>
-          <p className="chapter-turn mt-5 text-ink/70">{FINALE.script}</p>
-          <Link href={FINALE.primary.href} className="btn-blue mt-8 h-14 px-8 text-[1.0625rem]">
-            {named(FINALE.primary.label, name, isDefault)} <span aria-hidden>→</span>
+    <section aria-labelledby="finale-title" className="chapter-band relative overflow-hidden bg-green text-cream">
+      <div ref={ref} data-in={shown} className="chapter-finale shell relative py-20 text-center sm:py-28">
+        <span aria-hidden className="chapter-logo mx-auto block h-12 w-[118px] sm:h-14 sm:w-[138px]" />
+        <h2 id="finale-title" className="caps chapter-finale-title mt-10 text-[clamp(1.625rem,6.6vw,2.75rem)] leading-[0.95] sm:mt-12 sm:text-d1">
+          {FINALE.lines.map(([your, rest]) => (
+            <span key={rest} className="block">
+              <span className="text-beige">{your}</span> {rest}
+            </span>
+          ))}
+        </h2>
+        {!isDefault && (
+          <p className="chapter-sign mx-auto mt-6 flex max-w-full items-baseline justify-center gap-3 sm:mt-7">
+            <span className="label shrink-0 text-cream/60">{FINALE.madeFor}</span>
+            <span key={name} className="chapter-name-slap truncate pb-1 font-serif text-[clamp(1.75rem,3.2vw,2.5rem)] leading-none text-beige">
+              {name}
+            </span>
+          </p>
+        )}
+        <p className="mx-auto mt-6 max-w-[30rem] text-balance text-lead text-cream/75">{FINALE.body}</p>
+        <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <Link href={FINALE.primary.href} className="btn h-14 bg-cream px-8 text-[1rem] text-ink hover:bg-paper">
+            {named(FINALE.primary.label, name, isDefault || name.length > 16)} <span aria-hidden>→</span>
+          </Link>
+          <Link href={FINALE.secondary.href} className="btn h-14 px-7 text-[1rem] text-cream shadow-[inset_0_0_0_1.5px_theme(colors.cream/0.45)] hover:shadow-[inset_0_0_0_1.5px_theme(colors.cream)]">
+            {FINALE.secondary.label}
           </Link>
         </div>
       </div>

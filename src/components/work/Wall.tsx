@@ -8,9 +8,8 @@ import { EASE_IN, EASE_OUT, REST, fromFrame, prefersReducedMotion, rectsBy } fro
 import { linkPoints, links, panelSpot } from './geometry';
 import { layoutStream, layoutWall, type Layout, type Placed } from '@/lib/work-layout';
 import { CATEGORIES, leadOf, pieces, stripOf, type WorkCategory, type WorkItem } from '@/lib/work';
-import { NAME_MAX, possessive, useKidName } from '@/lib/name';
+import { NAME_MAX, YOUR_NAME, possessive, useOrgName } from '@/lib/name';
 import { useDrag } from '@/lib/motion';
-import { Star } from '@/components/Sticker';
 import './work.css';
 
 /**
@@ -333,7 +332,7 @@ export default function WorkWall({ projects }: { projects: WorkItem[] }) {
           h={handlers}
           head={
             <>
-              {/* The header band: a pale-blue rounded panel behind the headline. */}
+              {/* The header band: a cream panel behind the headline. */}
               <div aria-hidden className="wk-band" style={{ height: `calc(${U(BAND)} + 1.25rem)` }} />
               <h1 data-away className="absolute left-0" style={{ top: U(1.2) }}>
                 <span className="clip">
@@ -343,7 +342,7 @@ export default function WorkWall({ projects }: { projects: WorkItem[] }) {
                 </span>
                 <span className="clip mt-2">
                   <span className="block font-sans text-[clamp(1.125rem,1.5vw,1.375rem)] font-medium leading-none text-uv" style={{ animationDelay: '150ms' }}>
-                    Drag them around.
+                    Five concept collections, one for every kind of organization.
                   </span>
                 </span>
               </h1>
@@ -361,6 +360,9 @@ export default function WorkWall({ projects }: { projects: WorkItem[] }) {
           <h1 className="px-5">
             <span className="clip"><span className="caps block text-d1">Collections</span></span>
           </h1>
+          <p className="mt-3 max-w-[30ch] px-5 text-[0.9375rem] leading-snug text-ink/70">
+            Five concept collections, one for every kind of organization.
+          </p>
           <div className="mt-5 overflow-x-auto px-5 py-1 [scrollbar-width:none]">{filters}</div>
         </div>
         <Canvas ref={streamRef} layout={stream} mode="stream" active={active} openPid={open?.pid ?? null} h={handlers} />
@@ -371,7 +373,7 @@ export default function WorkWall({ projects }: { projects: WorkItem[] }) {
         <MobilePanel project={projects.find((p) => p.id === active.pid)!} onOpen={() => openProject(active.pid)} onClose={() => setActive(null)} />
       )}
 
-      <Ending />
+      <Ending count={projects.length} />
 
       {open && openProjectItem && (
         <Dossier
@@ -517,7 +519,7 @@ function Piece({ p, mine, primary, desk, hidden, h }: { p: Placed; mine: boolean
       ref={drag.ref}
       data-asset={p.asset.id}
       data-project={p.project.id}
-      className={`wk-item ${p.role === 'garment' ? 'is-cut' : p.asset.kind === 'artifact' && !p.asset.art?.t.match(/swatch|box/) ? 'is-cut' : 'is-rect'} ${p.asset.src ? 'is-photo' : ''} ${mine ? 'is-on' : ''} ${drag.dragging ? 'is-held' : ''}`}
+      className={`wk-item ${p.role === 'garment' ? 'is-cut' : p.asset.kind === 'artifact' && !p.asset.art?.t.match(/swatch/) ? 'is-cut' : 'is-rect'} ${p.asset.src ? 'is-photo' : ''} ${mine ? 'is-on' : ''} ${drag.dragging ? 'is-held' : ''}`}
       style={{
         ...drag.style,
         left: U(p.x), top: U(p.y), width: U(p.w), height: U(p.h),
@@ -568,13 +570,13 @@ function Filters({
   onChoose: (f: Filter) => void;
   counts: Map<WorkCategory, number>;
 }) {
-  const tabs: { id: Filter; label: string }[] = [
+  const tabs: { id: Filter; label: string; title?: string }[] = [
     { id: 'all', label: 'All' },
-    ...CATEGORIES.filter((c) => counts.get(c.id)).map((c) => ({ id: c.id, label: c.label })),
+    ...CATEGORIES.filter((c) => counts.get(c.id)).map((c) => ({ id: c.id, label: c.label, title: c.title })),
   ];
   return (
     <nav aria-label="Filter collections by category">
-      <ul className="flex items-center gap-2 whitespace-nowrap">
+      <ul className="flex items-center gap-1.5 whitespace-nowrap">
         {tabs.map((t) => {
           const on = t.id === filter;
           return (
@@ -583,7 +585,9 @@ function Filters({
                 type="button"
                 onClick={() => onChoose(t.id)}
                 aria-pressed={on}
-                className={`flex min-h-[40px] items-center rounded-full px-4 text-[0.875rem] font-semibold transition-colors duration-200 motion-reduce:transition-none ${
+                aria-label={t.title}
+                title={t.title}
+                className={`flex min-h-[40px] items-center rounded-full px-4 text-[0.8125rem] font-semibold transition-colors duration-200 motion-reduce:transition-none ${
                   on ? 'bg-ink text-paper' : 'bg-ink/5 text-ink hover:bg-ink/10'
                 }`}
               >
@@ -599,7 +603,7 @@ function Filters({
 
 function MobilePanel({ project, onOpen, onClose }: { project: WorkItem; onOpen: () => void; onClose: () => void }) {
   return (
-    <div className="wk-sheet fixed inset-x-3 bottom-3 z-[65] rounded-3xl bg-white p-4 text-ink shadow-[0_0_0_1px_theme(colors.rule),0_12px_32px_rgba(14,26,71,0.12)] lg:hidden" role="status">
+    <div className="wk-sheet fixed inset-x-3 bottom-3 z-[65] rounded-3xl bg-white p-4 text-ink shadow-[0_0_0_1px_theme(colors.rule),0_12px_32px_rgba(19,51,39,0.12)] lg:hidden" role="status">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="caps text-[1.375rem] leading-[0.95] tracking-tight">{project.title}</p>
@@ -617,44 +621,46 @@ function MobilePanel({ project, onOpen, onClose }: { project: WorkItem; onOpen: 
 }
 
 /**
- * The wall ends on the next collection: theirs. The name is typed straight into the
- * headline in raspberry; same name everywhere on the site.
+ * The wall ends on the next collection: theirs. The organization's name is typed
+ * straight into the headline; it's the same name everywhere on the site.
  */
-function Ending() {
-  const { name, raw, set, isDefault } = useKidName();
+function Ending({ count }: { count: number }) {
+  const { name, raw, set, isDefault } = useOrgName();
   // The input sizes to what's typed, so the name sits in the line like set type.
-  const chars = Math.max((raw || 'Your name').length, 4);
+  const chars = Math.max((raw || YOUR_NAME).length, 4);
   return (
-    <section aria-label="Your collection" className="wk-next relative mt-16 overflow-hidden rounded-[32px] bg-electric-lit text-ink lg:mt-10">
-      <Star variant="outline" rotate={15} className="pointer-events-none absolute right-[6%] top-10 hidden h-20 w-20 text-uv-lit md:block lg:h-28 lg:w-28" />
-      <div className="relative px-6 py-14 sm:px-10 lg:px-16 lg:py-20">
-        <h2 className="caps text-d1">
-          <span className="block">The</span>
-          <label className="block">
-            <span className="sr-only">Name</span>
-            <input
-              type="text"
-              value={raw}
-              onChange={(e) => set(e.target.value)}
-              maxLength={NAME_MAX}
-              placeholder="Your name"
-              autoComplete="off"
-              autoCapitalize="words"
-              spellCheck={false}
-              enterKeyHint="done"
-              size={chars}
-              style={{ width: `min(100%, ${chars * 0.74 + 0.3}em)` }}
-              className="wk-name caps block max-w-full rounded-none border-b-[0.06em] border-uv/40 bg-transparent pb-[0.04em] uppercase leading-[0.95] text-uv caret-uv outline-none placeholder:text-ink/25"
-            />
-          </label>
-          <span className="block">Collection.</span>
-        </h2>
-        <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-5">
-          <p className="font-sans text-[clamp(1.25rem,1.8vw,1.625rem)] font-medium leading-none text-ink">could be next.</p>
-          <Link href="/quote" className="btn-blue">
-            {isDefault ? 'Start your collection' : `Start ${possessive(name).replace("'", '’')} collection`} <span aria-hidden>→</span>
-          </Link>
+    <section aria-label="Your collection" className="wk-next relative mt-16 overflow-hidden rounded-[24px] bg-ink text-paper lg:mt-10">
+      <div className="relative grid gap-10 px-6 py-14 sm:px-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:px-16 lg:py-20">
+        <div className="min-w-0">
+          <p className="label text-paper/60">Collection No. {String(count + 1).padStart(3, '0')}</p>
+          <h2 className="caps mt-5 text-d1">
+            <span className="block">The</span>
+            <label className="block">
+              <span className="sr-only">Your organization’s name</span>
+              <input
+                type="text"
+                value={raw}
+                onChange={(e) => set(e.target.value)}
+                maxLength={NAME_MAX}
+                placeholder={YOUR_NAME}
+                autoComplete="organization"
+                autoCapitalize="words"
+                spellCheck={false}
+                enterKeyHint="done"
+                size={chars}
+                style={{ width: `min(100%, ${chars * 0.78 + 0.3}em)` }}
+                className="wk-name caps block max-w-full rounded-none border-b-[0.05em] border-uv-lit/50 bg-transparent pb-[0.04em] uppercase leading-[0.95] text-uv-lit caret-uv-lit outline-none placeholder:text-paper/25"
+              />
+            </label>
+            <span className="block">Collection.</span>
+          </h2>
+          <p className="mt-8 max-w-[38ch] text-lead text-paper/70">
+            Type your organization’s name. Then tell us who it’s for, and we’ll design the pieces around it.
+          </p>
         </div>
+        <Link href="/quote" className="btn-white self-start lg:self-end">
+          {isDefault ? 'Start your collection' : `Start ${possessive(name).replace("'", '’')} collection`} <span aria-hidden>→</span>
+        </Link>
       </div>
     </section>
   );

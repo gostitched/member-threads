@@ -3,38 +3,39 @@
 import DesignAct from './DesignAct';
 import Finale from './Finale';
 import Stage from './Stage';
-import { useKidName } from '@/lib/name';
+import { useOrgName } from '@/lib/name';
 import { ACT1, named } from '@/lib/chapter';
 import './chapter.css';
 
 /**
  * The chapter between the hero and how it works.
  *
- *   01  Not a blank: their hoodie on a pale-blue plate, five details to tap,
- *       and the name + colorway under it.
- *   02  Don't know what you want? One row: the line, and three pieces.
- *   ──  The finale: one pale-blue panel, three lines, one button.
+ *   01  Not a blank: the house hoodie on a cream plate, eight details to tap,
+ *       the organization's name and colorway under it, the tech pack beside.
+ *   02  Don't know what you want yet? One row: the line, and three pieces.
+ *   ──  The close: one dusty-blue band, three lines, one button.
  *
- * The kid's name (typed under the hoodie) runs through all of it. Content lives in
- * `@/lib/chapter`.
+ * The organization's name (typed under the hoodie) runs through all of it.
+ * Content lives in `@/lib/chapter`.
  */
 export default function Chapter({ receipt = false }: { receipt?: boolean }) {
-  const { name, isDefault } = useKidName();
+  const { name, isDefault } = useOrgName();
   return (
     <>
-      <section aria-labelledby="why-title" className="chapter-ground relative overflow-x-clip bg-paper pb-12 pt-8 text-ink sm:pt-10 lg:pb-8">
+      <section aria-labelledby="why-title" className="chapter-ground relative overflow-x-clip bg-paper pb-12 pt-14 text-ink sm:pt-20 lg:pb-10">
         <div className="shell relative text-center">
-          <h2 id="why-title" className="caps text-d1">
-            Not A blank.
+          <p className="label text-muted">{ACT1.eyebrow}</p>
+          <h2 id="why-title" className="caps mt-4 text-d1">
+            {ACT1.title}
           </h2>
-          <p className="mx-auto mt-4 max-w-[40rem] text-balance text-lead text-ink/80">
+          <p className="mx-auto mt-5 max-w-[38rem] text-balance text-lead text-ink/75">
             {ACT1.body.lead}
             <strong className="font-semibold text-ink">{ACT1.body.mark}</strong>
             {ACT1.body.rest}
           </p>
-          <p className="mx-auto mt-2 max-w-[30rem] text-[0.9375rem] text-muted">{named(ACT1.hint, name, isDefault)}</p>
+          <p className="mx-auto mt-3 max-w-[34rem] text-balance text-[0.875rem] text-muted">{named(ACT1.hint, name, isDefault)}</p>
         </div>
-        <div className="mt-8 lg:mt-10">
+        <div className="mt-10 lg:mt-12">
           <Stage receipt={receipt} />
         </div>
       </section>

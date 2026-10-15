@@ -2,7 +2,7 @@
  * The dashboard's public catalog DTOs, as the embed API serves them.
  *
  * Mirrors `PublicCatalogProduct` in the dashboard (`src/modules/catalog/public.ts`),
- * plus the optional Studio-only `sticker`.
+ * plus the optional site-only `sticker`.
  * That shape is a frozen public contract (its key list is snapshot-tested there), so
  * copying it is safer than it looks — but if the dashboard appends a field, add it
  * here before reading it.
@@ -95,8 +95,8 @@ export interface CatalogProduct {
   /** Absent when the site shows no prices. */
   pricing?: PublicPricing;
   /**
-   * Studio-only, never sent by the dashboard: a short kid-facing aside ("After-party
-   * approved") drawn as a butter sticker on the piece.
+   * Site-only, never sent by the dashboard: a short note drawn as a small label on
+   * the piece. Member Threads' own catalog does not use it.
    */
   sticker?: string;
 }

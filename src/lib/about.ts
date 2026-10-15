@@ -1,39 +1,57 @@
 /**
- * About page copy.
+ * About page copy. The page reads only from here.
  *
- * [CONFIRM] The founder quote, the origin story and the milestone lines are
- * drafted from the brand brief. Ethan to confirm before launch; the page reads
- * only from here.
+ * True and on file: Ethan Scher founded Stitched in 2023, making apparel for
+ * his own college clubs. Member Threads is the organization-focused brand
+ * under Stitched Group. Anything else marked [CONFIRM] is listed in README
+ * "Before launch".
  */
 export const FOUNDER = {
   name: 'Ethan Scher',
   role: 'Founder',
-  /** Drop a photo in /public/about/ and set the path here. */
+  /** Drop a photo in /public/about/ and set the path here (null shows a plain plate). */
   photo: '/about/founder.jpg' as string | null,
-  quote: 'The apparel should feel as considered as the rest of the event.',
 };
 
 export const ORIGIN = {
   intro:
-    'Member Threads started inside Stitched, a custom apparel studio that designs and makes clothes from the fabric up. Families and planners kept asking for Mitzvah apparel that didn’t look like a giveaway, so we gave it a studio of its own.',
+    'Member Threads designs and makes custom apparel collections for organizations: university clubs, companies, nonprofits, teams and associations. Pieces with the quality of a retail label, made for the people who wear your name.',
+  /** The large statement in the "Why" section. */
+  why: 'Most organizations want better merchandise. They just don’t know how to create it, or where to source it.',
+  whyBody:
+    'The usual answer is a promo catalog and a logo on a blank tee. It gets handed out once and ends up in a drawer. We think the people who show up for your organization deserve something they reach for on their own: the right fabric, a considered fit, colors that are actually yours, finished with the care of a real apparel brand.',
+  // [CONFIRM] "worked directly with manufacturers" and "fabric, fit, color, label" detail, carried over from the Stitched story.
   story: [
-    'Ethan started Stitched in 2023, making apparel for his college clubs. Instead of picking blanks from a catalog, he worked directly with manufacturers to build garments from scratch: the fabric, the fit, the color, the label inside the neck.',
-    'Then the Bar and Bat Mitzvah requests started. Not giveaways, but pieces that matched the rest of a very designed weekend, the kind a 13-year-old would actually keep wearing. What was out there was mostly wholesale hoodies with a logo pressed on.',
-    'So the Studio designs the collection around the kid, and Stitched makes every piece. One designer per family, our own production team, and the same standards whether it’s 50 pieces or 150.',
+    'Ethan Scher started making apparel in 2023 for his own college clubs. The options were the same everywhere: pick a blank from a catalog, press a logo on it, hope people wear it.',
+    'So he went further. He worked directly with manufacturers to build the pieces properly: the fabric, the fit, the color, the label inside the neck. Members wore them. Other clubs asked for the same.',
+    'That work became Stitched. Member Threads is how we bring it to every kind of organization, with a catalog to start from, a designer to shape it, and one clear price.',
   ],
 };
 
-export const MILESTONES = [
-  { year: 'Stitched', line: 'Since 2023: garments designed and made from scratch for clubs, companies and brands.' },
-  { year: 'The ask', line: 'Families and planners asking for Mitzvah apparel worth keeping.' },
-  { year: 'The Studio', line: 'A dedicated team and process for Bar, Bat and B’nai Mitzvah collections.' },
-  { year: 'Now', line: 'Designing collections for families and the planners who work with them.' },
+/** "What you get" on /about: what every organization gets, whatever the size. */
+export const OFFER = [
+  {
+    title: 'A dedicated designer',
+    line: 'One person owns your collection from first sketch to final proof. Bring a logo and a few references; no design team needed.',
+  },
+  {
+    title: 'One clear price',
+    line: 'Embroidery, custom colors, extra print locations and design are built into one per-piece price, quoted before anything is made.',
+  },
+  {
+    title: 'Reorders on file',
+    line: 'Every approved piece is saved to your organization, so next season’s run starts where the last one left off.',
+  },
+  {
+    // [CONFIRM] nationwide delivery.
+    title: 'Delivered nationwide',
+    line: 'Packed by size and shipped to your office, campus or event, anywhere in the U.S.',
+  },
 ] as const;
 
-/** The #planners section on /about. */
-export const PLANNERS = [
-  { title: 'Concept', line: 'Send the deck or the mood board. We design to the event’s palette and look, not around it.' },
-  { title: 'Timeline', line: 'We work back from the date and tell you on day one if it’s tight.' },
-  { title: 'Proofs', line: 'Proofs go to you and the family together, so nobody is chasing approvals.' },
-  { title: 'Delivery', line: 'Packed and labelled, to the venue, the hotel or the family’s door.' },
-] as const;
+/** How Member Threads and Stitched Group divide the work. */
+export const STITCHED = {
+  title: 'Part of Stitched Group.',
+  // [CONFIRM] the division of responsibilities between Member Threads and Stitched Group.
+  body: 'Member Threads is where organizations design their collections. Stitched Group, our parent company, runs sourcing, production, quality control and logistics. One team from brief to delivery, with no middleman between your designer and the people making the pieces.',
+};
