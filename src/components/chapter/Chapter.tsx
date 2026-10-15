@@ -3,7 +3,7 @@
 import DesignAct from './DesignAct';
 import Finale from './Finale';
 import Stage from './Stage';
-import { useKidName } from '@/lib/name';
+import { useOrgName } from '@/lib/name';
 import { ACT1, named } from '@/lib/chapter';
 import './chapter.css';
 
@@ -19,7 +19,7 @@ import './chapter.css';
  * `@/lib/chapter`.
  */
 export default function Chapter({ receipt = false }: { receipt?: boolean }) {
-  const { name, isDefault } = useKidName();
+  const { name, isDefault } = useOrgName();
   return (
     <>
       <section aria-labelledby="why-title" className="chapter-ground relative overflow-x-clip bg-paper pb-12 pt-8 text-ink sm:pt-10 lg:pb-8">

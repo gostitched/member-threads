@@ -5,7 +5,7 @@ import Hoodie from './Hoodie';
 import { VIEW } from './geometry';
 import Receipt, { type SlipLine } from './Receipt';
 import { register } from '@/lib/reveal';
-import { NAME_MAX, YOUR_NAME, useKidName } from '@/lib/name';
+import { NAME_MAX, YOUR_NAME, useOrgName } from '@/lib/name';
 import { useVibe } from '@/lib/vibe';
 import {
   ACT1, BLANK, CALLOUTS, COLORWAYS, LINER_STARS, colorwayIndex, isOn, named,
@@ -75,7 +75,7 @@ export default function Stage({ receipt = false }: { receipt?: boolean }) {
   const [focus, setHover] = useState<Custom | null>(null);
   const [said, setSaid] = useState('');
   const [burst, setBurst] = useState<Burst>({ id: null, n: 0 });
-  const { name: typed, isDefault: you } = useKidName();
+  const { name: typed, isDefault: you } = useOrgName();
   /** What the garment and tag show: the typed name, or a prompt. */
   const name = you ? YOUR_NAME : typed;
   const { vibe, set: setVibe } = useVibe();
@@ -235,7 +235,7 @@ function Colorways({ look, pick, className = '' }: Pick<Shared, 'look' | 'pick'>
 
 /** The name input: the chest script, the finale and /quote all read it. */
 function NameField({ className = '' }: { className?: string }) {
-  const { raw, set, clear } = useKidName();
+  const { raw, set, clear } = useOrgName();
   return (
     <div className={`chapter-name relative flex h-10 w-[12rem] items-center rounded-full bg-white ${className}`}>
       <input

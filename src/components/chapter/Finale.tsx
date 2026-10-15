@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Star } from '@/components/Sticker';
 import { register } from '@/lib/reveal';
-import { possessive, useKidName } from '@/lib/name';
+import { possessive, useOrgName } from '@/lib/name';
 import { FINALE, named } from '@/lib/chapter';
 
 /**
@@ -14,7 +14,7 @@ import { FINALE, named } from '@/lib/chapter';
  * arrives; with reduced motion it is simply there.
  */
 export default function Finale() {
-  const { name, isDefault } = useKidName();
+  const { name, isDefault } = useOrgName();
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(true);
 

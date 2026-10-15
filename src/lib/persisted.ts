@@ -1,5 +1,5 @@
 /**
- * Tiny localStorage-backed store shared by `useKidName` and `useVibe`.
+ * Tiny localStorage-backed store shared by `useOrgName` and `useVibe`.
  *
  * - Reads/writes are wrapped in try/catch (private mode, blocked storage); an
  *   in-memory copy keeps the value working for the session regardless.

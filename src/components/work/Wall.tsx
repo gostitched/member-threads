@@ -8,7 +8,7 @@ import { EASE_IN, EASE_OUT, REST, fromFrame, prefersReducedMotion, rectsBy } fro
 import { linkPoints, links, panelSpot } from './geometry';
 import { layoutStream, layoutWall, type Layout, type Placed } from '@/lib/work-layout';
 import { CATEGORIES, leadOf, pieces, stripOf, type WorkCategory, type WorkItem } from '@/lib/work';
-import { NAME_MAX, possessive, useKidName } from '@/lib/name';
+import { NAME_MAX, possessive, useOrgName } from '@/lib/name';
 import { useDrag } from '@/lib/motion';
 import { Star } from '@/components/Sticker';
 import './work.css';
@@ -621,7 +621,7 @@ function MobilePanel({ project, onOpen, onClose }: { project: WorkItem; onOpen: 
  * headline in raspberry; same name everywhere on the site.
  */
 function Ending() {
-  const { name, raw, set, isDefault } = useKidName();
+  const { name, raw, set, isDefault } = useOrgName();
   // The input sizes to what's typed, so the name sits in the line like set type.
   const chars = Math.max((raw || 'Your name').length, 4);
   return (

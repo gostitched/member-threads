@@ -4,15 +4,22 @@
 
 @layer base {
   :root {
-    /* The thread: raspberry, and its sticker-pink twin. */
-    --thread: #C8336E;
-    --thread-hi: #F9A8C9;
+    /* The thread: dusty blue, and its beige twin. */
+    --thread: #223041;
+    --thread-hi: #C4B19A;
+
+    /* One family, four roles (see layout.tsx). Display runs wide and heavy
+       like The Bold Font; labels are small tracked caps in the same face. */
+    --font-display: var(--font-archivo);
+    --font-sans: var(--font-archivo);
+    --font-mono: var(--font-archivo);
+    --font-serif: var(--font-script);
     --uv: theme('colors.uv');
     --uv-hi: theme('colors.uv-lit');
     color-scheme: light;
 
-    /* Type is set entirely in layout.tsx via next/font: Rubik (display),
-       Jost (body, nav, buttons) and DM Mono (labels, form small print). */
+    /* Type is set in layout.tsx via next/font: Archivo (display, body,
+       labels) and Yellowtail (the script accent, `font-serif`). */
   }
   html {
     -webkit-font-smoothing: antialiased;
@@ -23,6 +30,11 @@
   }
   h1, h2, h3, .font-extrabold, .font-black {
     font-family: var(--font-display);
+    font-stretch: 112%;
+  }
+  /* The script has no italic; never let the browser slant it. */
+  .font-serif, .font-serif.italic, .italic .font-serif {
+    font-style: normal;
   }
   ::selection {
     @apply bg-electric text-ink;
@@ -61,14 +73,16 @@
   /* Small uppercase mono label. Does the work that a sentence of body copy
      would otherwise do, which is how the page stays light on text. */
   .label {
-    @apply font-mono text-label uppercase;
+    @apply font-mono text-label font-semibold uppercase;
+    letter-spacing: 0.16em;
   }
 
   /* Display headings are set in heavy caps and tracked in tight. */
   .caps {
     @apply font-black uppercase;
     font-family: var(--font-display);
-    letter-spacing: -0.025em;
+    font-stretch: 118%;
+    letter-spacing: -0.02em;
   }
 
   .btn {
@@ -119,7 +133,7 @@
     border-radius: 9999px;
     background: theme('colors.ink');
     border: 3px solid theme('colors.paper');
-    box-shadow: 0 1px 4px rgba(14, 26, 71, 0.25);
+    box-shadow: 0 1px 4px rgba(19, 51, 39, 0.25);
   }
   .range::-moz-range-thumb {
     width: 26px;
@@ -346,8 +360,8 @@
      grid, crop marks, paper tags and a ticket, with one price that never moves. */
   .board-grid {
     background-image:
-      linear-gradient(rgba(14, 26, 71, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(14, 26, 71, 0.05) 1px, transparent 1px);
+      linear-gradient(rgba(19, 51, 39, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(19, 51, 39, 0.05) 1px, transparent 1px);
     background-size: 56px 56px;
     background-position: center top;
   }

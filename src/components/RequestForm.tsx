@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Sticker from '@/components/Sticker';
-import { possessive, useKidName } from '@/lib/name';
+import { possessive, useOrgName } from '@/lib/name';
 import { APP_URL, REQUEST_FORM_URL } from '@/lib/site';
 
 const MIN_HEIGHT = 1200;
@@ -116,7 +116,7 @@ export default function RequestForm() {
  * is raspberry; long names shrink to fit.
  */
 export function QuoteTitle() {
-  const { name, isDefault } = useKidName();
+  const { name, isDefault } = useOrgName();
   const who = (isDefault ? 'your day.' : `${possessive(name).replace(/'/g, '’')} day.`).toUpperCase();
   const cap = (len: number) => `min(1em, ${(100 / (Math.max(len, 1) * 0.66)).toFixed(2)}cqw)`;
   return (
@@ -137,7 +137,7 @@ export function QuoteTitle() {
 
 /** "For {name}": a small woven label above the form; renders nothing until a name is set. */
 export function ForSticker() {
-  const { name, isDefault } = useKidName();
+  const { name, isDefault } = useOrgName();
   if (isDefault) return null;
   return (
     <Sticker key={name} shape="label" draggable>

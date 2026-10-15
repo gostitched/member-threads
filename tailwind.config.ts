@@ -1,12 +1,14 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * Member Threads theme: "Every kid gets a drop."
+ * Member Threads theme: "Apparel your members actually want to wear."
  *
- * Bold flat color fields, one per section, with ink or paper type. Hot pink
- * (`electric`) is the signature. pop / lime are grounds and chip fills only,
- * never type; electric-lit is the only pink allowed as type on ink.
- * Token names are kept from the original system so components stay put.
+ * The brand board: Green #133327, Cream #EEE6D9, Beige #C4B19A, Dusty Blue
+ * #223041. Green is the ink (type, buttons, the logo); cream and a lighter
+ * paper are the grounds; beige is for plates, chips and tints (never type on
+ * cream); dusty blue is the second dark, for hover states and full-bleed bands.
+ * Token names are kept from the original system so components stay put:
+ * `electric*` = beige/cream tints, `blue`/`uv` = dusty blue, `pop` = beige.
  */
 const config: Config = {
   content: [
@@ -16,39 +18,45 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // WHITE: navy type on an off-white ground, baby-blue + pink accents.
-        ink: '#0E1A47',
-        'ink-2': '#1A2A5E',
-        muted: '#5C6584',
-        ash: '#F1EEE7',
-        'ash-2': '#E9E5DC',
-        rule: '#DCD8CF',
-        paper: '#F8F6F1',
-        // Baby blue: plates, chips, tints. Never type.
-        electric: '#A9CCF4',
-        'electric-deep': '#2B5BD7',
-        'electric-lit': '#DCE9F9',
-        blue: '#2B5BD7',
-        'blue-glow': '#A9CCF4',
-        // Raspberry (accent type, doodles) and sticker pink.
-        uv: '#C8336E',
-        'uv-lit': '#F9A8C9',
-        pop: '#F9A8C9',
-        'pop-lit': '#FDDAE6',
-        cream: '#F5EEDC',
+        // Brand board, by name.
+        green: '#133327',
+        'green-2': '#1F4A3A',
+        cream: '#EEE6D9',
+        beige: '#C4B19A',
+        'beige-deep': '#8C7A63',
+        dusty: '#223041',
+        // Roles.
+        ink: '#133327',
+        'ink-2': '#1F4A3A',
+        muted: '#5D6A63',
+        ash: '#EEE6D9',
+        'ash-2': '#E3D8C6',
+        rule: '#DCD1BF',
+        paper: '#F7F3EC',
+        // Beige plates, chips and tints. Never type on light grounds.
+        electric: '#C4B19A',
+        'electric-deep': '#223041',
+        'electric-lit': '#EEE6D9',
+        blue: '#223041',
+        'blue-glow': '#C4B19A',
+        // Accent type: dusty blue on light grounds, beige on dark ones.
+        uv: '#223041',
+        'uv-lit': '#C4B19A',
+        pop: '#C4B19A',
+        'pop-lit': '#EEE6D9',
         // Legacy aliases.
-        sky: '#A9CCF4',
-        cherry: '#C8336E',
-        hotpink: '#C8336E',
-        grape: '#C8336E',
-        tangerine: '#C8336E',
-        cobalt: '#2B5BD7',
-        forest: '#2B5BD7',
-        blush: '#F9A8C9',
-        navy: '#0E1A47',
-        oat: '#E9E5DC',
-        lime: '#DCE9F9',
-        aqua: '#DCE9F9',
+        sky: '#C4B19A',
+        cherry: '#223041',
+        hotpink: '#223041',
+        grape: '#223041',
+        tangerine: '#8C7A63',
+        cobalt: '#223041',
+        forest: '#133327',
+        blush: '#C4B19A',
+        navy: '#223041',
+        oat: '#E3D8C6',
+        lime: '#EEE6D9',
+        aqua: '#EEE6D9',
       },
       fontFamily: {
         display: ['var(--font-display)', 'system-ui', 'sans-serif'],

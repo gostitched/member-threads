@@ -1,14 +1,18 @@
 /**
  * Site content for Member Threads.
  *
- * Member Threads designs and makes complete apparel collections for Bar,
- * Bat and B'nai Mitzvahs: heavyweight hoodies, sweatpants, pajama pants, baby
- * tees, jerseys, hats, sets, packaging. Stitched is the engine underneath
- * (production, sourcing, QC, logistics) and is credited once per page at most.
+ * Member Threads makes retail-quality custom apparel collections for
+ * organizations: university clubs, companies, nonprofits, teams and fitness
+ * clubs, social clubs and associations. Customers start from a curated
+ * catalog and customize colors, fabric, fit, graphics and embroidery. Orders
+ * start at 36 pieces per style. Member Threads operates under Stitched Group,
+ * which runs production, sourcing, QC and logistics; credit it once per page
+ * at most.
  *
- * Voice: sell the collection, never the single shirt. Name the craft. No
- * exclamation points. Never state a fact that isn't true of the business;
- * anything marked [CONFIRM] is listed in README "Before launch".
+ * Voice: an apparel partner, not a promo-products distributor. Confident,
+ * plain, specific; sell the collection, never the single shirt. Name the
+ * craft. No exclamation points. Never state a fact that isn't true of the
+ * business; anything marked [CONFIRM] is listed in README "Before launch".
  */
 
 /** Public origin of this site. [CONFIRM] domain. */
@@ -41,17 +45,57 @@ export const MEDIA = {
 
 export const NAV = [
   { href: '/#how', label: 'How It Works' },
-  { href: '/catalog', label: 'The Goods' },
-  { href: '/work', label: 'Get Inspired' },
+  { href: '/catalog', label: 'Catalog' },
+  { href: '/work', label: 'Collections' },
+  { href: '/about', label: 'About' },
 ];
 
 /** The one header CTA. Static: personalisation lives in the chapter. */
-export const NAV_CTA = { href: '/quote', label: 'Start Creating' };
+export const NAV_CTA = { href: '/quote', label: 'Start a Collection' };
+
+/** Who we make collections for. Order is the display order. */
+export const SEGMENTS = [
+  {
+    id: 'campus',
+    label: 'University Clubs',
+    title: 'University clubs & student organizations',
+    body: 'Recruitment drops, exec board pieces and the hoodie everyone wears to the library.',
+    pieces: ['Hoodies', 'Crewnecks', 'Heavyweight tees', 'Quarter-zips', 'Hats'],
+  },
+  {
+    id: 'company',
+    label: 'Companies',
+    title: 'Businesses & corporate teams',
+    body: 'Onboarding kits, conference gear and team gifts that feel like a brand, not a booth.',
+    pieces: ['Premium hoodies', 'Embroidered polos', 'Quarter-zips', 'Outerwear'],
+  },
+  {
+    id: 'nonprofit',
+    label: 'Nonprofits',
+    title: 'Nonprofits, charities & fundraisers',
+    body: 'Apparel that unifies volunteers, thanks supporters and sells well enough to fund the mission.',
+    pieces: ['Graphic tees', 'Hoodies', 'Crewnecks', 'Event merch'],
+  },
+  {
+    id: 'athletic',
+    label: 'Teams & Fitness',
+    title: 'Sports teams, run clubs & fitness studios',
+    body: 'Off-field lifestyle pieces for the people who show up every week.',
+    pieces: ['Athletic tees', 'Shorts', 'Hoodies', 'Polos', 'Hats'],
+  },
+  {
+    id: 'social',
+    label: 'Clubs & Associations',
+    title: 'Social clubs, alumni & associations',
+    body: 'Quiet, embroidered pieces that signal membership to the people who know.',
+    pieces: ['Embroidered crewnecks', 'Polos', 'Heavyweight hoodies', 'Seasonal collections'],
+  },
+] as const;
 
 
 /** What the design engagement covers. Included in every collection. */
 export const DESIGN_STEPS = [
-  { n: '01', title: 'Tell us about the kid', body: 'Their colors, what they wear, the venue, the vibe. A planner’s deck or a few screenshots is plenty.' },
+  { n: '01', title: 'Tell us about your organization', body: 'Your logo, your colors, who it’s for and when you need it. A brand guide or a few screenshots is plenty.' },
   { n: '02', title: 'Meet your designer', body: 'One designer on our team owns the collection from first sketch to final proof.' },
   { n: '03', title: 'Revise together', body: 'Change the colors, the pieces, the artwork. Design is part of the collection, never billed by the hour.' },
   { n: '04', title: 'Approve it', body: 'You sign off on every piece and the full collection price before anything is made.' },
@@ -60,15 +104,15 @@ export const DESIGN_STEPS = [
 /** Labelled rows: the pieces we make and the ways we finish them. */
 export const CAPABILITIES = {
   garments: [
-    'Heavyweight hoodies', 'Sweatpants', 'Pajama pants', 'Baby tees', 'Tanks',
-    'Jerseys', 'Hats', 'Shorts', 'Foldover shorts', 'Crewnecks', 'Matching sets',
-    'Totes', 'Varsity jackets', 'Rugbys', 'Socks', 'Blankets', 'Robes',
+    'Heavyweight hoodies', 'Crewnecks', 'Heavyweight tees', 'Quarter-zips',
+    'Polos', 'Sweatpants', 'Shorts', 'Hats', 'Rugbys', 'Varsity jackets',
+    'Coach jackets', 'Vests', 'Long sleeves', 'Totes', 'Socks',
   ],
   decoration: [
-    'Chenille appliqué', 'Puff print', 'Embroidery', '3D puff embroidery',
-    'Woven neck labels', 'Custom zipper pulls', 'Jacquard patterns',
-    'Pantone-matched dye', 'Screen printing', 'Water-based ink', 'Satin script',
-    'Tackle twill', 'Woven patches', 'All-over print', 'Rhinestones',
+    'Embroidery', '3D puff embroidery', 'Chenille appliqué', 'Tackle twill',
+    'Woven neck labels', 'Custom zipper pulls', 'Pantone-matched dye',
+    'Screen printing', 'Water-based ink', 'Puff print', 'Woven patches',
+    'Garment dye', 'Custom hang tags', 'Debossed trims',
   ],
 } as const;
 
@@ -89,36 +133,42 @@ export type FaqItem = {
   line: string;
 };
 
-// [CONFIRM] 01 pricing range, 03 eight to twelve weeks, 04 per-product minimums. See README.
+// [CONFIRM] 01 per-piece pricing, 03 lead time. See README.
 export const FAQ: FaqItem[] = [
   {
     number: '01',
     question: 'What does a collection cost?',
-    answer: 'It depends on the order.',
-    line: 'Cost comes down to the pieces you choose and how many of each. You can price any product in our catalog, and most collections land between $5k and $10k.',
+    answer: 'One clear price per piece.',
+    line: 'Cost comes down to the pieces you choose and how many of each. Every product in our catalog shows a starting price, so you can budget before you talk to us.',
   },
   {
     number: '02',
     question: 'Does customizing cost extra?',
     answer: 'No.',
-    line: 'Embroidery, extra print spots, custom colors and design are all built into one clear price, quoted up front. What you see is what you pay, with no surprise fees added later.',
+    line: 'Embroidery, extra print locations, custom colors and design are built into one price, quoted up front. No setup fees, no surprise line items.',
   },
   {
     number: '03',
-    question: 'How far out should we start?',
-    answer: '8 to 12 weeks.',
-    line: 'Tighter dates are sometimes possible. Tell us yours and we check it first.',
+    question: 'What’s the minimum?',
+    answer: '36 pieces per style.',
+    line: 'Sizes can be mixed within a style. Most organizations order between 36 and 300 of each piece.',
   },
   {
     number: '04',
-    question: 'Is there a minimum?',
-    answer: 'It depends on the piece.',
-    line: 'Each product in the catalog lists its own minimum. Under it? Reach out anyway and we’ll see what we can do.',
+    question: 'How far out should we start?',
+    answer: '6 to 8 weeks.',
+    line: 'Design, sampling and production included. Have a hard date, like a recruitment week or a conference? Tell us first and we plan backward from it.',
   },
   {
     number: '05',
+    question: 'Can we reorder?',
+    answer: 'Anytime.',
+    line: 'Every approved piece is saved to your organization, so next semester’s run or next year’s onboarding kit starts where the last one left off.',
+  },
+  {
+    number: '06',
     question: 'Who actually makes it?',
     answer: 'We do.',
-    line: 'Made by Stitched, our own design and production team. No blanks with a logo pressed on.',
+    line: 'Member Threads is part of Stitched Group, which runs our design, sourcing and production. No blanks with a logo pressed on.',
   },
 ];

@@ -3,8 +3,8 @@ import type { CSSProperties } from 'react';
 import { persisted } from './persisted';
 
 /**
- * Hero "vibes", shown to people as Colorways 01–05: five palettes the kid can
- * switch between. `VIBES`, `vibeVars`
+ * Hero "vibes", shown to people as Colorways 01–05: five palettes an
+ * organization can switch between, all drawn from the brand board. `VIBES`, `vibeVars`
  * and `getVibe` are server-safe; `useVibe` is a client hook.
  */
 
@@ -21,13 +21,13 @@ export type Vibe = {
   rib: string;
 };
 
-/** All vibes in display order. Miami is the default. */
+/** All vibes in display order. Forest (id 'miami'; ids are frozen) is the default. */
 export const VIBES: Vibe[] = [
-  { id: 'club', label: 'Lily', ground: '#F8F6F1', ink: '#0E1A47', accent: '#C8336E', garment: '#F9A8C9', rib: '#C8336E' },
-  { id: 'racing', label: 'Navy', ground: '#F8F6F1', ink: '#0E1A47', accent: '#A9CCF4', garment: '#0E1A47', rib: '#F9A8C9' },
-  { id: 'miami', label: 'Sky', ground: '#F8F6F1', ink: '#0E1A47', accent: '#0E1A47', garment: '#A9CCF4', rib: '#0E1A47' },
-  { id: 'ballet', label: 'Cream', ground: '#F8F6F1', ink: '#0E1A47', accent: '#C8336E', garment: '#F5EEDC', rib: '#A9CCF4' },
-  { id: 'varsity', label: 'Berry', ground: '#F8F6F1', ink: '#0E1A47', accent: '#F8F6F1', garment: '#C8336E', rib: '#A9CCF4' },
+  { id: 'club', label: 'Cream', ground: '#F7F3EC', ink: '#133327', accent: '#133327', garment: '#EEE6D9', rib: '#133327' },
+  { id: 'racing', label: 'Navy', ground: '#F7F3EC', ink: '#133327', accent: '#C4B19A', garment: '#223041', rib: '#C4B19A' },
+  { id: 'miami', label: 'Forest', ground: '#F7F3EC', ink: '#133327', accent: '#C4B19A', garment: '#133327', rib: '#EEE6D9' },
+  { id: 'ballet', label: 'Sand', ground: '#F7F3EC', ink: '#133327', accent: '#133327', garment: '#C4B19A', rib: '#223041' },
+  { id: 'varsity', label: 'Heather', ground: '#F7F3EC', ink: '#133327', accent: '#223041', garment: '#A8A9A4', rib: '#133327' },
 ];
 
 /** Default vibe id (also the SSR value). */
@@ -35,7 +35,7 @@ export const DEFAULT_VIBE: VibeId = 'miami';
 
 const isVibeId = (v: string): v is VibeId => VIBES.some((x) => x.id === v);
 
-/** Look up a vibe by id; falls back to Miami. */
+/** Look up a vibe by id; falls back to Forest. */
 export function getVibe(id: string): Vibe {
   return VIBES.find((v) => v.id === id) ?? VIBES.find((v) => v.id === DEFAULT_VIBE)!;
 }
@@ -60,7 +60,7 @@ const serverSnapshot = () => '';
 
 /**
  * Shared, persisted vibe (localStorage 'mt:vibe'), live across components and
- * tabs. SSR/hydration render Miami. Client hook.
+ * tabs. SSR/hydration render Forest. Client hook.
  * @example const { vibe, set } = useVibe(); set('racing');
  */
 export function useVibe(): { vibe: Vibe; set(id: VibeId): void } {

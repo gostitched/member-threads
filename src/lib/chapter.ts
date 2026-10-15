@@ -17,7 +17,7 @@ import { possessive } from './name';
 import { VIBES, type VibeId } from './vibe';
 
 /**
- * Fill `{name}` / `{name’s}` tokens with the kid's name (from `useKidName`).
+ * Fill `{name}` / `{name’s}` tokens with the kid's name (from `useOrgName`).
  * With no name typed (`you`), the copy speaks to the visitor instead:
  * `{name’s}` → "your", `{name}` → "Your name", capitalised at the start.
  * @example named('{name’s} hoodie', 'James') // 'James’ hoodie'
