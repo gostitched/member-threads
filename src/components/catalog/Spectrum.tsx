@@ -30,7 +30,7 @@ export default function Spectrum({
     <div>
       <div className="relative">
         <div
-          className="flex h-[120px] w-full overflow-hidden"
+          className="flex h-[88px] w-full overflow-hidden sm:h-[112px]"
           onPointerLeave={() => setHover(null)}
           aria-hidden
         >
@@ -80,10 +80,10 @@ export default function Spectrum({
               aria-pressed={on}
               onClick={() => onPick(on ? null : f.id)}
               className={`flex min-h-[44px] items-center gap-2.5 rounded-full pl-1.5 pr-4 text-[0.875rem] font-semibold transition-colors duration-200 motion-reduce:transition-none ${
-                on ? 'bg-paper text-ink' : 'bg-paper/10 text-paper hover:bg-paper/20'
+                on ? 'bg-ink text-paper' : 'bg-ink/5 text-ink hover:bg-ink/10'
               }`}
             >
-              <span className="h-8 w-8 rounded-full" style={{ background: f.swatch }} />
+              <span className="h-8 w-8 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]" style={{ background: f.swatch }} />
               {f.label}
             </button>
           );

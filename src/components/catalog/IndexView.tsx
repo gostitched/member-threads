@@ -76,12 +76,12 @@ const COLUMNS: Column[] = [
   },
   {
     key: 'price',
-    label: 'From',
+    label: 'From, at 36',
     align: 'right',
     has: (p) => Boolean(entryPrice(p)),
     cell: (p) => {
       const price = entryPrice(p);
-      return price ? formatMoney(price.cents, price.currency) : <span className="text-muted">In collection</span>;
+      return price ? formatMoney(price.cents, price.currency) : <span className="text-muted">With collection</span>;
     },
   },
 ];
@@ -95,7 +95,15 @@ export default function IndexView({ products }: { products: CatalogProduct[] }) 
   const router = useRouter();
   const [preview, setPreview] = useState<CatalogProduct | null>(null);
   const floater = useRef<HTMLDivElement>(null);
-  const columns = COLUMNS.filter((c) => products.some(c.has));
+  // A column every style answers the same way (minimum, lead time) is said once in
+  // the page header instead of repeated down the table.
+  const uniform = (key: string, of: (p: CatalogProduct) => unknown) =>
+    COLUMNS.some((c) => c.key === key) && new Set(products.map((p) => JSON.stringify(of(p)))).size <= 1;
+  const same: Record<string, boolean> = {
+    moq: uniform('moq', (p) => p.minimumOrderQuantity),
+    lead: uniform('lead', (p) => p.leadTimeDays),
+  };
+  const columns = COLUMNS.filter((c) => products.some(c.has) && !(products.length > 1 && same[c.key]));
   // Style number sits before the name; everything else after it.
   const styleCol = columns.find((c) => c.key === 'style');
   const restCols = columns.filter((c) => c.key !== 'style');
@@ -110,14 +118,14 @@ export default function IndexView({ products }: { products: CatalogProduct[] }) 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[560px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-ink/30">
-              {styleCol && <th scope="col" className="text-[0.8125rem] py-3 pr-4 font-normal text-muted">{styleCol.label}</th>}
-              <th scope="col" className="text-[0.8125rem] py-3 pr-4 font-normal text-muted">Piece</th>
+            <tr className="border-b border-ink">
+              {styleCol && <th scope="col" className="label py-3 pr-4 font-semibold text-muted">{styleCol.label}</th>}
+              <th scope="col" className="label py-3 pr-4 font-semibold text-muted">Style</th>
               {restCols.map((c) => (
                 <th
                   key={c.key}
                   scope="col"
-                  className={`text-[0.8125rem] py-3 pr-4 font-normal text-muted last:pr-0 ${c.align === 'right' ? 'text-right' : ''}`}
+                  className={`label py-3 pr-4 font-semibold text-muted last:pr-0 ${c.align === 'right' ? 'text-right' : ''}`}
                 >
                   {c.label}
                 </th>
@@ -130,14 +138,14 @@ export default function IndexView({ products }: { products: CatalogProduct[] }) 
                 key={p.slug}
                 onPointerEnter={(e) => e.pointerType === 'mouse' && setPreview(p)}
                 onClick={() => router.push(`/catalog/${p.slug}`)}
-                className="group cursor-pointer border-b border-rule transition-colors duration-150 hover:bg-white"
+                className="group cursor-pointer border-b border-rule transition-colors duration-150 hover:bg-cream/60"
               >
                 {styleCol && <td className="py-4 pr-4">{styleCol.cell(p)}</td>}
                 <td className="py-4 pr-4">
                   <Link
                     href={`/catalog/${p.slug}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="text-[1.0625rem] font-semibold tracking-tight group-hover:text-electric-deep"
+                    className="text-[1.0625rem] font-semibold tracking-tight underline-offset-4 group-hover:underline"
                   >
                     {p.name}
                   </Link>
@@ -163,7 +171,7 @@ export default function IndexView({ products }: { products: CatalogProduct[] }) 
       <div
         ref={floater}
         aria-hidden
-        className={`pointer-events-none fixed left-0 top-0 z-30 hidden h-56 w-56 overflow-hidden rounded-2xl bg-white ring-1 ring-rule transition-opacity duration-200 lg:block ${
+        className={`pointer-events-none fixed left-0 top-0 z-30 hidden h-56 w-56 overflow-hidden rounded-2xl bg-cream transition-opacity duration-200 lg:block ${
           preview ? 'opacity-100' : 'opacity-0'
         }`}
       >

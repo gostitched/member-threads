@@ -1,10 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Satisfy } from 'next/font/google';
 import { hoodie, VIEW, type HoodieGeometry } from './geometry';
 import { DEFAULT_NAME, YOUR_NAME, possessive } from '@/lib/name';
-import { COLORWAYS, UNDYED, type Colorway, type Custom, type Look } from '@/lib/chapter';
+import { COLORWAYS, UNDYED, initial, lockup, type Colorway, type Custom, type Look } from '@/lib/chapter';
 
 /**
  * The hoodie, drawn from its pieces and finished like cloth.
@@ -21,42 +20,37 @@ import { COLORWAYS, UNDYED, type Colorway, type Custom, type Look } from '@/lib/
  * `look` says what the visitor has built. Every option takes its colours from
  * the colourway (body, accent, print edge), so any combination is one the studio
  * would sign off. Until the colour step is taken the body is the undyed blank.
- * `focus` is the detail being pointed at: a hot-pink preview of where it goes,
+ * `focus` is the detail being pointed at: a dashed preview of where it goes,
  * never a change.
  */
 
 /** Neutral greys for the metal aglets (light, mid, shadow). */
 const METAL = ['#FFFFFF', '#C9CCD6', '#5C6584'];
 
-/** The house cut: oversized, boxy, with a heavyweight band. Fixed: Sophie's details go on top of it. */
+/** The house cut: oversized, boxy, with a heavyweight band. Fixed: the details go on top of it. */
 const CUT = { w: 48, l: -70, band: 128 };
-/** Satin script for the kid's name (and the cap, tee and label in the collection art). */
-const embroidery = Satisfy({ subsets: ['latin'], weight: '400', display: 'swap' });
 
+/**
+ * The chest wordmark: a collegiate lockup, embroidered. The top line rides an
+ * arch across the chest; the rest of the name sits straight under it, smaller
+ * and tracked out. Sizes come from the character count, so a long name shrinks
+ * to stay inside the chest instead of running into the sleeves.
+ */
+const MARK = { cx: 966, x0: 636, x1: 1296, y: 1000, lift: 100, line2: 1088, w1: 640, w2: 540, max1: 124, max2: 56 };
+const ARCH = `M${MARK.x0} ${MARK.y}Q${MARK.cx} ${MARK.y - MARK.lift} ${MARK.x1} ${MARK.y}`;
+const size1 = (t: string) => Math.round(Math.min(MARK.max1, MARK.w1 / (Math.max(1, t.length) * 0.82)));
+const size2 = (t: string) => Math.round(Math.min(MARK.max2, MARK.w2 / (Math.max(1, t.length) * 0.8)));
 
-const SCRIPT = { x: 1252, y: 830, size: 92, r: -7 };
-/** Long names shrink so the script stays on the chest (Sophie is the 6-letter reference). */
-const scriptSize = (name: string) => Math.round(SCRIPT.size * Math.min(1, 7 / Math.max(1, name.length)));
-/** The sleeve patch: a chenille S on a round felt patch, set in from the sleeve's outer edge. */
+/** The sleeve patch: a chenille initial on a round felt patch, set in from the sleeve's outer edge. */
 const PATCH = { r: 80, letter: 104 };
 const PATCH_AT = (g: HoodieGeometry) => `translate(${g.marks.sleeveL[0] + 16} ${g.marks.sleeveL[1] - 40}) rotate(-12)`;
 
-/** The print: the date, small, in raised puff ink, in the pocket's bottom-right corner (house cut). */
-const PRINT = { text: '05.16.26', x: 1272, y: 1506, size: 40, r: -4 };
+/** The print: small, in raised puff ink, in the pocket's bottom-right corner (house cut). */
+const PRINT = { text: 'SEASON 01', x: 1262, y: 1500, size: 34, r: 0 };
 const CORDS = [
-  { from: [916, 566], d: 'M916 566C913 650 908 720 902 790', tip: [902, 790], r: 3 },
-  { from: [1016, 566], d: 'M1016 566C1020 640 1026 700 1034 770', tip: [1034, 770], r: -5 },
+  { from: [916, 566], d: 'M916 566C914 610 911 650 907 690', tip: [907, 690], r: 3 },
+  { from: [1016, 566], d: 'M1016 566C1018 600 1021 640 1026 676', tip: [1026, 676], r: -4 },
 ] as const;
-
-/** A five-point star centred on 0,0, for the liner print. */
-const star = (r: number) =>
-  Array.from({ length: 10 }, (_, i) => {
-    const a = (Math.PI / 5) * i - Math.PI / 2;
-    const d = i % 2 ? r * 0.45 : r;
-    return `${i ? 'L' : 'M'}${(Math.cos(a) * d).toFixed(1)} ${(Math.sin(a) * d).toFixed(1)}`;
-  }).join('') + 'Z';
-const STAR = star(15);
-const STAR_SM = star(9);
 
 /** The colourway the hoodie is in: the chosen one, or the undyed blank before the colour step. */
 function colorway(look: Look): Colorway {
@@ -67,16 +61,16 @@ function colorway(look: Look): Colorway {
 export function describe(look: Look, name = DEFAULT_NAME) {
   const c = colorway(look);
   const bits = [
-    look.liner && `a ${c.linerName.toLowerCase()} ${look.linerStars ? 'star-print' : 'jersey'} hood liner`,
+    look.embroidery && `${name} embroidered in an arched wordmark across the chest`,
+    look.liner && `a ${c.linerName.toLowerCase()} ${look.linerStripe ? 'rugby-stripe' : 'jersey'} hood liner`,
     look.rib && 'contrast 2×2 rib at the hem and cuffs',
-    look.embroidery && `${name} in satin script on the left chest`,
-    look.print && '05.16.26 in small puff print at the bottom right of the pocket',
-    look.patch && 'a chenille S patch on the sleeve',
-    look.trims && 'flat cords with metal tips',
+    look.print && 'Season 01 in small puff print on the pocket',
+    look.patch && `a chenille ${initial(name)} patch on the sleeve`,
+    look.trims && 'flat drawcords with metal aglets',
     look.construction && 'contrast topstitching',
   ].filter(Boolean);
   return (
-    `${name === YOUR_NAME ? 'Your' : possessive(name).replace("'", '’')} oversized, boxy hoodie in ${look.colorSet ? `${c.name.toLowerCase()} colorway` : 'undyed'} 420 GSM fleece` +
+    `${name === YOUR_NAME ? 'Your' : possessive(name).replace("'", '’')} oversized, boxy hoodie in ${look.colorSet ? `the ${c.name.toLowerCase()} colorway` : 'undyed'}, 420 GSM fleece` +
     (bits.length ? `, with ${bits.join(', ')}` : '') +
     '.'
   );
@@ -91,7 +85,7 @@ export default function Hoodie({
   name = DEFAULT_NAME,
 }: {
   look: Look;
-  /** The kid's name: the chest script. */
+  /** The organization's name: the chest wordmark, and the patch initial. */
   name?: string;
   focus?: Custom | null;
   uid: string;
@@ -104,7 +98,7 @@ export default function Hoodie({
   const url = (s: string) => `url(#${id(s)})`;
 
   const rib = look.rib ? c.rib : c.body;
-  const INK = c.line ?? '#0E1A47';
+  const INK = c.line;
   const liner = look.liner ? c.liner : c.body;
   const heavy = true;
   const cuffs = g.cuffs.split('Z').filter(Boolean).map((p) => p + 'Z');
@@ -131,6 +125,7 @@ export default function Hoodie({
       role="img"
       aria-label={label ?? describe(look, name)}
       className={`block h-auto w-full overflow-visible ${className}`}
+      style={{ '--mark': c.mark } as React.CSSProperties}
     >
       <Defs uid={uid} c={c} heavy={heavy} g={g} />
 
@@ -173,7 +168,7 @@ export default function Hoodie({
       {piece(g.hood, c.body, url('hoodShade'))}
       <path d={g.lining} style={{ ...ease, fill: liner }} />
       <path d={g.lining} fill={url(look.liner ? 'jersey' : 'surface')} style={look.liner ? undefined : { mixBlendMode: 'overlay' }} />
-      {look.liner && look.linerStars && <path d={g.lining} fill={url('stars')} className="chapter-fade-in" />}
+      {look.liner && look.linerStripe && <path d={g.lining} fill={url('stripe')} className="chapter-fade-in" />}
       <path d={g.lining} fill={url('linerDepth')} />
       {/* The back of the hood falls into shadow; blurred so it reads as depth, not a panel. */}
       <g clipPath={url('liner')}>
@@ -210,24 +205,7 @@ export default function Hoodie({
         </text>
         </g>
       )}
-      {look.embroidery && (
-        <g className="chapter-add" key={name}>
-        <text
-          x={SCRIPT.x}
-          y={SCRIPT.y}
-          transform={`rotate(${SCRIPT.r} ${SCRIPT.x} ${SCRIPT.y})`}
-          textAnchor="middle"
-          fontFamily={embroidery.style.fontFamily}
-          fontSize={scriptSize(name)}
-          fill={url('satin')}
-          stroke={url('satin')}
-          strokeWidth="2.4"
-          strokeLinejoin="round"
-        >
-          {name}
-        </text>
-        </g>
-      )}
+      {look.embroidery && <Wordmark name={name} uid={uid} key={name} />}
       {look.patch && (
         // Sewn onto the sleeve: clipped to the sleeve, so it wraps out of sight at the edge.
         <>
@@ -235,10 +213,10 @@ export default function Hoodie({
           <g className="chapter-add">
             <g transform={PATCH_AT(g)} filter={url('raised')}>
               {/* Felt patch, a stitched edge, then the letter: felt outline under fuzzy chenille loops. */}
-              <circle r={PATCH.r} fill={c.accent} />
+              <circle r={PATCH.r} fill={c.patch.felt} />
               <circle r={PATCH.r} fill={url('felt')} />
-              <circle r={PATCH.r - 11} fill="none" stroke={c.edge} strokeWidth="3" strokeDasharray="8 6" />
-              <ChenilleS uid={uid} fill={c.liner} outline={c.edge} />
+              <circle r={PATCH.r - 11} fill="none" stroke={c.patch.outline} strokeWidth="3" strokeDasharray="8 6" />
+              <ChenilleS uid={uid} letter={initial(name)} fill={c.patch.letter} outline={c.patch.outline} />
             </g>
           </g>
         </g>
@@ -320,6 +298,14 @@ function Defs({ uid, c, heavy, g }: { uid: string; c: Colorway; heavy: boolean; 
         <rect width="2" height="7" fill="#fff" fillOpacity="0.16" />
       </pattern>
 
+      <pattern id={id('satinEdge')} width="7" height="7" patternUnits="userSpaceOnUse">
+        <rect width="7" height="7" fill={c.accent} />
+        <rect width="7" height="7" fill="#000" fillOpacity="0.28" />
+      </pattern>
+      <filter id={id('raised-sm')} x="-10%" y="-20%" width="120%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="1.6" floodColor="#000" floodOpacity="0.32" />
+      </filter>
+
       <linearGradient id={id('sideShade')} x1="0" x2="1">
         <stop offset="0" stopColor="#000" stopOpacity={heavy ? 0.32 : 0.24} />
         <stop offset="0.16" stopColor="#000" stopOpacity="0" />
@@ -350,10 +336,10 @@ function Defs({ uid, c, heavy, g }: { uid: string; c: Colorway; heavy: boolean; 
         <stop offset="0" stopColor="#000" stopOpacity="0.1" />
         <stop offset="1" stopColor="#000" stopOpacity="0.28" />
       </linearGradient>
-      {/* The liner's star print: big and small stars, offset, in the accent (pink when the accent is the liner colour). */}
-      <pattern id={id('stars')} width="96" height="96" patternUnits="userSpaceOnUse" patternTransform="rotate(-14)">
-        <path d={STAR} transform="translate(24 24)" fill={c.accent === c.liner ? '#F9A8C9' : c.accent} />
-        <path d={STAR_SM} transform="translate(72 70) rotate(18)" fill={c.accent === c.liner ? '#F9A8C9' : c.accent} />
+      {/* The liner's rugby stripe: the body colour over the liner, a broad bar and a pin. */}
+      <pattern id={id('stripe')} width="64" height="64" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+        <rect y="0" width="64" height="22" fill={c.body} />
+        <rect y="34" width="64" height="5" fill={c.body} />
       </pattern>
       <clipPath id={id('liner')}><path d={g.lining} /></clipPath>
       <clipPath id={id('all')}><path d={g.sleeves.join('') + g.body + g.hood + g.cuffs + g.hem} /></clipPath>
@@ -383,27 +369,66 @@ function Defs({ uid, c, heavy, g }: { uid: string; c: Colorway; heavy: boolean; 
   );
 }
 
-/** The chenille S: a felt outline, the letter, its loops, all through a slight fuzz. */
-function ChenilleS({ uid, fill, outline }: { uid: string; fill: string; outline: string }) {
+/** The chenille initial: a felt outline, the letter, its loops, all through a slight fuzz. */
+function ChenilleS({ uid, letter, fill, outline }: { uid: string; letter: string; fill: string; outline: string }) {
   const t = {
     y: PATCH.letter * 0.36,
     textAnchor: 'middle',
     fontFamily: 'var(--font-display)',
-    fontWeight: 800,
+    fontWeight: 900,
+    fontStretch: '112%',
     fontSize: PATCH.letter,
   } as const;
   return (
     <g>
-      <text {...t} fill={outline} stroke={outline} strokeWidth="16" strokeLinejoin="round">S</text>
+      <text {...t} fill={outline} stroke={outline} strokeWidth="16" strokeLinejoin="round">{letter}</text>
       <g filter={`url(#${uid}-fuzz)`}>
-        <text {...t} fill={fill}>S</text>
-        <text {...t} fill={`url(#${uid}-loops)`}>S</text>
+        <text {...t} fill={fill}>{letter}</text>
+        <text {...t} fill={`url(#${uid}-loops)`}>{letter}</text>
       </g>
     </g>
   );
 }
 
-/** Hot-pink marks for the detail being pointed at: where it is, or where it would go. */
+/**
+ * The organization's name across the chest, as a collegiate lockup: the top
+ * line on an arch, the rest straight underneath. Satin-stitch fill with a fine
+ * edge and a slight lift, so it reads as embroidery rather than print.
+ */
+function Wordmark({ name, uid }: { name: string; uid: string }) {
+  const [top, rest] = lockup(name);
+  const f1 = size1(top);
+  const f2 = size2(rest);
+  const face = {
+    fontFamily: 'var(--font-display)',
+    fontWeight: 900,
+    fontStretch: '118%',
+    fill: `url(#${uid}-satin)`,
+    stroke: `url(#${uid}-satinEdge)`,
+    strokeWidth: 2,
+    strokeLinejoin: 'round',
+    paintOrder: 'stroke',
+  } as const;
+  // A single arch sits a little lower so the lockup stays centred on the chest.
+  const drop = rest ? 0 : 40;
+  return (
+    <g className="chapter-add" filter={`url(#${uid}-raised-sm)`}>
+      <g transform={`translate(0 ${drop})`}>
+        <path id={`${uid}-arch`} d={ARCH} fill="none" />
+        <text {...face} fontSize={f1} letterSpacing={f1 * 0.04} textAnchor="middle">
+          <textPath href={`#${uid}-arch`} startOffset="50%">{top}</textPath>
+        </text>
+      </g>
+      {rest && (
+        <text {...face} x={MARK.cx} y={MARK.line2 + (MARK.max2 - f2) * 0.2} fontSize={f2} letterSpacing={f2 * 0.16} textAnchor="middle" fontStretch="125%" fontWeight={800}>
+          {rest}
+        </text>
+      )}
+    </g>
+  );
+}
+
+/** Dashed marks for the detail being pointed at: where it is, or where it would go. */
 function Overlay({ focus, g, id }: { focus: Custom | null; g: HoodieGeometry; id: (s: string) => string }) {
   // A paper-coloured halo keeps the notes legible on any body colour.
   // Colours come from .chapter-marks in chapter.css (the light, with a ground-coloured halo on the notes).
@@ -428,7 +453,7 @@ function Overlay({ focus, g, id }: { focus: Custom | null; g: HoodieGeometry; id
         </g>
       );
     case 'embroidery':
-      return <rect className="chapter-draw" x={SCRIPT.x - 190} y={SCRIPT.y - 100} width="380" height="150" {...trace} />;
+      return <rect className="chapter-draw" x={MARK.x0 - 30} y={MARK.y - MARK.lift - 110} width={MARK.x1 - MARK.x0 + 60} height="300" rx="18" {...trace} />;
     case 'print':
       return (
         <g className="chapter-draw">

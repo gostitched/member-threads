@@ -1,141 +1,99 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
-import hoodies from '../../public/hero/hoodies.png';
+import HeroStill from '@/components/home/HeroStill';
 import { Arrow } from '@/components/SiteHeader';
 
 /**
- * The hero: "YOUR PARTY. / YOUR COLLECTION." in chunky navy caps, one line of copy,
- * one navy pill and the promises, beside two staggered lookbook crops on a
- * baby-blue plate (stacked and centred below lg). Shares the header's container so
- * every edge lines up with the logo and the CTA. Server component.
+ * The hero: "Apparel your members actually want to wear" in heavy wide caps with
+ * one script word, one line of copy, the pill and a quiet text link, then the
+ * three promises. Beside it, a drawn still life of one sample collection (stacked
+ * below lg). Shares the header's frame so every edge lines up with the logo and
+ * the CTA. Server component.
  */
 
 const d = (ms: number) => ({ animationDelay: `${ms}ms` }) as CSSProperties;
 
-/**
- * The source photo is a 1398×478 panoramic strip, too wide and too small to fill
- * a column. So it is shown as two portrait 4:5 "lookbook" crops, one per hoodie,
- * each a 320×472 window (nearly the strip's full height) onto the strip (the baked-in tag stays out of frame and
- * is set in type instead). Each crop is a window: the image is scaled so the
- * window fills the tile, then shifted into place.
- */
-const SRC = { w: 1398, h: 478 };
-const CROP_W = 320;
-const CROP_H = 472;
-const crop = (x: number, y: number): CSSProperties => ({
-  width: `${(SRC.w / CROP_W) * 100}%`,
-  left: `${(-x / CROP_W) * 100}%`,
-  top: `${(-y / CROP_H) * 100}%`,
-});
-
-const TILES = [
-  {
-    key: 'jack',
-    style: crop(272, 3),
-    alt: 'A baby-blue hoodie printed “Jack’s After Party” with a hand-drawn star.',
-    wrap: '',
-  },
-  {
-    key: 'lily',
-    style: crop(820, 0),
-    alt: 'A pink hoodie printed “the lily club” with a heart, beside a cream tee with two stars.',
-    wrap: 'translate-y-[12%]',
-  },
-] as const;
+const PROMISES = ['From 36 pieces', 'Design included', 'No upcharges'] as const;
 
 export default function Hero() {
   return (
     <section aria-labelledby="hero-title" className="relative overflow-x-clip bg-paper text-ink">
-      {/* Same container as the header, so the headline and photo line up with the logo and the CTA. */}
-      <div className="mx-auto w-full max-w-[1536px] px-5 pt-8 sm:px-8 sm:pt-12 lg:px-14 lg:pt-0">
-        {/* lg+: fills the first screen below the 92px header, content centred; capped so very tall screens don't drift apart. */}
-        <div className="lg:relative lg:grid lg:min-h-[min(calc(100svh-92px),56rem)] lg:grid-cols-[minmax(0,1.12fr)_minmax(0,1fr)] lg:items-center lg:gap-10 lg:pb-16 lg:pt-8 xl:gap-14">
-          <div>
+      <div className="mx-auto w-full max-w-[1536px] px-5 pt-10 sm:px-8 sm:pt-14 lg:px-14 lg:pt-0">
+        {/* lg+: fills the first screen below the 92px header, capped so tall screens don't drift apart. */}
+        <div className="lg:grid lg:min-h-[min(calc(100svh-92px),58rem)] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:py-12 xl:gap-20">
+          <div className="text-center lg:text-left">
+            <p className="rise label text-ink/60" style={d(0)}>
+              Custom apparel collections for organizations
+            </p>
+
             <h1
               id="hero-title"
-              className="caps text-center text-[clamp(2.75rem,13vw,5.5rem)] leading-[0.86] tracking-[-0.04em] lg:text-left lg:text-[min(6.5vw,7.0625rem)]"
+              className="caps mt-5 text-[clamp(2.5rem,10.6vw,4.25rem)] leading-[0.98] lg:leading-[0.9] tracking-[-0.035em] sm:mt-6 lg:mt-7 lg:text-[min(4.2vw,5.25rem)]"
             >
-              <span className="rise block whitespace-nowrap" style={d(40)}>
-                YOUR PARTY.
+              <span className="rise block lg:whitespace-nowrap" style={d(40)}>Apparel your</span>
+              <span className="rise block lg:whitespace-nowrap" style={d(100)}>
+                members{' '}
+                {/* The one script word: a baseball-jersey hand against the heavy caps. */}
+                <span className="relative top-[0.04em] font-serif text-[0.92em] font-normal normal-case tracking-[0] text-uv">
+                  actually
+                </span>
               </span>
-              {/* The soft note against the heavy caps, tucked up under the first line. */}
-              <span className="rise mt-[0.06em] block whitespace-nowrap font-serif text-[0.9em] font-normal normal-case italic leading-[0.95] tracking-[-0.01em] text-uv" style={d(120)}>
-                your collection.
-              </span>
+              <span className="rise block lg:whitespace-nowrap" style={d(160)}>want to wear.</span>
             </h1>
 
             <p
-              className="rise mx-auto mt-5 max-w-[24rem] text-balance text-center font-sans text-[clamp(1.0625rem,1.45vw,1.5rem)] font-normal leading-[1.45] tracking-[-0.008em] text-ink/75 sm:mt-7 sm:max-w-[34rem] lg:mx-0 lg:mt-8 lg:max-w-[33rem] lg:text-left lg:[@media(min-height:820px)]:mt-12"
-              style={d(220)}
+              className="rise mx-auto mt-6 max-w-[30rem] text-balance text-lead text-ink/75 sm:mt-8 lg:mx-0 lg:max-w-[31rem] lg:text-[1.1875rem]"
+              style={d(240)}
             >
-              Custom apparel for Bar &amp; Bat Mitzvahs, designed around you and made to wear long after the party.
+              Retail-quality collections for clubs, companies, teams and causes. Start from our catalog, make every
+              piece your own, and get one clear price.
             </p>
 
-            <div className="rise relative z-10 mt-7 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 sm:mt-9 lg:mt-10 lg:justify-start lg:[@media(min-height:820px)]:mt-14" style={d(300)}>
-              <Link href="/quote" className="btn-blue h-14 px-8 text-[1.0625rem] lg:h-16 lg:px-11 lg:text-[1.25rem]">
-                Create Your Collection <Arrow className="ml-2 h-[18px] w-6" />
+            <div
+              className="rise mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 sm:mt-10 lg:justify-start"
+              style={d(320)}
+            >
+              <Link href="/quote" className="btn-blue h-14 px-8 text-[1.0625rem] lg:h-[3.75rem] lg:px-10">
+                Start a Collection <Arrow className="ml-2 h-[16px] w-[22px]" />
               </Link>
               <Link
                 href="/catalog"
-                className="-my-3 inline-block py-3 text-[1rem] font-medium underline decoration-ink/30 underline-offset-[6px] transition-colors hover:decoration-ink lg:text-[1.1875rem]"
+                className="-my-3 inline-block py-3 text-[1rem] font-medium underline decoration-ink/25 underline-offset-[7px] transition-colors hover:decoration-ink"
               >
-                Browse The Goods
+                Browse the Catalog
               </Link>
             </div>
 
-            {/* The promises: premium quality, unlimited customization, Jewish owned. */}
             <ul
-              className="rise relative z-10 mx-auto mt-6 flex max-w-[24rem] flex-col items-center gap-y-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-5 lg:flex-col lg:items-start xl:flex-row xl:justify-start font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-ink/85 sm:max-w-none sm:gap-x-6 lg:text-[0.75rem] lg:mx-0 lg:mt-9 lg:[@media(min-height:820px)]:mt-12 lg:gap-x-7"
-              style={d(360)}
+              className="rise mx-auto mt-10 flex max-w-[30rem] flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-ink/15 pt-5 sm:gap-x-4 lg:mx-0 lg:mt-14 lg:justify-start"
+              style={d(380)}
             >
-              {['Premium Quality', 'Unlimited Customization', 'Jewish Owned'].map((t) => (
-                <li key={t} className="flex items-center gap-2 whitespace-nowrap">
-                  <svg aria-hidden viewBox="0 0 16 16" className="h-[11px] w-[11px] shrink-0 text-uv"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              {PROMISES.map((t, i) => (
+                <li key={t} className="label flex items-center whitespace-nowrap text-ink/80">
+                  {i > 0 && <span aria-hidden className="mr-4 hidden h-1 w-1 rounded-full bg-beige sm:block" />}
                   {t}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* The product: two lookbook crops, staggered on a baby-blue plate. */}
-          <div className="rise relative mx-auto mt-12 w-full max-w-[640px] lg:mx-0 pb-[9%] sm:mt-16 lg:mt-0 lg:max-w-none lg:pb-[7%]" style={d(380)}>
-            <div aria-hidden className="absolute bottom-0 left-[14%] right-0 top-[16%] rounded-[18px] bg-electric sm:rounded-[22px] lg:left-[10%] lg:top-[18%]" />
-            <div className="relative grid grid-cols-2 gap-3 pr-[4%] sm:gap-5 lg:pr-[5%]">
-              {TILES.map((t) => (
-                <div key={t.key} className={t.wrap}>
-                  <div className="relative aspect-[40/59] overflow-hidden rounded-[16px] bg-cream shadow-[0_1px_0_rgba(14,26,71,0.04),0_18px_40px_-24px_rgba(14,26,71,0.35)] sm:rounded-[18px]">
-                    <Image
-                      src={hoodies}
-                      alt={t.alt}
-                      priority
-                      quality={90}
-                      sizes="1400px"
-                      className="absolute h-auto max-w-none"
-                      style={t.style}
-                    />
-                  </div>
-                </div>
-              ))}
+          {/* One sample collection, laid flat. */}
+          <figure className="rise mx-auto mt-12 w-full max-w-[600px] sm:mt-16 lg:mt-0 lg:max-w-[640px] lg:justify-self-end" style={d(300)}>
+            <div className="overflow-hidden rounded-[20px] bg-cream">
+              <HeroStill className="mx-auto" />
             </div>
-            <p className="absolute bottom-[3%] left-[2%] -rotate-[4deg] whitespace-nowrap rounded-[6px] bg-pop px-3.5 py-2 font-sans text-[0.875rem] font-medium leading-none text-ink shadow-[0_10px_24px_-14px_rgba(14,26,71,0.45)] sm:bottom-[4%] sm:px-4 sm:py-2.5 sm:text-[1rem]">
-              Made to wear on repeat.
-            </p>
-          </div>
-
-          {/* Scroll cue: lg+ and only when there's room under the content. */}
-          <div aria-hidden className="rise absolute bottom-7 left-[calc(50%-0.5px)] hidden h-11 w-px overflow-hidden bg-ink/15 lg:[@media(min-height:760px)_and_(max-height:987px)]:block" style={d(700)}>
-            <span className="scroll-cue block h-1/2 w-full bg-ink/60" />
-          </div>
+            <figcaption className="mt-4 flex items-baseline justify-between gap-4 text-ink/60">
+              <span className="label">Sample collection · Harbor Run Club</span>
+              <span className="label hidden sm:inline">Hoodie / Crewneck / Cap</span>
+            </figcaption>
+          </figure>
         </div>
 
-        {/* Divider: sits just below the fold on lg+, so the first screen is the hero alone. */}
-        <div className="mx-auto flex max-w-[1052px] items-center gap-4 pb-0 pt-16 sm:gap-6 lg:pt-8">
-          <span aria-hidden className="h-px flex-1 bg-ink/70" />
-          <span className="whitespace-nowrap font-sans text-[0.8125rem] font-medium uppercase tracking-[0.18em] text-ink sm:text-[0.9375rem]">
-            Let’s make it yours
-          </span>
-          <span aria-hidden className="h-px flex-1 bg-ink/70" />
+        {/* Divider into the chapter: just below the fold on lg+. */}
+        <div className="flex items-center gap-4 pt-20 sm:gap-6 sm:pt-24 lg:pt-6">
+          <span aria-hidden className="h-px flex-1 bg-ink/20" />
+          <span className="label whitespace-nowrap text-ink">Made to your standard</span>
+          <span aria-hidden className="h-px flex-1 bg-ink/20" />
         </div>
       </div>
     </section>

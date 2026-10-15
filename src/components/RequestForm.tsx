@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Sticker from '@/components/Sticker';
-import { possessive, useOrgName } from '@/lib/name';
+import { useOrgName } from '@/lib/name';
 import { APP_URL, REQUEST_FORM_URL } from '@/lib/site';
 
 const MIN_HEIGHT = 1200;
@@ -84,18 +84,19 @@ export default function RequestForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-[32px] bg-electric-lit p-10 text-center text-ink sm:p-16">
-        <h2 className="caps text-d2">Got it.</h2>
-        <p className="mt-2 font-sans text-[clamp(1.25rem,2vw,1.625rem)] font-medium text-uv">Your designer is next.</p>
-        <p className="mx-auto mt-5 max-w-[36ch] text-[0.9375rem] leading-relaxed text-ink/70">
-          We check your date first, then a designer reaches out to start on the collection.
+      <div className="rounded-[4px] bg-cream px-8 py-14 text-ink sm:px-14 sm:py-20">
+        <p className="label text-ink/55">Request received</p>
+        <h2 className="caps mt-5 text-d1">Thank you.</h2>
+        <p className="mt-3 font-serif text-[clamp(1.75rem,3vw,2.5rem)] leading-none text-dusty">Your designer is next.</p>
+        <p className="mt-8 max-w-[40ch] text-lead text-ink/70">
+          We review your timeline first, then a designer reaches out to start on the collection.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-rule">
+    <div className="overflow-hidden rounded-[4px] bg-white ring-1 ring-rule">
       <iframe
         ref={frameRef}
         src={REQUEST_FORM_URL}
@@ -110,38 +111,44 @@ export default function RequestForm() {
 }
 
 /**
- * /quote headline, personalised: "Tell us about Sophie's day." once a name has
- * been typed on the home page, else "Tell us about your day." Hydrates as the
- * default and swaps in the stored name after (no mismatch). The name line
- * is raspberry; long names shrink to fit.
+ * /quote headline, personalised: "Start the Harbor Run Club collection." once
+ * a name has been typed on the home page, else "Start your collection."
+ * Hydrates as the default and swaps in the stored name after (no mismatch).
+ * The name line is dusty blue; long names shrink to fit the line.
  */
 export function QuoteTitle() {
   const { name, isDefault } = useOrgName();
-  const who = (isDefault ? 'your day.' : `${possessive(name).replace(/'/g, '’')} day.`).toUpperCase();
-  const cap = (len: number) => `min(1em, ${(100 / (Math.max(len, 1) * 0.66)).toFixed(2)}cqw)`;
+  const who = (isDefault ? 'your collection.' : `the ${name.replace(/'/g, '’')}`).toUpperCase();
+  const cap = (len: number) => `min(1em, ${(100 / (Math.max(len, 1) * 0.9)).toFixed(2)}cqw)`;
   return (
     <div className="[container-type:inline-size]">
-      <h1 className="caps text-d1">
+      <h1 className="caps text-[clamp(2.75rem,7.6vw,7.25rem)] leading-[0.92] tracking-[-0.035em]">
         <span className="rise block" style={{ animationDelay: '60ms' }}>
-          Tell us about
+          Start
         </span>
         <span className="rise block" style={{ animationDelay: '140ms' }}>
-          <span className="inline-block text-uv" style={{ fontSize: cap(who.length) }}>
+          <span className="inline-block whitespace-nowrap text-dusty" style={{ fontSize: cap(who.length) }}>
             {who}
           </span>
         </span>
+        {!isDefault && (
+          <span className="rise block" style={{ animationDelay: '220ms' }}>
+            collection.
+          </span>
+        )}
       </h1>
     </div>
   );
 }
 
-/** "For {name}": a small woven label above the form; renders nothing until a name is set. */
+/** "For {name}": a small woven label beside the form; renders nothing until a name is set. */
 export function ForSticker() {
   const { name, isDefault } = useOrgName();
   if (isDefault) return null;
   return (
     <Sticker key={name} shape="label" draggable>
       <span>For {name.replace(/'/g, '’')}</span>
+      <span className="opacity-60">Collection 01</span>
     </Sticker>
   );
 }

@@ -1,8 +1,12 @@
 # Member Threads: marketing site
 
-The public site for Member Threads, custom apparel collections for Bar, Bat
-and B'nai Mitzvahs. A Stitched brand: the Studio is the customer-facing creative
-side; Stitched's design and production team makes every piece.
+The public site for Member Threads: premium custom apparel collections for
+organizations (university clubs and student orgs, companies, nonprofits,
+sports teams and fitness clubs, social clubs and associations). Customers
+start from a curated catalog and customize colors, fabric, fit, graphics and
+embroidery into one cohesive collection, from 36 pieces per style. Member
+Threads is a Stitched Group company: Stitched runs sourcing, production,
+quality control and logistics.
 
 Next.js 15 (App Router), React 19, Tailwind, statically rendered.
 
@@ -10,58 +14,62 @@ Next.js 15 (App Router), React 19, Tailwind, statically rendered.
 
 | Route | What it is |
 |---|---|
-| `/` | Hero (drawn concept collection), the chapter ("We actually make the clothes" / "Designed around them"), how it works, FAQ |
-| `/work`, `/work/[slug]` | Collections (`jake`, `sophie`, `levi-noa`, `ella`; all concepts for now) |
+| `/` | Hero, the chapter, how it works, FAQ |
+| `/work`, `/work/[slug]` | Collections |
 | `/catalog`, `/catalog/[slug]` | Pieces: starting points, each priced inside a collection |
-| `/custom` | Fully custom pieces |
-| `/about` | The Studio, including `#planners` |
+| `/custom` | Fully custom pieces, developed from scratch |
+| `/about` | Why we exist, the founder, who it's for, `#what-you-get`, Stitched Group |
 | `/quote` | Start a collection (the intake form) |
+| 404 | `src/app/not-found.tsx`, branded |
 
 ## Design system
 
-Direction: **WHITE v1, "Your party. Your collection."** (`.plan/WHITE.md`).
-An off-white page with chunky navy display type, baby-blue and pink accents,
-rounded white cards and the odd star doodle. Friendly, confident, little copy.
+Direction: a retail-grade apparel brand, not a promo-merch site. Restrained,
+confident, generous whitespace, hairline rules instead of cards, heavy wide
+caps over plain text, one script accent per view at most.
 
-Tokens live in `tailwind.config.ts` (names kept from the original system):
-`ink` `#0E1A47` is navy TYPE (and the solid pill), `paper` `#F8F6F1` is the
-GROUND; `muted`, `ash`, `ash-2`, `rule` are warm neutrals. `electric`
-`#A9CCF4` baby blue (plates, chips, tints; never type), `electric-lit`
-`#DCE9F9` pale-blue ground, `blue` / `electric-deep` `#2B5BD7` (links, hover),
-`uv` `#C8336E` raspberry (accent type, doodles, the thread), `uv-lit` / `pop`
-`#F9A8C9` sticker pink, `pop-lit` `#FDDAE6`, `cream` `#F5EEDC`. Rules: every
-ground is paper; cards are `bg-white rounded-3xl ring-1 ring-rule`; nothing
-glows, sweeps or strobes; at most one star doodle (`<Star>` in
-`src/components/Sticker.tsx`) per section. The one button is `.btn-blue`, a
-navy pill. The thread colour is `--thread` in `src/app/globals.css`.
+Tokens live in `tailwind.config.ts` (legacy names are remapped to the brand
+board so components stay put):
 
-Type is loaded with `next/font/google` in `src/app/layout.tsx`: Rubik 700/900
-(display caps, wordmark, numerals), Jost (body, nav, buttons, the "turn" lines
-in medium) and DM Mono (labels, form small print).
+- **Green** `#133327` (`ink`, `green`): type, buttons, the logo.
+- **Paper** `#F7F3EC` (`paper`): the default ground.
+- **Cream** `#EEE6D9` (`cream`, `ash`): raised bands, chips; logo colour on dark.
+- **Beige** `#C4B19A` (`beige`, `electric`, `pop`): plates, chips, tints, and
+  accent type on dark grounds. Never body type on light grounds.
+- **Dusty Blue** `#223041` (`dusty`, `blue`, `uv`, `navy`): the second dark:
+  hover, accent type on light grounds, full-bleed bands (the footer).
 
-Logos: `public/mt-logo.svg` (primary script wordmark) is rendered by `Wordmark`
-in `src/components/SiteHeader.tsx` for the header and footer. `public/mt-mark.svg`
-is the MT lettermark, and `public/favicon.svg` is that lettermark on a paper tile.
-Both brand files are dark green (`#133327`).
+The one button is `.btn-blue`, a green pill that turns dusty blue on hover.
+Secondary pages, the header and the footer share one frame (`FRAME` in
+`src/components/frame.ts`: 1536px max, 56px gutters at `lg`) so their edges
+line up with the home hero.
 
-### Hype layer (name, colorway, motion)
+Type is loaded with `next/font/google` in `src/app/layout.tsx`. **Archivo**
+does everything: `font-display` heavy and wide for caps (standing in for The
+Bold Font), `font-sans` for body (standing in for Acumin), `font-mono` as
+small tracked caps labels (`.label`). **Yellowtail** (`font-serif`) stands in
+for the brand script, Billion Dreams: used sparingly, never italic.
 
-- **Name**: typed into the home hero (`01 / NAME`), stored in `localStorage`
-  (`mt:name`) via `useKidName()` in `src/lib/name.ts`, and echoed on the hero
-  headline and swing tag, the header readout and CTA, the chapter and finale,
-  the /work reserved frame, the footer woven label and the /quote headline.
-  Server render and hydration always use the default, so there are no
-  hydration mismatches.
-- **Colorway**: five palettes in `src/lib/vibe.ts` (`mt:vibe`; ids frozen,
-  shown as Colorways 01–05), applied as CSS variables (`--v-ground` etc.) on the
-  hero with a 400ms cross-fade; the header reads it while it sits transparent
-  over the hero, then turns ink on scroll.
+Logos: `public/mt-logo.svg` (script "Member" over block "THREADS") and
+`public/mt-mark.svg` (MT lettermark), both green `#133327`;
+`public/favicon.svg` is the lettermark. `Wordmark` in
+`src/components/SiteHeader.tsx` inlines the primary logo's path data
+unchanged with `fill="currentColor"`, so the header shows it in green and the
+footer in cream on dusty blue, as on the brand board. If the logo file
+changes, re-copy its paths there.
+
+### Personalisation and motion
+
+- **Name**: the organization's name, typed into the home hero, stored in
+  `localStorage` (`mt:name`) via `useOrgName()` in `src/lib/name.ts`, and
+  echoed across the site, including the /quote headline ("Start the Harbor
+  Run Club collection.") and the woven label beside the form. Server render
+  and hydration always use the default, so there are no hydration mismatches.
+- **Colorway**: palettes in `src/lib/vibe.ts` (`mt:vibe`), applied as CSS
+  variables on the hero.
 - **Trims**: `Sticker` renders garment trims (`label`, `chip`, `care`, `tag`,
-  `pip`), set straight, at most two per viewport, with production-true copy.
-- **Motion**: color and text move, layout doesn't. `Marquee` (48s),
-  `useDrag` on the swing tag and woven label, `.slap` (240ms) only for the name
-  landing and the ADDED chip, one slow parallax rate on the hero photo.
-  `.tilt` / `.wiggle` / `.nudge` are retired no-ops. Everything is static under
+  `pip`), set straight, with production-true copy.
+- **Motion**: color and text move, layout doesn't. Everything is static under
   `prefers-reduced-motion`. No animation libraries.
 
 ## The intake form (`/quote`)
@@ -122,7 +130,7 @@ turn off GitHub Pages.
 Copy is kept out of the components:
 
 - `src/lib/site.ts`: site URL, contact, nav, capabilities, FAQ.
-- `src/lib/about.ts`: founder, origin story, milestones, planner section.
+- `src/lib/about.ts`: founder, origin story, "what you get", the Stitched Group note.
 - `src/lib/work.ts`, `src/lib/cases.ts`: the collections.
 - `src/lib/chapter.ts`, `src/lib/process.ts`: the home chapter.
 - `src/lib/catalog/local.ts`: pieces and starting prices.
@@ -135,17 +143,17 @@ in the code. Check each one; anything left as-is ships as written.
 
 - [ ] **Domain**: `SITE_URL` / `metadataBase` is `https://memberthreads.com` (`src/lib/site.ts`).
 - [ ] **Inbox**: `hello@memberthreads.com` exists and is monitored (`CONTACT` in `src/lib/site.ts`).
-- [ ] **FAQ 01 pricing**: "Most land $5–10k" and the starting points (hoodies from $65, sweatpants ~$40, PJ pants ~$35, tees ~$25, jerseys ~$35, hats ~$25).
-- [ ] **FAQ 02 timing**: 12 weeks before the event as the recommended start.
-- [ ] **FAQ 03 minimum**: collections start around 50 guest pieces, with smaller runs inside.
-- [ ] **FAQ 04 sizing**: youth XS–XL and adult S–2XL; a size-collection link or RSVP list; extras built in.
-- [ ] **FAQ 05 planners**: proofs go to planner and family together; delivery to venue or hotel.
-- [ ] **How it works**: one designer per family as the point of contact; delivery in custom boxes to home, venue or hotel.
-- [ ] **About**: founder quote ("The apparel should feel as considered as the rest of the event."), the origin story and the milestone lines (`src/lib/about.ts`). Add a founder photo at `public/about/` and set `FOUNDER.photo`.
-- [ ] **Collections are concepts**: Jake, Sophie, Levi & Noa and Ella are labelled "Concept". Piece counts, cities and lead times on them are illustrative. Replace with real collections (and photography, with the family's permission) as they ship.
-- [ ] **Case study metrics**: lead time and piece/guest counts in `src/lib/cases.ts`.
+- [ ] **FAQ pricing**: "one clear price per piece" and the catalog's starting prices.
+- [ ] **FAQ lead time**: 6 to 8 weeks as the recommended start.
+- [ ] **Minimum**: 36 pieces per style, sizes mixed within a style (FAQ, footer, /about, /quote).
+- [ ] **About, origin story**: Ethan working directly with manufacturers on fabric, fit, color and labels (`ORIGIN.story` in `src/lib/about.ts`).
+- [ ] **About, Stitched Group**: Member Threads designs; Stitched Group runs sourcing, production, QC and logistics (`STITCHED`).
+- [ ] **About, what you get**: one dedicated designer per collection, reorders saved on file, and **nationwide (U.S.) delivery**, packed by size (`OFFER`).
+- [ ] **/quote**: "if the timeline is tight, we tell you on day one" and "a designer reads every request".
+- [ ] **/custom**: the fabric, fit, construction and trim examples; whether fully custom pieces carry the same 36-piece minimum.
+- [ ] **Founder photo**: `public/about/founder.jpg` is approved for use.
+- [ ] **Collections**: any collection not yet produced is labelled "Concept"; piece counts and lead times on them are illustrative. Replace with real collections (and photography, with the organization's permission) as they ship.
+- [ ] **Case study metrics**: lead times and piece counts in `src/lib/cases.ts`.
 - [ ] **Catalog**: starting prices, fabrics, GSM, colourways and sizes in `src/lib/catalog/local.ts`.
-- [ ] **Illustration specs**: Pantone codes and measurements in the Sophie drawings (`public/chapter/sophie-*.svg`, PANTONE 2767 C, 24" chest, 3" patch, etc.) and the GSM on catalog pieces other than the 420 GSM hoodie are illustrative.
-- [ ] **Concept guest counts**: Jake 64, Levi & Noa 110, Ella 58 are invented (only Sophie's 80 is from the brief).
-- [ ] **Intake form**: `/quote` frames Stitched's `/request` form; confirm the form's own copy reads right for Mitzvah families, or point `NEXT_PUBLIC_APP_URL` at a Studio-branded version.
-- [ ] **Logo**: `public/mt-mark.svg` / `public/mt-logo.svg` are first-pass marks drawn for this launch. Swap in final artwork if a designer produces one.
+- [ ] **Intake form**: `/quote` frames Stitched's `/request` form; confirm the form's own copy reads right for organizations, and that leads land under the Member Threads embed key.
+- [ ] **Fonts**: Archivo and Yellowtail are stand-ins for The Bold Font, Acumin and Billion Dreams. Swap in licensed brand fonts if available.

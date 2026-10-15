@@ -83,7 +83,7 @@ export function CareSymbols() {
  * - `slap`: plays `.slap` on mount; remount (change `key`) to replay.
  * - `className` → the trim face; `wrapperClassName` / `style` → the outer (positioning).
  * Copy is production-true: "100% THEIRS", "WASH COLD", "SIZE / ALL", "REV 02".
- * @example <Sticker shape="label">THE SOPHIE COLLECTION<br />DROP 005</Sticker>
+ * @example <Sticker shape="label">THE EASTLINE COLLECTION<br />DROP 005</Sticker>
  * @example <Sticker shape="chip" color="var(--thread)">Laser</Sticker>
  */
 export function Sticker({

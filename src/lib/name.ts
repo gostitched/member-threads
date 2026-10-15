@@ -13,7 +13,7 @@ export const DEFAULT_NAME = 'Harbor Run Club';
 /** What the garment shows when nobody has typed a name: a prompt, not a stand-in org. */
 export const YOUR_NAME = 'Your Club';
 /** Max characters for a name (use as the input's maxLength). */
-export const NAME_MAX = 18;
+export const NAME_MAX = 28;
 
 /**
  * Light sanitizing while typing: keeps letters, digits, spaces, ' - & and ., drops leading
@@ -32,7 +32,7 @@ function sanitizeTyping(raw: string): string {
 
 /**
  * Display-ready name: letters, digits, space, ' - & and . only; Title Case (first
- * letter of each word/hyphen part uppercased, rest kept as typed); trimmed; ≤18 chars.
+ * letter of each word/hyphen part uppercased, rest kept as typed); trimmed; ≤28 chars.
  * Returns '' when nothing usable is left.
  * @example cleanName('  delta 5k club!') // 'Delta 5k Club'
  */

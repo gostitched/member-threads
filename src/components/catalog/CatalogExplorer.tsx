@@ -101,7 +101,7 @@ function FlapBoard({ text }: { text: string }) {
 }
 
 /**
- * The catalog: every piece hung on one rack, and the same pieces as a spec sheet.
+ * The catalog: every style hung on one rack, and the same pieces as a spec sheet.
  *
  * Categories, colour and search narrow what hangs; changing them runs the conveyor
  * (see rack/engine.ts). The filters live in the URL so a rack can be shared.
@@ -178,7 +178,8 @@ export default function CatalogExplorer({
   const swatches = useMemo(() => spectrum(products), [products]);
   const familyCounts = useMemo(() => countBy(products, (p) => productFamilies(p)), [products]);
   const categories = useMemo(
-    () => [...countBy(products, (p) => (p.category ? [p.category] : [])).entries()].sort((a, b) => a[0].localeCompare(b[0])),
+    // In catalog order (Map keeps first appearance), so Fleece leads, not Bags.
+    () => [...countBy(products, (p) => (p.category ? [p.category] : [])).entries()],
     [products]
   );
 
@@ -259,7 +260,7 @@ export default function CatalogExplorer({
   const board = `${state.q ? 'Search' : familyLabel ?? state.category ?? 'All'} ${results.length}`;
   const count = (
     <>
-      <b>{results.length}</b> {results.length === 1 ? 'piece' : 'pieces'}
+      <b>{results.length}</b> {results.length === 1 ? 'style' : 'styles'}
       {state.family && (
         <button type="button" onClick={() => set({ family: null })} className="ml-3 text-uv hover:underline" aria-label={`Remove filter ${familyLabel}`}>
           {familyLabel} ×
@@ -273,12 +274,10 @@ export default function CatalogExplorer({
       {/* ── Colour ─────────────────────────────────────────────────────────── */}
       {/* Only when there is colour to explore: a heading over an empty band is noise. */}
       {swatches.length > 0 && (
-        <section className="pb-8 pt-12 text-ink sm:pb-10 sm:pt-16">
-          <div className="shell mb-8 lg:mb-10">
-            <h2>
-              <span className="caps block text-d1">Pick a color.</span>
-              <span className="mt-2 block font-sans text-[clamp(1.25rem,1.8vw,1.625rem)] font-medium leading-none text-uv">Any color.</span>
-            </h2>
+        <section className="pb-8 text-ink sm:pb-10">
+          <div className="shell mb-5 flex items-baseline justify-between gap-6">
+            <h2 className="label text-ink">Shop by color</h2>
+            <p className="label hidden text-muted sm:block">{swatches.length} colorways</p>
           </div>
           <Spectrum swatches={swatches} familyCounts={familyCounts} active={state.family} onPick={pickFamily} />
         </section>
@@ -318,7 +317,7 @@ export default function CatalogExplorer({
                 <circle cx="5.5" cy="5.5" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
                 <path d="M9 9l3.2 3.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
               </svg>
-              <span className="sr-only">Search pieces</span>
+              <span className="sr-only">Search styles</span>
               <input
                 ref={searchRef}
                 type="search"
@@ -326,7 +325,7 @@ export default function CatalogExplorer({
                 onChange={(e) => setSearchDraft(e.target.value)}
                 autoComplete="off"
                 spellCheck={false}
-                placeholder="Search"
+                placeholder="Search styles"
                 className="w-full min-w-0 bg-transparent py-1 text-[0.875rem] outline-none placeholder:text-ink/40 lg:w-40 [&::-webkit-search-cancel-button]:appearance-none"
               />
             </label>
@@ -362,7 +361,7 @@ export default function CatalogExplorer({
       </div>
 
       {/* ── The rack ───────────────────────────────────────────────────────── */}
-      <section ref={sectionRef} className="rk" hidden={state.view !== 'rack'} aria-label="Pieces on the rack">
+      <section ref={sectionRef} className="rk" hidden={state.view !== 'rack'} aria-label="Styles on the rack">
         <div ref={headRef} className="rk-head">
           <p className="rk-count" aria-live="polite">
             {count}
@@ -392,15 +391,15 @@ export default function CatalogExplorer({
             {count}
           </p>
           {results.length === 0 ? (
-            <div className="flex flex-col items-start gap-5 rounded-3xl bg-white p-10 ring-1 ring-rule sm:p-16">
-              <p className="caps text-d2">Nothing on file for that.</p>
-              <p className="max-w-measure text-lead text-muted">Try another search, or describe it and we&rsquo;ll develop it.</p>
+            <div className="flex flex-col items-start gap-5 border-y border-rule py-14 sm:py-20">
+              <p className="caps text-d2">No styles match.</p>
+              <p className="max-w-measure text-lead text-muted">Try another search, or tell us what you need and we&rsquo;ll source it.</p>
               <div className="flex flex-wrap gap-3">
                 <button type="button" onClick={clearAll} className="btn-outline">
                   Clear filters
                 </button>
-                <a href="/custom" className="btn-blue">
-                  Describe the piece
+                <a href="/quote" className="btn-blue">
+                  Start a collection
                 </a>
               </div>
             </div>

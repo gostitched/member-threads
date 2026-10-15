@@ -5,10 +5,11 @@ import Reveal from '@/components/Reveal';
 import { CONTACT, FAQ, type FaqItem } from '@/lib/site';
 
 /**
- * Four questions on a raised panel. Each sits over a stitched seam with a
- * loose thread at its right end; pulling it (the whole row is the button)
- * unpicks the stitches and the panel parts, showing the answer on the paper
- * beneath. One seam open at a time; the thread in the opening sews it shut.
+ * The questions, on a raised panel. Each sits over a stitched seam with a loose
+ * thread at its right end; pulling it (the whole row is the button) unpicks the
+ * stitches and the panel parts, showing the answer beneath. One seam open at a
+ * time; the thread in the opening sews it shut. The heading and a way to ask
+ * something else hold the left column, mirroring How it works.
  *
  * All motion is CSS (`.inside-*` in globals.css), driven by `data-open`.
  */
@@ -23,15 +24,30 @@ export default function Faq() {
   };
 
   return (
-    <section aria-labelledby="faq-title" className="inside-garment overflow-x-clip pb-20 sm:pb-28">
-      <div className="shell">
-        <Reveal>
-          <h2 id="faq-title" className="caps text-d1">
-            <span className="whitespace-nowrap">QuestiOns.</span>
-          </h2>
+    <section aria-labelledby="faq-title" className="inside-garment overflow-x-clip pb-24 pt-4 sm:pb-32 lg:pb-40">
+      <div className="mx-auto grid w-full max-w-[1536px] grid-cols-[minmax(0,1fr)] gap-10 px-5 sm:px-8 lg:grid-cols-12 lg:gap-10 lg:px-14">
+        <Reveal className="lg:col-span-5">
+          <div className="lg:sticky lg:top-36">
+            <p className="label text-ink/60">Questions</p>
+            <h2 id="faq-title" className="caps mt-5 text-[clamp(2rem,4vw,3.75rem)] leading-[0.95] tracking-[-0.03em]">
+              Good to know.
+            </h2>
+            <p className="mt-6 max-w-[26rem] text-lead text-ink/75">
+              Straight answers on price, minimums, timing and reorders. Pull a thread to open one.
+            </p>
+            <p className="mt-8 text-[0.9375rem] text-ink/60">
+              Something else?{' '}
+              <a
+                href={`mailto:${CONTACT.email}`}
+                className="font-medium text-ink underline decoration-ink/25 underline-offset-[5px] transition-colors hover:decoration-ink"
+              >
+                {CONTACT.email}
+              </a>
+            </p>
+          </div>
         </Reveal>
 
-        <div className="inside-label mt-10 sm:mt-14">
+        <div className="inside-label lg:col-span-7">
           {FAQ.map((item, i) => (
             <Entry
               key={item.number}
@@ -45,13 +61,6 @@ export default function Faq() {
             />
           ))}
         </div>
-
-        <p className="mt-6 text-[0.9375rem] text-ink/60">
-          Something else?{' '}
-          <a href={`mailto:${CONTACT.email}`} className="text-electric-deep underline-offset-4 hover:underline">
-            {CONTACT.email}
-          </a>
-        </p>
       </div>
     </section>
   );
@@ -99,7 +108,7 @@ function Entry({
           <div className="inside-under-body">
             <div className="inside-answer flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
               <div className="min-w-0">
-                <p className="caps text-d2 text-ink">{item.answer}</p>
+                <p className="caps text-d3 text-ink">{item.answer}</p>
                 <p className="mt-3 max-w-[44ch] text-[0.9375rem] leading-relaxed text-ink/70">{item.line}</p>
               </div>
               <button type="button" onClick={onClose} className="inside-close">

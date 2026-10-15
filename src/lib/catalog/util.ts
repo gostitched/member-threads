@@ -37,25 +37,25 @@ export function hexToHsl(hex: string | null | undefined): Hsl | null {
 }
 
 /** Near-black or white text, whichever reads on this swatch. */
-export function inkOn(hex: string | null | undefined): '#0E1A47' | '#FFFFFF' {
+export function inkOn(hex: string | null | undefined): '#133327' | '#FFFFFF' {
   const rgb = parseHex(hex);
-  if (!rgb) return '#0E1A47';
+  if (!rgb) return '#133327';
   const [r, g, b] = rgb.map((x) => {
     const c = x / 255;
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? '#0E1A47' : '#FFFFFF';
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? '#133327' : '#FFFFFF';
 }
 
 export const COLOR_FAMILIES = [
-  { id: 'neutral', label: 'Neutrals', swatch: '#E9E0C8' },
-  { id: 'red', label: 'Reds', swatch: '#FF2F2F' },
-  { id: 'orange', label: 'Oranges', swatch: '#FF6B1F' },
-  { id: 'yellow', label: 'Yellows', swatch: '#FFE14D' },
-  { id: 'green', label: 'Greens', swatch: '#1FA45B' },
-  { id: 'blue', label: 'Blues', swatch: '#2447FF' },
-  { id: 'purple', label: 'Purples', swatch: '#6A2BFF' },
-  { id: 'pink', label: 'Pinks', swatch: '#FF3D8F' },
+  { id: 'neutral', label: 'Neutrals', swatch: '#D8CEBD' },
+  { id: 'red', label: 'Reds', swatch: '#5A2230' },
+  { id: 'orange', label: 'Rusts', swatch: '#9A5434' },
+  { id: 'yellow', label: 'Khakis', swatch: '#B3A07C' },
+  { id: 'green', label: 'Greens', swatch: '#1F3D30' },
+  { id: 'blue', label: 'Blues', swatch: '#1E2A3D' },
+  { id: 'purple', label: 'Purples', swatch: '#4A3A5C' },
+  { id: 'pink', label: 'Pinks', swatch: '#C99AA0' },
 ] as const;
 
 export type ColorFamily = (typeof COLOR_FAMILIES)[number]['id'];
@@ -138,9 +138,13 @@ export type GarmentKind =
   | 'longsleeve'
   | 'hoodie'
   | 'crewneck'
+  | 'quarterzip'
   | 'polo'
+  | 'rugby'
   | 'jacket'
+  | 'vest'
   | 'cap'
+  | 'fivepanel'
   | 'beanie'
   | 'tote'
   | 'pants'
@@ -151,9 +155,13 @@ const KIND_WORDS: Array<[GarmentKind, RegExp]> = [
   // Packaging is drawn as the plain box, never as a bag.
   ['generic', /packag|\bbox(es)?\b/],
   ['hoodie', /hood/],
-  ['crewneck', /crew|sweatshirt|quarter[- ]?zip|pullover/],
+  ['quarterzip', /quarter[- ]?zip|half[- ]?zip|1\/4[- ]?zip/],
+  ['crewneck', /crew|sweatshirt|pullover/],
+  ['rugby', /rugby/],
   ['polo', /polo/],
-  ['jacket', /jacket|coat|shell|anorak|windbreaker|vest|outerwear|varsity|bomber/],
+  ['vest', /\bvest|gilet/],
+  ['jacket', /jacket|coat|shell|anorak|windbreaker|outerwear|varsity|bomber/],
+  ['fivepanel', /five[- ]?panel|5[- ]?panel|camp cap/],
   ['cap', /\bcap\b|hat|snapback|trucker|visor|panel/],
   ['beanie', /beanie|toque|knit hat/],
   ['tote', /tote|\bbags?\b|backpack|pouch/],

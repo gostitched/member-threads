@@ -3,7 +3,7 @@
  *
  * ── WHERE IT COMES FROM ──────────────────────────────────────────────────────
  * Member Threads's pieces live in `local.ts` and are served from there by
- * default. Set `CATALOG_SOURCE=live` to read the dashboard instead; everything
+ * default. Set `MT_CATALOG_SOURCE=live` to read the dashboard instead; everything
  * below this note describes that path, which is kept intact so switching is one
  * environment variable, not a rewrite.
  *
@@ -36,8 +36,12 @@ import { APP_URL } from '@/lib/site';
 import { LOCAL_CATALOG } from './local';
 import type { Catalog, CatalogBrand, CatalogProduct, CatalogSource } from './types';
 
-/** The dashboard is opt-in; the Studio's own list is the default. */
-const LIVE = process.env.CATALOG_SOURCE?.trim().toLowerCase() === 'live';
+/**
+ * The dashboard is opt-in; Member Threads' own list is the default. Its own variable,
+ * not `CATALOG_SOURCE`: that one was set for the site this was copied from, and its
+ * dashboard placements are that brand's products, not these.
+ */
+const LIVE = process.env.MT_CATALOG_SOURCE?.trim().toLowerCase() === 'live';
 
 const KEY = process.env.STITCHED_CATALOG_KEY?.trim() || 'emb_live_gostitched_default';
 const REVALIDATE_SECONDS = 60;

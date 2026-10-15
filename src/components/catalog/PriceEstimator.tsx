@@ -5,14 +5,13 @@ import type { PublicPriceBreak } from '@/lib/catalog/types';
 import { formatMoney } from '@/lib/catalog/util';
 
 /**
- * Price breaks as something you can feel: drag the quantity and watch the unit price
- * step down as it crosses each break.
+ * The price ladder, and a quantity you can drag across it.
  *
- * The slider is logarithmic because the interesting range is: 50 and 100 are as far
- * apart, in decision terms, as 500 and 1,000. A linear track would crush every small
- * order into its first centimetre.
+ * The tiers read first, as a row (36 / 72 / 144 / 300+), because that is the answer
+ * most buyers want. The slider underneath turns it into a total for their headcount.
+ * It is logarithmic: 36 to 72 matters as much, in decision terms, as 300 to 600.
  */
-const MAX_QTY = 5000;
+const MAX_QTY = 1000;
 
 /** `breaks` is one flat ladder (see `flatBreaks`): decoration is in the price. */
 export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPriceBreak[]; minimum?: number | null }) {
@@ -21,7 +20,6 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
   // and the track starts at it.
   const tiers = ladder.filter((t, i) => !(minimum && ladder[i + 1] && ladder[i + 1].minQuantity <= minimum));
   const minQ = Math.max(minimum ?? 1, tiers[0]?.minQuantity ?? 1);
-  // Reaches 5,000, or past the top break if a product's ladder goes higher.
   const maxQ = Math.max(MAX_QTY, Math.round((tiers[tiers.length - 1]?.minQuantity ?? minQ) * 1.6));
   const [pos, setPos] = useState(0);
 
@@ -30,14 +28,45 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
   const qty = Math.round(Math.exp(Math.log(minQ) + pos * (Math.log(maxQ) - Math.log(minQ))));
   const active = [...tiers].reverse().find((t) => qty >= t.minQuantity) ?? tiers[0];
   const currency = active.currency;
-  const top = tiers[0].unitPriceCents;
+  const last = tiers[tiers.length - 1];
 
   return (
     <div>
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-end">
+      {/* The ladder. Each tier is a button that jumps the slider to it. */}
+      <div className="grid border-y border-rule" style={{ gridTemplateColumns: `repeat(${tiers.length}, minmax(0, 1fr))` }}>
+        {tiers.map((t, i) => {
+          const on = t === active;
+          const q = Math.max(t.minQuantity, minQ);
+          return (
+            <button
+              key={t.minQuantity}
+              type="button"
+              aria-pressed={on}
+              onClick={() => setPos((Math.log(q) - Math.log(minQ)) / (Math.log(maxQ) - Math.log(minQ)))}
+              className={`relative flex flex-col items-start gap-2 px-3 py-4 text-left transition-colors duration-200 sm:px-4 ${
+                i > 0 ? 'border-l border-rule' : ''
+              } ${on ? 'bg-cream' : 'hover:bg-cream/50'}`}
+            >
+              <span className="label text-muted">
+                {q.toLocaleString('en-US')}
+                {t === last ? '+' : ''}
+              </span>
+              <span className="text-[1.125rem] font-semibold tabular-nums sm:text-[1.375rem]">
+                {formatMoney(t.unitPriceCents, t.currency)}
+              </span>
+              <span aria-hidden className={`absolute inset-x-0 top-0 h-[2px] ${on ? 'bg-ink' : 'bg-transparent'}`} />
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
-          <p className="text-[0.875rem] text-muted">Quantity</p>
-          <p className="mt-2 text-d1 font-extrabold tabular-nums">{qty.toLocaleString('en-US')}</p>
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="label text-muted">Quantity</p>
+            <p className="text-[0.8125rem] text-muted">Sizes mix freely</p>
+          </div>
+          <p className="mt-2 text-d2 font-black tabular-nums">{qty.toLocaleString('en-US')}</p>
           <input
             type="range"
             min={0}
@@ -45,44 +74,24 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
             step={0.001}
             value={pos}
             onChange={(e) => setPos(Number(e.target.value))}
-            className="range mt-2"
+            className="range mt-3"
             aria-label="Quantity"
-            aria-valuetext={`${qty} units`}
+            aria-valuetext={`${qty} pieces`}
           />
-          <div className="mt-6 grid grid-cols-2 gap-6 border-t border-rule pt-5">
-            <div>
-              <p className="text-[0.875rem] text-muted">Per piece</p>
-              <p className="mt-2 text-d3 font-semibold tabular-nums">{formatMoney(active.unitPriceCents, currency)}</p>
-            </div>
-            <div>
-              <p className="text-[0.875rem] text-muted">Estimated total</p>
-              <p className="mt-2 text-d3 font-semibold tabular-nums">{formatMoney(active.unitPriceCents * qty, currency)}</p>
-            </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6 border-t border-rule pt-5 sm:min-w-[15rem] sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
+          <div>
+            <p className="label text-muted">Per piece</p>
+            <p className="mt-2 text-[1.25rem] font-semibold tabular-nums">{formatMoney(active.unitPriceCents, currency)}</p>
+          </div>
+          <div>
+            <p className="label text-muted">Estimate</p>
+            <p className="mt-2 text-[1.25rem] font-semibold tabular-nums">
+              {formatMoney(active.unitPriceCents * qty, currency)}
+            </p>
           </div>
         </div>
-
-        {/* The breaks as bars: height is the unit price, the active tier is lit. */}
-        <div className="flex h-48 items-end gap-2" aria-hidden>
-          {tiers.map((t) => {
-            const on = t === active;
-            return (
-              <div key={t.minQuantity} className="flex flex-1 flex-col items-center gap-2">
-                <span className={`text-[0.75rem] font-semibold tabular-nums ${on ? 'text-uv' : 'text-muted'}`}>
-                  {formatMoney(t.unitPriceCents, t.currency)}
-                </span>
-                <div
-                  className={`w-full transition-colors duration-300 ${on ? 'bg-electric' : 'bg-ink/5'} rounded-t-md`}
-                  style={{ height: `${Math.max(12, (t.unitPriceCents / top) * 150)}px` }}
-                />
-                <span className={`text-[0.75rem] tabular-nums ${on ? 'text-ink' : 'text-muted'}`}>
-                  {Math.max(t.minQuantity, minQ).toLocaleString('en-US')}+
-                </span>
-              </div>
-            );
-          })}
-        </div>
       </div>
-
     </div>
   );
 }

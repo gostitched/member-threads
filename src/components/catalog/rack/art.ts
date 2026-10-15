@@ -23,13 +23,14 @@ export const pad3 = (n: number) => String(n).padStart(3, '0');
 
 /** How a thing hangs: tops on a wire hanger, bottoms on a clip bar, the rest from a peg clip. */
 export type Mount = 'top' | 'bottom' | 'head';
-const MOUNT: Partial<Record<GarmentKind, Mount>> = { pants: 'bottom', shorts: 'bottom', cap: 'head', beanie: 'head', tote: 'head', generic: 'head' };
+const MOUNT: Partial<Record<GarmentKind, Mount>> = { pants: 'bottom', shorts: 'bottom', cap: 'head', fivepanel: 'head', beanie: 'head', tote: 'head', generic: 'head' };
 export const mountOf = (kind: GarmentKind): Mount => MOUNT[kind] ?? 'top';
 
 /** Where each drawing sits so its hanging point meets the hanger (necks at y≈88, waists at 70, crowns at 98). */
 const TF: Partial<Record<GarmentKind, string>> = {
   shorts: 'translate(0 -40)',
   cap: 'translate(-6 -22)',
+  fivepanel: 'translate(-6 -24)',
   beanie: 'translate(0 -44)',
   // Hung by one handle, the way a bag hangs off a peg.
   tote: 'translate(29 0)',
@@ -209,7 +210,7 @@ export function itemMarkup(p: CatalogProduct, stream: boolean): Hung {
   }
   html += '</div>';
   html += `<div class="rk-info"><div class="rk-nm">${esc(p.name)}</div><div class="rk-pr">${
-    from ? `From ${from}` : 'In your collection'
+    from ? `From ${from}` : 'Priced with your collection'
   }</div><div class="rk-vw" aria-hidden="true">${cycles ? `${p.colorways.length} colors · tap to lock` : 'View →'}</div></div>`;
   return { html, mount, photo, cutout };
 }
@@ -226,8 +227,8 @@ export function ctaMarkup(): string {
   return `<div class="rk-swing"><svg class="rk-wire" viewBox="0 0 20 46" aria-hidden="true">
     <circle cx="10" cy="3" r="6.6" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M10 9.6V46" stroke="currentColor" stroke-width="2"/></svg>
     <div class="rk-cta"><div class="rk-cta-body">
-    <h3>Not on the rack?</h3>
-    <p>We make it from scratch.</p>
+    <h3>Need another style?</h3>
+    <p>Your designer will source it.</p>
     <a class="btn-blue" href="/quote" data-nav>Start a collection</a></div></div></div>`;
 }
 

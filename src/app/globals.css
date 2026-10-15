@@ -66,8 +66,10 @@
     white-space: nowrap;
   }
 
+  /* The site frame. Matches FRAME in src/components/frame.ts, so header,
+     footer and every page share the same edges. */
   .shell {
-    @apply mx-auto w-full max-w-shell px-5 sm:px-8;
+    @apply mx-auto w-full max-w-[1536px] px-5 sm:px-8 lg:px-14;
   }
 
   /* Small uppercase mono label. Does the work that a sentence of body copy
