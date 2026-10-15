@@ -105,6 +105,18 @@ npm run build
 
 Set these in the Vercel project for this site. They are read at build time.
 
+## Deploying
+
+The Vercel project (`stitched1/member-threads`) is connected to this repo:
+
+- Every push to `main` deploys to production at https://member-threads.vercel.app.
+- Every pull request gets a preview deployment, linked from the PR's Vercel check.
+
+`memberthreads.com` still points at the old static site on GitHub Pages
+(`gh-pages` branch). To move it, add the domain under Vercel → Settings →
+Domains, swap the DNS records at the registrar for the ones Vercel lists, then
+turn off GitHub Pages.
+
 ## Where the content lives
 
 Copy is kept out of the components:
