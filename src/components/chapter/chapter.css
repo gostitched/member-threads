@@ -1,0 +1,383 @@
+/* ── The chapter: 01 the hoodie toy, 02 the collection row, the finale ─────────────
+   Every colour is a theme token (theme('colors.…')), so palette changes in
+   tailwind.config.ts flow straight through. Every ground is paper; accents are
+   pale plates (blue, pink, cream) and navy type. Board type is sized in
+   container units so the board scales as one object. */
+
+.chapter-ground,
+.chapter-design,
+.chapter-finale {
+  --settle: cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+
+/* The turn: Jost, medium, a touch bigger than the lead. */
+.chapter-turn {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(1.25rem, 1.8vw, 1.625rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+
+/* ── The board ───────────────────────────────────────────────────────── */
+.chapter-board { container-type: inline-size; }
+
+.chapter-obj {
+  position: absolute;
+  z-index: 15;
+  rotate: var(--r, 0deg);
+  transition:
+    translate 0.9s var(--settle) var(--d, 0ms),
+    opacity 0.6s ease var(--d, 0ms);
+}
+.chapter-board[data-in='false'] .chapter-obj {
+  translate: var(--from, 0 24px);
+  opacity: 0;
+}
+
+.chapter-garment {
+  z-index: 10;
+  transition: opacity 0.7s ease 420ms, translate 0.9s var(--settle) 420ms;
+}
+.chapter-board[data-in='false'] .chapter-garment {
+  opacity: 0;
+  translate: 0 28px;
+}
+
+/* Leaders: navy hairlines, full strength when pointed at or on. */
+.chapter-board > svg { z-index: 20; }
+.chapter-leader { color: theme('colors.ink / 40%'); }
+.chapter-leader[data-on] { color: theme('colors.ink / 70%'); }
+.chapter-leader[data-active] { color: theme('colors.ink'); }
+.chapter-lead-dot { fill: currentColor; transition: opacity 0.4s ease var(--d, 0ms); }
+.chapter-board[data-in='false'] .chapter-lead-dot { opacity: 0; }
+.chapter-lead {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.55s ease var(--d, 0ms);
+}
+.chapter-leader[data-active] .chapter-lead { stroke-width: 2; }
+.chapter-board[data-in='false'] .chapter-lead { stroke-dashoffset: 1; }
+
+/* Preview marks on the garment (Hoodie's Overlay): raspberry. */
+.chapter-marks path,
+.chapter-marks rect,
+.chapter-marks circle { stroke: theme('colors.uv'); }
+.chapter-marks .chapter-mark-dot { fill: theme('colors.uv'); stroke: none; }
+.chapter-marks text { fill: theme('colors.uv'); stroke: theme('colors.white'); }
+
+
+/* ── Callouts: the details you can tap, as white pills (navy once on) ── */
+.chapter-callout {
+  display: flex;
+  flex-direction: column;
+  min-height: 44px;
+  cursor: pointer;
+  transition: opacity 0.4s ease var(--d, 0ms);
+}
+.chapter-callout.text-right { align-items: flex-end; }
+.chapter-callout.text-left { align-items: flex-start; }
+.chapter-board[data-in='false'] .chapter-callout { opacity: 0; }
+.chapter-callout-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(0.9375rem, 1.3cqw, 1.1875rem);
+  line-height: 1;
+  white-space: nowrap;
+  color: theme('colors.ink');
+  transition: color 0.2s ease;
+}
+.chapter-callout .chapter-callout-head,
+.chapter-chip {
+  padding: 0.75em 1.1em;
+  border-radius: 9999px;
+  background: theme('colors.white');
+  box-shadow: inset 0 0 0 1px theme('colors.rule');
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, translate 0.2s ease;
+}
+.chapter-callout:hover .chapter-callout-head,
+.chapter-callout[data-active] .chapter-callout-head,
+.chapter-chip:hover,
+.chapter-chip[data-active] { box-shadow: inset 0 0 0 1.5px theme('colors.ink'); }
+.chapter-callout[data-on] .chapter-callout-head,
+.chapter-chip[data-on] {
+  background: theme('colors.ink');
+  color: theme('colors.paper');
+  box-shadow: none;
+}
+.chapter-chip[data-on] .chapter-callout-head { color: theme('colors.paper'); }
+.chapter-callout-dot {
+  flex: none;
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1.5px theme('colors.ink / 45%');
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+.chapter-callout[data-on] .chapter-callout-dot,
+.chapter-chip[data-on] .chapter-callout-dot {
+  background-color: theme('colors.uv-lit');
+  box-shadow: none;
+}
+.chapter-callout-sub {
+  display: block;
+  margin-top: 0.45em;
+  padding-inline: 1.2em;
+  font-size: clamp(0.8125rem, 1cqw, 0.9375rem);
+  line-height: 1.3;
+  color: theme('colors.muted');
+}
+.chapter-callout[data-on] .chapter-callout-sub { color: theme('colors.uv'); }
+
+/* Phone chips. */
+.chapter-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  cursor: pointer;
+}
+.chapter-chip .chapter-callout-head { font-size: 0.9375rem; }
+
+/* "On": a chip that lands beside the detail, holds, then lifts away. */
+.chapter-added {
+  position: absolute;
+  top: 0.15rem;
+  pointer-events: none;
+  padding: 0.45em 0.8em;
+  border-radius: 9999px;
+  background: theme('colors.uv-lit');
+  color: theme('colors.ink');
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1;
+  animation: chapter-added 1.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes chapter-added {
+  0% { opacity: 0; transform: translateY(0) scale(1.25); }
+  17% { opacity: 1; transform: translateY(0) scale(1); }
+  70% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-16px) scale(1); }
+}
+.chapter-sub-slap { animation: chapter-sub 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) both; transform-origin: 0 50%; }
+.text-right .chapter-sub-slap { transform-origin: 100% 50%; }
+@keyframes chapter-sub {
+  from { transform: scale(1.12); }
+  to { transform: scale(1); }
+}
+
+/* The garment bumps on every press (two names so the animation restarts). */
+.chapter-bump-a { animation: chapter-bump-a 0.42s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.chapter-bump-b { animation: chapter-bump-b 0.42s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes chapter-bump-a { 0% { scale: 1; } 35% { scale: 1.02; } 100% { scale: 1; } }
+@keyframes chapter-bump-b { 0% { scale: 1; } 35% { scale: 1.02; } 100% { scale: 1; } }
+
+/* Colorways: five flat 28px dots in 44px targets; the current one gets a navy ring. */
+.chapter-swatch {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+.chapter-swatch-dot {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--sw);
+  box-shadow: inset 0 0 0 1px theme('colors.ink / 14%');
+  transition: box-shadow 0.25s ease, scale 0.25s ease;
+}
+.chapter-swatch:hover .chapter-swatch-dot { scale: 1.1; }
+.chapter-swatch[data-current] .chapter-swatch-dot {
+  box-shadow:
+    inset 0 0 0 1px theme('colors.ink / 14%'),
+    0 0 0 2px theme('colors.white'),
+    0 0 0 4px theme('colors.ink');
+}
+.chapter-swatch:focus-visible { outline: 2px solid theme('colors.electric-deep'); outline-offset: 0; }
+/* After the dots: not a swatch, just a note that any colour can be made. */
+.chapter-anycolor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: theme('colors.ink / 70%');
+}
+.chapter-anycolor-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: conic-gradient(#F9A8C9, #C8336E, #F2B33D, #7BC67E, #A9CCF4, #2B5BD7, #7E5BD7, #F9A8C9);
+  box-shadow: inset 0 0 0 1px theme('colors.ink / 14%');
+}
+
+/* The name pill under the hoodie. */
+.chapter-name {
+  box-shadow: inset 0 0 0 1px theme('colors.rule');
+  transition: box-shadow 0.2s ease;
+}
+.chapter-name:focus-within { box-shadow: inset 0 0 0 2px theme('colors.ink'); }
+
+/* ── Act 02: pieces settle in on pale plates ─────────────────────────── */
+.chapter-piece {
+  transition:
+    translate 0.9s var(--settle) var(--d, 0ms),
+    opacity 0.7s ease var(--d, 0ms);
+}
+.chapter-table[data-in='false'] .chapter-piece {
+  translate: var(--from, 0 30px);
+  opacity: 0;
+}
+
+/* The finale headline scales in as it arrives. */
+.chapter-finale-title {
+  transform-origin: 50% 100%;
+  transition: scale 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+}
+.chapter-finale[data-in='false'] .chapter-finale-title { scale: 0.92; opacity: 0; }
+
+/* A name landing: the house slap, resting at --r. */
+.chapter-name-slap { display: inline-block; animation: slap 240ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ── Small one-shot motions ──────────────────────────────────────────── */
+.chapter-fade-in { animation: chapter-fade 0.3s ease both; }
+.chapter-draw { animation: chapter-fade 0.35s ease both; }
+@keyframes chapter-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* Something new sewn onto the garment springs into place. */
+.chapter-add {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: chapter-add 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes chapter-add {
+  0% { opacity: 0; scale: 1.5; rotate: -6deg; }
+  55% { opacity: 1; scale: 0.96; rotate: 4deg; }
+  100% { opacity: 1; scale: 1; rotate: 0deg; }
+}
+
+/* ── The tech-pack slip (hidden on the homepage; `<Stage receipt />`) ── */
+.chapter-slip {
+  padding: 1.8em 1.6em 1.6em;
+  font-size: 12px;
+  background: theme('colors.white');
+  color: theme('colors.ink');
+  box-shadow: 0 30px 50px -24px rgba(40, 32, 20, 0.45), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+/* On the board the slip scales with the board, so it fits its corner at any width. */
+.chapter-board .chapter-slip { font-size: clamp(8px, 0.78cqw, 12px); }
+.chapter-slip-wrap { z-index: 5; }
+/* Torn at the top as well as the bottom (the bottom tear comes from .receipt). */
+.chapter-slip::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -7px;
+  height: 7px;
+  background:
+    linear-gradient(-135deg, transparent 5px, #fff 0) 0 0 / 10px 7px repeat-x,
+    linear-gradient(135deg, transparent 5px, #fff 0) 0 0 / 10px 7px repeat-x;
+}
+.chapter-slip-brand {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 1.3em;
+  line-height: 1.1;
+}
+.chapter-slip-text {
+  font-family: var(--font-mono);
+  font-size: 1em;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.chapter-slip-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5em;
+  margin: 0 -0.5em;
+  padding: 0.18em 0.5em;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+.chapter-slip-row[data-lit] { background: theme('colors.electric-lit'); color: theme('colors.ink'); }
+.chapter-slip-rule { border-top: 1px dashed theme('colors.rule'); }
+.chapter-slip-double { border-top: 3px double theme('colors.rule'); }
+.chapter-slip-barcode {
+  height: 2.6em;
+  margin-inline: 8%;
+  background: repeating-linear-gradient(90deg,
+    currentColor 0 2px, transparent 2px 4px, currentColor 4px 5px, transparent 5px 8px,
+    currentColor 8px 11px, transparent 11px 12px, currentColor 12px 13px, transparent 13px 16px);
+  opacity: 0.6;
+}
+.chapter-slip-total {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 3.2em;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+.chapter-slip-in { animation: chapter-print 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes chapter-print {
+  from { opacity: 0; translate: 0 -6px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+/* Small trims kept for Materials (dormant). */
+.chapter-tag {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.2em 0.7em;
+  font-size: 11px;
+  line-height: 1.3;
+  color: theme('colors.muted');
+  white-space: nowrap;
+}
+.chapter-woven {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.7em 1.4em 0.65em;
+  background: theme('colors.white');
+  color: theme('colors.ink');
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-inline: 1px dashed theme('colors.rule');
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-fade-in, .chapter-draw, .chapter-slip-in, .chapter-add,
+  .chapter-sub-slap, .chapter-bump-a, .chapter-bump-b { animation: none; }
+  .chapter-name-slap { animation: none; transform: rotate(var(--r, 0deg)); }
+  .chapter-added { display: none; }
+  .chapter-finale-title, .chapter-obj, .chapter-garment, .chapter-piece { transition: none; }
+  .chapter-swatch-dot, .chapter-plate img { transition: none; }
+  .chapter-callout-head, .chapter-chip, .chapter-name { transition: none; }
+}
