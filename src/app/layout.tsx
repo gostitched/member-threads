@@ -38,19 +38,19 @@ const serif = Instrument_Serif({
   display: 'swap',
 });
 
-const TITLE = 'The Mitzvah Studio | Custom Bar & Bat Mitzvah Apparel Collections';
+const TITLE = 'Member Threads | Custom Bar & Bat Mitzvah Apparel Collections';
 const DESCRIPTION =
   'Fully custom, fashion-quality apparel collections for Bar and Bat Mitzvahs. Designed around your kid, their colors and their weekend, then made from scratch.';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: TITLE, template: '%s | The Mitzvah Studio' },
+  title: { default: TITLE, template: '%s | Member Threads' },
   description: DESCRIPTION,
   openGraph: {
-    title: { default: TITLE, template: '%s | The Mitzvah Studio' },
+    title: { default: TITLE, template: '%s | Member Threads' },
     description: 'Their biggest day. Made to be worn long after. Custom Mitzvah collections, designed and made from scratch.',
     url: SITE_URL,
-    siteName: 'The Mitzvah Studio',
+    siteName: 'Member Threads',
     type: 'website',
   },
   icons: { icon: '/favicon.svg?v=2', apple: '/favicon.svg?v=2' },

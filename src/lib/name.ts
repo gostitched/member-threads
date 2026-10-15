@@ -49,11 +49,11 @@ export function possessive(n: string): string {
   return /s$/i.test(s) ? `${s}'` : `${s}'s`;
 }
 
-const store = persisted('tms:name', sanitizeTyping);
+const store = persisted('mt:name', sanitizeTyping);
 const serverSnapshot = () => '';
 
 /**
- * Shared, persisted kid name (localStorage 'tms:name'). Every component using
+ * Shared, persisted kid name (localStorage 'mt:name'). Every component using
  * it updates live, across components and tabs. SSR/hydration render DEFAULT_NAME.
  * - `name`: display name (cleaned), or DEFAULT_NAME when unset.
  * - `isDefault`: true when nobody has typed a name (render "THEIR" etc.).

@@ -1,7 +1,7 @@
 import { Star } from "@/components/Sticker";
 
 /**
- * What The Mitzvah Studio is, for a parent landing cold: an intro, three cards and
+ * What Member Threads is, for a parent landing cold: an intro, three cards and
  * a closing line, in the owner's words. Sits after the chapter (the hoodie builder)
  * and shares the header/hero container so its left edge lines up with the logo.
  */
@@ -34,21 +34,21 @@ const INTRO = [
 export default function Intro() {
   return (
     <section
-      aria-label="What The Mitzvah Studio is"
+      aria-label="What Member Threads is"
       className="bg-paper pt-12 text-ink sm:pt-12"
     >
       <div className="mx-auto w-full max-w-[1536px] px-5 sm:px-8 lg:px-14">
         <div className="grid gap-5 md:grid-cols-12 md:items-end md:gap-10">
           <div className="md:col-span-6">
             <p className="font-sans text-[0.8125rem] font-medium uppercase tracking-[0.18em] text-uv">
-              The Mitzvah Studio
+              Member Threads
             </p>
             <h2 className="caps mt-3 text-[clamp(2.1rem,4.4vw,3.75rem)] leading-[0.93]">
               Fully custom apparel for bar &amp; bat mitzvahs.
             </h2>
           </div>
           <p className="text-lead text-ink/75 md:col-span-6 md:pb-1">
-            The Mitzvah Studio creates fully custom apparel for bar and bat
+            Member Threads creates fully custom apparel for bar and bat
             mitzvahs. We guide you through the possibilities and handle
             everything from design to delivery.
           </p>

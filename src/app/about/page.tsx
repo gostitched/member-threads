@@ -6,7 +6,7 @@ import { CONTACT } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Studio',
-  description: 'How The Mitzvah Studio started, who makes the collections, and how we work with planners.',
+  description: 'How Member Threads started, who makes the collections, and how we work with planners.',
 };
 
 /**

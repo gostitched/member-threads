@@ -21,7 +21,7 @@ export default function Receipt({
     <div className={`receipt relative w-full max-w-[21rem] bg-white font-mono text-ink ${className}`} style={style}>
       <div className="px-5 pb-6 pt-5 text-[11px] uppercase leading-[1.5] tracking-[0.06em]">
         <div className="flex items-baseline justify-between">
-          <span className="font-bold tracking-[0.14em]">The Mitzvah Studio</span>
+          <span className="font-bold tracking-[0.14em]">Member Threads</span>
           <span className="text-ink/50">Ticket Nº 0065</span>
         </div>
         <p className="text-ink/50">Studio order · Qty 1</p>

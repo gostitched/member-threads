@@ -58,7 +58,7 @@ export function ShareButton({ w, tone = 'ink', className = '' }: { w: WorkItem; 
 
   const share = async () => {
     const url = `${window.location.origin}/work/${w.slug}`;
-    const text = `${w.title}. ${pieces(w) ? `${pieces(w)} pieces, ` : ''}designed by The Mitzvah Studio.`;
+    const text = `${w.title}. ${pieces(w) ? `${pieces(w)} pieces, ` : ''}designed by Member Threads.`;
     if (typeof navigator.share === 'function') {
       try {
         await navigator.share({ title: w.title, text, url });

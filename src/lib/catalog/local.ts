@@ -1,5 +1,5 @@
 /**
- * The Mitzvah Studio's pieces, held here rather than in the dashboard.
+ * Member Threads's pieces, held here rather than in the dashboard.
  *
  * The Studio sells collections, not SKUs: every piece below is a starting point a
  * designer builds on (fabric, color, fit, decoration), and every price is a
@@ -58,7 +58,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'heavyweight-hoodie',
     name: 'Heavyweight Hoodie',
-    styleNumber: 'TMS-01',
+    styleNumber: 'MT-01',
     category: 'Hoodies & crewnecks',
     isFeatured: true,
     sticker: "The one they'll actually wear",
@@ -76,7 +76,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'pajama-pants',
     name: 'Pajama Pants',
-    styleNumber: 'TMS-02',
+    styleNumber: 'MT-02',
     category: 'Bottoms',
     isFeatured: true,
     sticker: 'After-party approved',
@@ -94,7 +94,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'racing-jersey',
     name: 'Racing Jersey',
-    styleNumber: 'TMS-03',
+    styleNumber: 'MT-03',
     category: 'Jerseys',
     isFeatured: true,
     sticker: 'Pick your number',
@@ -114,7 +114,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'sweatpants',
     name: 'Sweatpants',
-    styleNumber: 'TMS-04',
+    styleNumber: 'MT-04',
     category: 'Bottoms',
     sticker: 'Matches the hoodie',
     description:
@@ -130,7 +130,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'heavyweight-tee',
     name: 'Heavyweight Tee',
-    styleNumber: 'TMS-05',
+    styleNumber: 'MT-05',
     category: 'Tees & tanks',
     description:
       'A boxy, heavyweight cotton tee with a thick rib neck. Vintage-wash on request, so it feels like it has been in their closet for years.',
@@ -145,7 +145,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'baby-tee',
     name: 'Baby Tee',
-    styleNumber: 'TMS-06',
+    styleNumber: 'MT-06',
     category: 'Tees & tanks',
     sticker: 'Friends section',
     description:
@@ -161,7 +161,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'dance-floor-hat',
     name: 'Dance-Floor Hat',
-    styleNumber: 'TMS-07',
+    styleNumber: 'MT-07',
     category: 'Hats',
     sticker: 'Rope brim',
     description:
@@ -181,7 +181,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'heavyweight-crewneck',
     name: 'Heavyweight Crewneck',
-    styleNumber: 'TMS-08',
+    styleNumber: 'MT-08',
     category: 'Hoodies & crewnecks',
     description:
       'Vintage country-club crewneck in heavyweight fleece, with a varsity rib collar and a chenille crest on the chest.',
@@ -195,7 +195,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'varsity-jacket',
     name: 'Varsity Jacket',
-    styleNumber: 'TMS-09',
+    styleNumber: 'MT-09',
     category: 'Hoodies & crewnecks',
     sticker: 'Family only',
     description:
@@ -212,7 +212,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'foldover-short',
     name: 'Foldover Short',
-    styleNumber: 'TMS-10',
+    styleNumber: 'MT-10',
     category: 'Bottoms',
     description:
       'A soft foldover-waist short, made to go with the baby tee as a set. Dyed to the same Pantone so the two read as one look.',
@@ -226,7 +226,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'ribbed-tank',
     name: 'Ribbed Tank',
-    styleNumber: 'TMS-11',
+    styleNumber: 'MT-11',
     category: 'Tees & tanks',
     description: 'A fitted rib tank for the pool day or the morning after, with a tiny embroidered mark at the neckline.',
     fabric: 'Cotton rib',
@@ -239,7 +239,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'matching-set',
     name: 'Matching Set',
-    styleNumber: 'TMS-12',
+    styleNumber: 'MT-12',
     category: 'Sets',
     sticker: 'For the best friends',
     description:
@@ -253,7 +253,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'canvas-tote',
     name: 'Canvas Tote',
-    styleNumber: 'TMS-13',
+    styleNumber: 'MT-13',
     category: 'Bags & packaging',
     description:
       'Heavy canvas, long handles, the collection mark embroidered or printed on the front. Carries the rest of the pieces home.',
@@ -269,7 +269,7 @@ const PRODUCTS: CatalogProduct[] = [
   piece({
     slug: 'custom-packaging',
     name: 'Custom Packaging',
-    styleNumber: 'TMS-14',
+    styleNumber: 'MT-14',
     category: 'Bags & packaging',
     sticker: 'Unboxing included',
     description:
@@ -287,6 +287,6 @@ const PRODUCTS: CatalogProduct[] = [
 
 export const LOCAL_CATALOG: Catalog = {
   source: 'live',
-  brand: { slug: 'the-mitzvah-studio', displayName: 'The Mitzvah Studio' },
+  brand: { slug: 'member-threads', displayName: 'Member Threads' },
   products: PRODUCTS,
 };

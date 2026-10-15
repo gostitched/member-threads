@@ -50,7 +50,7 @@ export default function SiteHeader() {
           href="/"
           className="flex min-h-11 items-center justify-self-start"
           onClick={() => setOpen(false)}
-          aria-label="The Mitzvah Studio, home"
+          aria-label="Member Threads, home"
         >
           <Wordmark />
         </Link>
@@ -134,11 +134,11 @@ export function Arrow({ className = 'h-4 w-5' }: { className?: string }) {
 }
 
 /**
- * The primary logo (`public/tms-logo.svg`, the brand file as supplied). The
+ * The primary logo (`public/mt-logo.svg`, the brand file as supplied). The
  * link around it carries the name, so the image itself is decorative.
  */
 export function Wordmark({ size = 'header' }: { size?: 'header' | 'footer' }) {
   const h = size === 'header' ? 'h-11 sm:h-[52px] lg:h-14' : 'h-16 sm:h-20';
   // eslint-disable-next-line @next/next/no-img-element -- a static SVG; next/image adds nothing here
-  return <img src="/tms-logo.svg" alt="" width={460} height={180} className={`block w-auto ${h}`} />;
+  return <img src="/mt-logo.svg" alt="" width={352} height={144} className={`block w-auto ${h}`} />;
 }

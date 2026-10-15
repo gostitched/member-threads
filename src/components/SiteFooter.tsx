@@ -12,7 +12,7 @@ export default function SiteFooter() {
       <div className="shell">
         <div className="grid gap-10 pb-10 pt-14 sm:grid-cols-[2fr_1fr_1fr] sm:pt-16">
           <div>
-            <Link href="/" className="inline-flex" aria-label="The Mitzvah Studio, home">
+            <Link href="/" className="inline-flex" aria-label="Member Threads, home">
               <Wordmark size="footer" />
             </Link>
             <a
@@ -35,7 +35,7 @@ export default function SiteFooter() {
         </div>
 
         <p className="border-t border-rule py-5 text-[0.8125rem] text-muted">
-          © {new Date().getFullYear()} The Mitzvah Studio · A Stitched brand · Jewish owned
+          © {new Date().getFullYear()} Member Threads · A Stitched brand · Jewish owned
         </p>
       </div>
     </footer>

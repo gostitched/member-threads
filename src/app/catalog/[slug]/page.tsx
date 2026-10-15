@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // The first paragraph only: product descriptions run to two.
     description:
       product.description?.split(/\n\s*\n/)[0] ??
-      `${product.name}, designed into a custom Bar or Bat Mitzvah collection by The Mitzvah Studio. Design included.`,
+      `${product.name}, designed into a custom Bar or Bat Mitzvah collection by Member Threads. Design included.`,
     ...(image ? { openGraph: { images: [{ url: image.url }] } } : {}),
   };
 }

@@ -176,9 +176,9 @@ export const isOn = (look: Look, id: Custom) => (id === 'color' ? look.colorSet 
  * per-piece prices: the hoodie is priced inside the collection.
  */
 export const SLIP = {
-  brand: 'The Mitzvah Studio',
+  brand: 'Member Threads',
   title: '{name’s} hoodie / tech pack',
-  no: 'Style TMS-H01',
+  no: 'Style MT-H01',
   qty: '420 GSM',
   item: 'Item',
   upcharge: 'Upcharge',
@@ -186,7 +186,7 @@ export const SLIP = {
   totalLabel: 'Total upcharge',
   total: '$0',
   note: 'Every upgrade, design and development included',
-  code: 'TMS 0516 2026',
+  code: 'MT 0516 2026',
 };
 
 // ── Act 02 ────────────────────────────────────────────────────────────────────

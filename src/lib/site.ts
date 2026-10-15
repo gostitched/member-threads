@@ -1,7 +1,7 @@
 /**
- * Site content for The Mitzvah Studio.
+ * Site content for Member Threads.
  *
- * The Mitzvah Studio designs and makes complete apparel collections for Bar,
+ * Member Threads designs and makes complete apparel collections for Bar,
  * Bat and B'nai Mitzvahs: heavyweight hoodies, sweatpants, pajama pants, baby
  * tees, jerseys, hats, sets, packaging. Stitched is the engine underneath
  * (production, sourcing, QC, logistics) and is credited once per page at most.
@@ -12,12 +12,12 @@
  */
 
 /** Public origin of this site. [CONFIRM] domain. */
-export const SITE_URL = 'https://themitzvahstudio.com';
+export const SITE_URL = 'https://memberthreads.com';
 
 /** Origin of the customer app that serves the intake form (Stitched's pipeline). */
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.gostitched.com';
 /**
- * The Mitzvah Studio's embed key (Stitched dashboard → Embed sites). Public by design:
+ * Member Threads's embed key (Stitched dashboard → Embed sites). Public by design:
  * it tells the dashboard which site is asking, so leads land under this brand and the
  * form only frames on this site's registered origins.
  */
@@ -25,7 +25,7 @@ export const EMBED_KEY = process.env.NEXT_PUBLIC_EMBED_KEY || 'emb_live_NGvIwbuo
 export const REQUEST_FORM_URL = `${APP_URL}/embed/v1/form?embed=true&key=${encodeURIComponent(EMBED_KEY)}`;
 
 /** [CONFIRM] inbox. */
-export const CONTACT = { email: 'hello@themitzvahstudio.com' };
+export const CONTACT = { email: 'hello@memberthreads.com' };
 
 /**
  * Background footage for the methods section.

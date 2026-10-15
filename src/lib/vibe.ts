@@ -55,11 +55,11 @@ export function vibeVars(v: Vibe): CSSProperties {
   } as CSSProperties;
 }
 
-const store = persisted('tms:vibe', (raw) => (isVibeId(raw) ? raw : ''));
+const store = persisted('mt:vibe', (raw) => (isVibeId(raw) ? raw : ''));
 const serverSnapshot = () => '';
 
 /**
- * Shared, persisted vibe (localStorage 'tms:vibe'), live across components and
+ * Shared, persisted vibe (localStorage 'mt:vibe'), live across components and
  * tabs. SSR/hydration render Miami. Client hook.
  * @example const { vibe, set } = useVibe(); set('racing');
  */

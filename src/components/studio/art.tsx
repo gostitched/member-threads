@@ -110,7 +110,7 @@ export const ART: Record<ArtId, { tall?: boolean; render: (p: ArtPaint) => React
         <circle cx="50" cy="50" r="44" fill="none" stroke={alt} strokeWidth="3.6" strokeDasharray="0.9 1.1" />
         <circle cx="50" cy="50" r="23" fill="none" stroke={alt} strokeWidth="0.8" />
         <text fontSize="8.4" letterSpacing="2.2" style={sans} fill={alt}>
-          <textPath href={`#ring-${uid}`}>MITZVAH STUDIO • MADE TO ORDER •</textPath>
+          <textPath href={`#ring-${uid}`}>MEMBER THREADS • MADE TO ORDER •</textPath>
         </text>
         <path d="M50 36L53.6 45.4L63.6 45.9L55.8 52.2L58.4 61.9L50 56.4L41.6 61.9L44.2 52.2L36.4 45.9L46.4 45.4Z" fill={alt} />
       </g>
@@ -228,7 +228,7 @@ export const ART: Record<ArtId, { tall?: boolean; render: (p: ArtPaint) => React
         x="50" y="50" textAnchor="middle" dominantBaseline="central" fontSize="9.6" letterSpacing="2.4"
         transform="rotate(90 50 50)" style={sans} fill={fill}
       >
-        THE MITZVAH STUDIO
+        MEMBER THREADS
       </text>
     ),
   },

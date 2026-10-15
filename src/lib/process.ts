@@ -25,8 +25,8 @@ export const PROCESS = {
 
   /** The production ticket in stage 03. Illustrative, but keep it believable. */
   ticket: {
-    brand: 'The Mitzvah Studio',
-    project: 'TMS-0516',
+    brand: 'Member Threads',
+    project: 'MT-0516',
     style: 'Heavyweight hoodie',
     qty: '86 pcs',
     total: '86',

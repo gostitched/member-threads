@@ -1,6 +1,6 @@
-# The Mitzvah Studio: marketing site
+# Member Threads: marketing site
 
-The public site for The Mitzvah Studio, custom apparel collections for Bar, Bat
+The public site for Member Threads, custom apparel collections for Bar, Bat
 and B'nai Mitzvahs. A Stitched brand: the Studio is the customer-facing creative
 side; Stitched's design and production team makes every piece.
 
@@ -39,21 +39,20 @@ Type is loaded with `next/font/google` in `src/app/layout.tsx`: Rubik 700/900
 (display caps, wordmark, numerals), Jost (body, nav, buttons, the "turn" lines
 in medium) and DM Mono (labels, form small print).
 
-Logos: on the site the wordmark is set live (`Wordmark` in
-`src/components/SiteHeader.tsx`: THE / MITZVAH / STUDIO ★ stacked, "by
-Stitched" under it). `public/tms-logo.svg` (stacked wordmark),
-`public/tms-mark.svg` and `public/favicon.svg` (navy rounded square with a
-paper star) are the off-site files.
+Logos: `public/mt-logo.svg` (primary script wordmark) is rendered by `Wordmark`
+in `src/components/SiteHeader.tsx` for the header and footer. `public/mt-mark.svg`
+is the MT lettermark, and `public/favicon.svg` is that lettermark on a paper tile.
+Both brand files are dark green (`#133327`).
 
 ### Hype layer (name, colorway, motion)
 
 - **Name**: typed into the home hero (`01 / NAME`), stored in `localStorage`
-  (`tms:name`) via `useKidName()` in `src/lib/name.ts`, and echoed on the hero
+  (`mt:name`) via `useKidName()` in `src/lib/name.ts`, and echoed on the hero
   headline and swing tag, the header readout and CTA, the chapter and finale,
   the /work reserved frame, the footer woven label and the /quote headline.
   Server render and hydration always use the default, so there are no
   hydration mismatches.
-- **Colorway**: five palettes in `src/lib/vibe.ts` (`tms:vibe`; ids frozen,
+- **Colorway**: five palettes in `src/lib/vibe.ts` (`mt:vibe`; ids frozen,
   shown as Colorways 01–05), applied as CSS variables (`--v-ground` etc.) on the
   hero with a 400ms cross-fade; the header reads it while it sits transparent
   over the hero, then turns ink on scroll.
@@ -122,8 +121,8 @@ Copy is kept out of the components:
 Every item below was written from the brand brief and is marked `[CONFIRM]`
 in the code. Check each one; anything left as-is ships as written.
 
-- [ ] **Domain**: `SITE_URL` / `metadataBase` is `https://themitzvahstudio.com` (`src/lib/site.ts`).
-- [ ] **Inbox**: `hello@themitzvahstudio.com` exists and is monitored (`CONTACT` in `src/lib/site.ts`).
+- [ ] **Domain**: `SITE_URL` / `metadataBase` is `https://memberthreads.com` (`src/lib/site.ts`).
+- [ ] **Inbox**: `hello@memberthreads.com` exists and is monitored (`CONTACT` in `src/lib/site.ts`).
 - [ ] **FAQ 01 pricing**: "Most land $5–10k" and the starting points (hoodies from $65, sweatpants ~$40, PJ pants ~$35, tees ~$25, jerseys ~$35, hats ~$25).
 - [ ] **FAQ 02 timing**: 12 weeks before the event as the recommended start.
 - [ ] **FAQ 03 minimum**: collections start around 50 guest pieces, with smaller runs inside.
@@ -137,4 +136,4 @@ in the code. Check each one; anything left as-is ships as written.
 - [ ] **Illustration specs**: Pantone codes and measurements in the Sophie drawings (`public/chapter/sophie-*.svg`, PANTONE 2767 C, 24" chest, 3" patch, etc.) and the GSM on catalog pieces other than the 420 GSM hoodie are illustrative.
 - [ ] **Concept guest counts**: Jake 64, Levi & Noa 110, Ella 58 are invented (only Sophie's 80 is from the brief).
 - [ ] **Intake form**: `/quote` frames Stitched's `/request` form; confirm the form's own copy reads right for Mitzvah families, or point `NEXT_PUBLIC_APP_URL` at a Studio-branded version.
-- [ ] **Logo**: `public/tms-mark.svg` / `public/tms-logo.svg` are first-pass marks drawn for this launch. Swap in final artwork if a designer produces one.
+- [ ] **Logo**: `public/mt-mark.svg` / `public/mt-logo.svg` are first-pass marks drawn for this launch. Swap in final artwork if a designer produces one.

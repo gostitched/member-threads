@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * The Mitzvah Studio theme: "Every kid gets a drop."
+ * Member Threads theme: "Every kid gets a drop."
  *
  * Bold flat color fields, one per section, with ink or paper type. Hot pink
  * (`electric`) is the signature. pop / lime are grounds and chip fills only,

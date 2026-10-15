@@ -2,7 +2,7 @@
  * Reading the catalog. Server-side only.
  *
  * ── WHERE IT COMES FROM ──────────────────────────────────────────────────────
- * The Mitzvah Studio's pieces live in `local.ts` and are served from there by
+ * Member Threads's pieces live in `local.ts` and are served from there by
  * default. Set `CATALOG_SOURCE=live` to read the dashboard instead; everything
  * below this note describes that path, which is kept intact so switching is one
  * environment variable, not a rewrite.

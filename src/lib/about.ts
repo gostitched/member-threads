@@ -15,7 +15,7 @@ export const FOUNDER = {
 
 export const ORIGIN = {
   intro:
-    'The Mitzvah Studio started inside Stitched, a custom apparel studio that designs and makes clothes from the fabric up. Families and planners kept asking for Mitzvah apparel that didn’t look like a giveaway, so we gave it a studio of its own.',
+    'Member Threads started inside Stitched, a custom apparel studio that designs and makes clothes from the fabric up. Families and planners kept asking for Mitzvah apparel that didn’t look like a giveaway, so we gave it a studio of its own.',
   story: [
     'Ethan started Stitched in 2023, making apparel for his college clubs. Instead of picking blanks from a catalog, he worked directly with manufacturers to build garments from scratch: the fabric, the fit, the color, the label inside the neck.',
     'Then the Bar and Bat Mitzvah requests started. Not giveaways, but pieces that matched the rest of a very designed weekend, the kind a 13-year-old would actually keep wearing. What was out there was mostly wholesale hoodies with a logo pressed on.',
