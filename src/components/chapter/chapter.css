@@ -36,7 +36,10 @@
   pointer-events: none;
 }
 .chapter-sheet-label { box-shadow: 0 1px 0 rgba(19, 51, 39, 0.08); }
-.chapter-woven-name { display: block; max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1; }
+.chapter-sheet-label { white-space: normal; }
+/* Long names wrap onto a second line rather than truncating. */
+.chapter-woven-name { display: block; max-width: 24ch; line-height: 1.3; overflow-wrap: anywhere; }
+.chapter-necklabel .chapter-woven-name { max-width: 20ch; }
 
 /* Arrival: the sheet wipes up, the garment settles, leaders draw, chips land. */
 .chapter-board .chapter-sheet,
@@ -134,7 +137,7 @@
 }
 .chapter-chip[data-on]::after { opacity: 0.45; transform: none; }
 .chapter-chip-no {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
@@ -142,7 +145,7 @@
 }
 .chapter-chip-word { font-size: 14px; }
 .chapter-chip-sub {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -158,14 +161,28 @@
 .chapter-added {
   position: absolute;
   top: 50%;
-  margin-top: -0.95em;
+  margin-top: -0.85rem;
+  padding: 0.4rem 0.5rem;
+  background: theme('colors.paper');
+  color: theme('colors.ink');
+  box-shadow: inset 0 0 0 1px theme('colors.ink');
   pointer-events: none;
-  font-size: 11px;
+  white-space: nowrap;
   animation:
     slap 240ms var(--ease-out) both,
     chapter-lift 420ms var(--ease-out) 1100ms both;
 }
 @keyframes chapter-lift { to { opacity: 0; translate: 0 -10px; } }
+
+/* Phone/tablet stage: sticky under the header, the garment sized by height so
+   the controls always have room beneath it. */
+.chapter-stage-m .chapter-sheet {
+  overflow: visible;
+  border-bottom: 1px solid var(--rule-c);
+  padding: 0.75rem 0 1.25rem;
+}
+.chapter-stage-m .chapter-linen { overflow: hidden; }
+.chapter-stage-box { width: min(40svh, 86vw, 26rem); aspect-ratio: 1; }
 
 /* Phone pins: small numbered squares on the garment. */
 .chapter-pin {
@@ -173,16 +190,16 @@
   z-index: 5;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   translate: -50% -50%;
   background: theme('colors.paper');
   color: theme('colors.ink');
   box-shadow: inset 0 0 0 1px theme('colors.ink / 55%');
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   line-height: 1;
   pointer-events: none;
   transition: background-color var(--dur-quick) ease, color var(--dur-quick) ease, scale var(--dur-base) var(--ease-out);
@@ -289,7 +306,7 @@
   border-radius: 9999px;
   box-shadow: inset 0 0 0 1px theme('colors.ink / 25%');
 }
-.chapter-necklabel { max-width: 62%; font-size: 10.5px; padding: 0.75em 1.1em 0.7em; }
+.chapter-necklabel { max-width: 62%; font-size: 12px; white-space: normal; text-align: right; padding: 0.75em 1.1em 0.7em; }
 .chapter-slip-lines { padding-bottom: 0.25rem; }
 .chapter-slip-row {
   display: flex;
@@ -387,37 +404,19 @@
 .chapter-finale[data-in='false'] .chapter-finale-stitch { transform: scaleX(0); }
 .chapter-finale[data-in='false'] .chapter-finale-after { opacity: 0; translate: 0 16px; }
 
-/* The photo bleeds off the right edge (mobile: both edges, full width). */
-.chapter-finale-photo { margin-inline: -20px; margin-bottom: calc(-1 * var(--sec-lg)); }
-@media (min-width: 640px) { .chapter-finale-photo { margin-inline: -32px; } }
-@media (min-width: 1024px) {
-  .chapter-finale-photo {
-    margin-left: 0;
-    margin-right: calc(-1 * max(56px, (100vw - 1536px) / 2 + 56px));
-  }
-}
-
-/* The hang tag, on a string from the band's top edge, across the photo's edge.
-   Phone: it hangs from the photo's top edge instead. */
+/* The hang tag, on a string from the band's top edge. */
 .chapter-tag-hang {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  left: 0;
-  width: min(17.5rem, 74%);
-  padding-top: 3.5rem;
+  position: relative;
+  width: min(18rem, 80%);
 }
+@media (min-width: 1024px) { .chapter-tag-hang { width: 19.5rem; } }
 .chapter-tag-string {
   position: absolute;
   left: 50%;
-  top: 0;
+  bottom: calc(100% - 26px);
   width: 1px;
-  height: calc(3.5rem + 26px);
+  height: 200vh;
   background: theme('colors.ink / 55%');
-}
-@media (min-width: 1024px) {
-  .chapter-tag-hang { top: 14%; left: -7.5rem; width: 16.5rem; padding-top: 0; }
-  .chapter-tag-string { top: auto; bottom: calc(100% - 26px); height: 200vh; }
 }
 .chapter-tag-swing { transform-origin: 50% 26px; transition: rotate var(--dur-slow) var(--ease-out) 200ms, translate var(--dur-slow) var(--ease-out) 200ms, opacity var(--dur-base) ease 200ms; rotate: -2deg; }
 .chapter-finale[data-in='false'] .chapter-tag-swing { rotate: 9deg; translate: 0 -32px; opacity: 0; }
@@ -501,4 +500,14 @@
   .chapter-board .chapter-sheet, .chapter-garment, .chapter-callout-in, .chapter-leader, .chapter-lead-solid,
   .chapter-piece, .chapter-piece-art, .chapter-finale-line, .chapter-finale-stitch, .chapter-finale-after,
   .chapter-tag-swing, .chapter-chip, .chapter-swatch-dot, .chapter-pin { transition: none !important; }
+}
+
+/* Secondary actions: sentence case, Archivo 500, re-sewing underline. */
+.chapter-link {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
 }

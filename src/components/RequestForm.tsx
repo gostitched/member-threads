@@ -10,6 +10,8 @@ const MAX_HEIGHT = 25000;
 /** Before the form reports its height: about one screen of fields, not a page of blank. */
 const DEFAULT_HEIGHT = 1200;
 const QUIET_AFTER_MS = 9000;
+/** The plate's height while the form loads: calm, not a page of blank. */
+const LOADING_HEIGHT = 560;
 /** Without a handshake the frame scrolls itself; one screen is enough. */
 const QUIET_HEIGHT = 760;
 const PING_INTERVAL_MS = 2000;
@@ -100,8 +102,8 @@ export default function RequestForm() {
   if (submitted) {
     return (
       <div className="band-green px-6 py-14 sm:px-12 sm:py-20" role="status">
-        <span className="woven woven-beige">Request received</span>
-        <h2 className="t-h1 mt-8">
+        <p className="t-eyebrow text-beige">Request received</p>
+        <h2 className="t-h1 mt-6">
           Your designer is <em>next</em>.
         </h2>
         <p className="t-script mt-6 text-[clamp(2.25rem,4vw,3.25rem)] text-beige">Welcome to the club.</p>
@@ -120,7 +122,7 @@ export default function RequestForm() {
         <p className="t-spec fg-muted">Member Threads × Stitched</p>
       </div>
 
-      <div className="relative">
+      <div className="relative overflow-hidden" style={status === 'loading' ? { maxHeight: LOADING_HEIGHT } : undefined}>
         <iframe
           ref={frameRef}
           src={REQUEST_FORM_URL}
@@ -131,24 +133,17 @@ export default function RequestForm() {
           style={status === 'quiet' ? { height: QUIET_HEIGHT } : { height, minHeight: MIN_HEIGHT }}
         />
 
-        {/* Loading: a stitch sews across the plate until the frame lands. */}
+        {/* Loading: a stitch sews across while the form is fetched. No fake fields. */}
         <div
           aria-hidden={status !== 'loading'}
           data-done={status !== 'loading'}
-          className="mt-plate-loading absolute inset-0 flex flex-col gap-6 bg-cream px-5 pt-10 sm:px-8 sm:pt-14"
+          className="mt-plate-loading absolute inset-0 flex flex-col items-start justify-center gap-6 bg-cream px-5 sm:px-12"
         >
-          <p className="t-spec fg-muted" role="status">
+          <p className="t-spec" role="status">
             Loading the request form
           </p>
-          <span className="mt-sewing stitch-rule w-full" />
-          <div className="space-y-10 pt-6" aria-hidden>
-            {['Organization', 'Your name', 'Email', 'Pieces and quantities'].map((l) => (
-              <div key={l}>
-                <p className="field-label">{l}</p>
-                <span className="block h-px w-full bg-ink/20" />
-              </div>
-            ))}
-          </div>
+          <span className="mt-sewing stitch-rule w-full max-w-[28rem]" />
+          <p className="t-body max-w-[40ch] text-ink/90">This usually takes a few seconds.</p>
         </div>
 
         {status === 'quiet' && (

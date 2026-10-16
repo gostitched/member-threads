@@ -10,7 +10,7 @@
  *
  * Rules from the business, not taste:
  *  - Sell the collection, never the shirt: no per-piece prices on this table.
- *  - Name the craft (420 GSM fleece, chenille, embroidery, puff print, 2×2 rib).
+ *  - Name the craft (400 GSM fleece, chenille, embroidery, puff print, 2×2 rib).
  *  - Customization never costs extra; design help is included.
  *  - Harbor Run Club is a sample organization; nothing here claims a real client.
  */
@@ -58,7 +58,7 @@ export const initial = (name: string) => (name.trim().match(/\p{L}|\p{N}/u)?.[0]
 // ── Act 01 ────────────────────────────────────────────────────────────────────
 
 export const ACT1 = {
-  eyebrow: 'The house hoodie · 420 GSM',
+  eyebrow: 'The house hoodie · 400 GSM',
   /** Sentence case; the bracketed word is set in the serif italic. */
   title: ['Not a ', 'blank', '.'] as const,
   /** The lead: what the hoodie is for. */
@@ -82,7 +82,7 @@ export const ACT1 = {
 
 /**
  * The details a visitor can add to the hoodie. The cut is fixed as the house
- * piece: oversized, boxy, 420 GSM fleece. It starts in the site's colorway
+ * piece: oversized, boxy, 400 GSM fleece. It starts in the site's colorway
  * with the organization's wordmark on the chest (tonal rib, self-lined hood, no
  * cords). Every accent comes from the colorway, so no combination can clash.
  */
@@ -117,7 +117,7 @@ export const CALLOUTS: Callout[] = [
   { id: 'construction', word: 'Contrast stitch', add: 'Every seam', line: 'Contrast topstitch, {accent}', at: [478, 812], side: 'left', rides: 'side' },
   { id: 'patch', word: 'Chenille patch', add: 'On the sleeve', line: 'Chenille “{initial}” patch, sleeve', at: [330, 1090], side: 'left', pin: [440, 1190], rides: 'side' },
   { id: 'color', word: 'Colorway', add: 'Tap to change', line: 'Body / {color} fleece', at: [330, 1250], side: 'left', pin: [760, 1240], rides: 'side' },
-  { id: 'rib', word: 'Contrast rib', add: 'Hem and cuffs', line: '2×2 rib, {liner}, hem + cuffs', at: [300, 1690], side: 'left', rides: 'side' },
+  { id: 'rib', word: 'Contrast rib', add: 'Hem and cuffs', line: '2×2 rib, {liner}, hem + cuffs', at: [300, 1690], side: 'left', pin: [660, 1690], rides: 'side' },
   { id: 'liner', word: 'Hood liner', add: 'Inside the hood', line: '{liner} jersey hood liner', at: [1120, 300], side: 'right', pin: [1100, 280] },
   { id: 'trims', word: 'Cords + aglets', add: 'Flat cord, metal tips', line: 'Flat drawcord, metal aglets', at: [1034, 740], side: 'right', pin: [1034, 700] },
   { id: 'embroidery', word: 'Wordmark', add: 'Script, embroidered', line: '“{name}” script, embroidered, chest', at: [1250, 930], side: 'right', pin: [1240, 900] },
@@ -228,7 +228,7 @@ export const SLIP = {
   title: '{name}',
   no: 'MT-HD01',
   specs: [
-    ['Body', '420 GSM fleece'],
+    ['Body', '400 GSM fleece'],
     ['Fit', 'Oversized, boxy'],
     ['Colorway', '{color}'],
     ['Minimum', '36 pcs'],
@@ -296,6 +296,6 @@ export const FINALE = {
   madeFor: 'Made for',
   tag: { style: 'The house hoodie', min: 'From 36 pieces' },
   body: 'Start from the catalog, make every detail yours, and get one clear price. From 36 pieces per style.',
-  primary: { label: 'Start {name’s} collection', href: '/quote' },
+  primary: { label: 'Start a collection', href: '/quote' },
   secondary: { label: 'Browse the catalog', href: '/catalog' },
 };

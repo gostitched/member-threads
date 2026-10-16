@@ -7,7 +7,7 @@
 /* The duotone layer laid over a graded photo. At rest the wall is green and cream;
    hover or focus releases the tile into colour. Phones show full grade. */
 .wk-duo { transition: opacity var(--dur-base) var(--ease-inout); }
-@media (max-width: 1023px) { .wk-duo { display: none; } }
+@media (max-width: 1023px) { .wk-duo { display: none; } .wk-keep-duo .wk-duo { display: block; } }
 .wk-tile:hover .wk-duo,
 .wk-tile:focus-within .wk-duo,
 .wk-next-link:hover .wk-duo,
@@ -31,7 +31,6 @@
   .wk-pos-2 { grid-column: 2 / span 4; margin-top: 24%; }
   .wk-pos-3 { grid-column: 7 / span 5; }
   .wk-pos-4 { grid-column: 3 / span 4; margin-top: -54%; }
-  .wk-pos-5 { grid-column: 8 / span 5; margin-top: 14%; }
 }
 /* Tablet: alternate wide and inset. */
 @media (min-width: 640px) and (max-width: 1023px) {
@@ -88,27 +87,6 @@
 .wk-title svg { opacity: 0; transform: translateX(-6px); transition: opacity var(--dur-quick) ease, transform var(--dur-base) var(--ease-out); }
 .wk-tile:hover .wk-title svg,
 .wk-tile-link:focus-visible .wk-title svg { opacity: 1; transform: none; }
-
-/* The reserved slot: an empty frame, stitched round, waiting for a name. */
-.wk-reserved {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  aspect-ratio: 3 / 2;
-  padding: 28px;
-  background: theme('colors.cream');
-}
-.wk-reserved::after {
-  content: '';
-  position: absolute;
-  inset: 8px;
-  border: 1px dashed theme('colors.beige-deep');
-  pointer-events: none;
-  transition: inset var(--dur-base) var(--ease-out);
-}
-.wk-reserved:hover::after { inset: 12px; }
-@media (max-width: 639px) { .wk-reserved { aspect-ratio: 4 / 5; padding: 22px; } }
 
 /* ---- The dossier ----------------------------------------------------------- */
 
@@ -193,7 +171,7 @@
   background-size: 100% 3px;
   background-position: 0 100%;
 }
-.wk-name::placeholder { color: theme('colors.ink'); opacity: 0.4; }
+.wk-name::placeholder { color: theme('colors.ink'); opacity: 1; }
 .wk-name:focus { outline: none; }
 .wk-name:focus-visible { outline: 2px solid var(--focus); outline-offset: 6px; }
 
@@ -202,3 +180,8 @@
   .wk-tile:hover .wk-img, .wk-next-link:hover .wk-img { transform: none; }
   .wk-tile:hover .wk-flat > *, .wk-flatplate:hover > * { transform: none; }
 }
+
+/* In-focus photography (dossier and collection heroes): the house grade, pulled a
+   little further toward the palette so every collection's opening frame sits in the
+   same warm, quiet register whatever the source shot. */
+.wk-focus.grade img, .wk-tile .grade img, .wk-next-link .grade img { filter: saturate(0.5) contrast(1.1) sepia(0.22) brightness(0.95); }

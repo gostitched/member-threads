@@ -40,15 +40,17 @@ Brand-board fonts (Billion Dreams, Acumin, The Bold Font) are not licensed for w
 | `.t-block` | Archivo 900/125 caps | 24px | 43px (max 44) | 0.90 | −0.02em | Numerals, stats, roster numbers, short names. |
 | `.t-body` | Archivo 400 | 16px | 17px | 1.6 | 0 | Reading text. Max 62ch. |
 | `.t-small` | Archivo 400 | 14px | 14px | 1.5 | 0 | Secondary notes. |
-| `.t-eyebrow` | Archivo 600 caps | 11.5px | 11.5px | 14px | 0.18em | Section labels. |
+| `.t-eyebrow` | Archivo 600 caps | 12px | 12px | 15px | 0.18em | Section labels. |
 | `.t-spec` | Archivo 500 caps, tabular | 12px | 12px | 16px | 0.06em | Tech-pack lines, captions, prices, metadata. |
+
+**12px floor:** nothing on the site computes below 12px (eyebrows, `.label`, `.t-spec`, `.caption`, `.woven`, chip counts). Don't scale these down with utilities.
 | `.t-script` | Yellowtail | relative | relative | 1 | 0 | See rules. Rotated −5deg. |
 
 Rules:
 - **Headlines are sentences in the serif**, sentence case, with one italic word doing the emphasis ("Apparel your members *actually* want to wear."). No more all-caps headlines. The block face appears for numbers and names only, which is what makes it hit.
 - `h1–h3` default to the serif. Existing `.caps` (now Archivo 900/125) is legacy; replace `caps` headlines with `.t-display`/`.t-h*` as you rebuild each section.
 - **Script lives where it would be embroidered:** on garments, on hang tags, as a sign-off ("Welcome to the club."). Max one script moment per page, two to four words. Never in nav, buttons or body. Use `font-script`/`.t-script` (`font-serif` is the legacy name and still maps to the script).
-- Body copy is ink at 80–100%, never grey on beige. `text-muted` (#55625A) only for metadata.
+- Body copy is ink at 80–100%, never grey on beige. `text-muted` (#4A564F, ≥5.5:1 on paper and cream) only for metadata.
 - Eyebrows are optional. Use them when they carry information (No. 03 / Audiences), not as decoration on every section.
 
 ## 3. Colour
@@ -59,13 +61,14 @@ Rules:
 | `cream` | #EEE6D9 | Alternate ground (`.band-cream`), photo plates | ~12% |
 | `green` / `ink` | #133327 | All type on light; primary button; the clubhouse band (`.band-green`) | ~18% |
 | `green-deep` | #0D241B | Footer, button hover | footer only |
-| `beige` | #C4B19A | Thread: stitch rules, accents on dark, `.woven-beige` | ~3% |
+| `beige` | #C4B19A | A FILL: stitch rules, plates, `.woven-beige`, large numerals on green | ~3% |
+| `beige-deep` | #6A5A45 | Beige as TEXT on paper/cream (block numerals, small accents), ≥5.3:1 | |
 | `dusty` | #223041 | Second dark: focus rings, `.duo-dusty` photos, script on light grounds | ≤2% |
 | `rule` | #D3C8B6 | Hairlines on paper (`var(--rule-c)` adapts per band) | |
 | `alert` | #9B2C1F | Form errors only | |
 
 - One dark band per page plus the footer. Two adjacent dark sections never touch; paper always separates them.
-- Beige is never body type on light grounds (fails contrast). Beige on green: yes, for eyebrows, numerals, stitch.
+- Beige is a fill colour. On paper/cream, beige-coloured text uses `beige-deep`. On green, beige only for numerals ≥24px and stitch; small caps on dark bands (eyebrows, `.t-spec`, captions) are cream at 80% (`var(--fg-muted)`), which the band classes enforce.
 - Bands re-point contextual colours: inside `.band-green`/`.band-dusty`, `var(--fg-muted)`, `var(--rule-c)`, `.hairline`, `.stitch-rule`, focus rings and `.field` all adapt. Use `.fg-muted` rather than hard-coded opacities.
 - Legacy names (`electric*`, `uv*`, `pop*`, `blue`, `sky`, …) still resolve to board colours; don't use them in new code.
 
@@ -73,6 +76,7 @@ Rules:
 
 - Frame: `.shell` / `FRAME` (max 1536, side padding 20 / 32 / 56). Unchanged.
 - Grid: `.grid-12` = 4 / 8 / 12 columns, gutter 16 / 24 / 32 (`gap-gutter`). Compose asymmetrically: headline cols 1–8, lead 9–12 aligned to the headline's last baseline; images that break into the gutter or bleed off one edge (never both).
+- Sticky header: `html` has `scroll-padding-top` (88/100/108px) and inputs/anchors a matching `scroll-margin-top`, so anchors and focused fields clear the header. Don't add your own offsets.
 - Section rhythm: `.sec` (80→160px), `.sec-sm` (56→96), `.sec-lg` (112→224). Nothing else. Inside a section: eyebrow→headline 20px, headline→lead 24–32px, lead→CTA 40px, header block→content 64–96px.
 - Spacing scale: 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 160.
 - **Shape: square.** Radius is `var(--radius)` = 2px on buttons, fields, chips; 0 on photos and plates. The only round things: colour swatches, the punched hole in a hang tag, radio dots. Remove every `rounded-2xl/3xl/[24px]` card.
@@ -80,6 +84,8 @@ Rules:
 
 ## 5. Components
 
+- **Motif budget.** Max ONE hang tag per page. Woven labels only on photo corners and ID/roster numbers, max ~4 per viewport. Dashed stitch rules only as dividers that carry meaning (joining steps, splitting roster rows), never as decoration.
+- **CTA standard.** The only primary label is "Start a collection" (write it in sentence case; `.btn` sets it in tracked caps). One primary per viewport. Secondary actions are sentence-case `.link-arrow` links, never tracked caps or a second button style. No page-level CTA directly above the footer's CTA: end pages with a next-step link instead.
 - **Buttons:** `.btn-blue` (= `.btn-primary`, green), `.btn-white` (= `.btn-cream`, for dark bands), `.btn-outline` (hairline, current colour), modifier `.btn-sm`. Tracked caps 13px, 52/56px tall, square. Hover: a stitch appears inside the edge and the trailing arrow steps 4px. Always end primary CTAs with the arrow SVG. One primary per viewport.
 - **Links:** `.link-u` (re-sewing underline) for inline and nav; `.link-arrow` for "See all →".
 - **Labels:** `.t-eyebrow`; `.woven` (cream), `.woven-green`, `.woven-beige`, `.woven-dusty`, `.woven-lg`. `.stamp` is legacy and renders as `.woven-green`.
@@ -93,6 +99,7 @@ Rules:
 The photo editor will add files to `public/photos/` and a manifest at `src/lib/photos.ts` (src, alt, width, height, focal point, treatment). Build every image slot against that manifest, with `next/image`, real `sizes`, `object-position` from the focal point, and the current SVG art as fallback until a photo exists.
 
 - **Subjects:** real members in real places: a run club at 6am, a chapter on the quad steps, a team on an office rooftop, a fundraiser crowd. Groups of 3–8, mid-laugh, arms over shoulders: *belonging*. Details at macro: chenille texture, satin-stitch embroidery, a woven label, a rib cuff. Product: flat-lay or folded stacks on cream linen, shot top-down. No models isolated on white, no stock handshakes.
+- **Each photo asset is used once site-wide.** Exception: a collection's photos may appear both on its wall tile and on its own page.
 - **Frames:** use only `RATIO` from `src/lib/design.ts`: portrait 4:5 (people), tall 2:3 (hero, editorial), square (details), landscape 3:2 (places), cinema 21:9 (dossier heroes, desktop only; fall back to 4:5 on mobile). Crop tight: cut people at the shoulder or knee, never at joints; details fill the frame edge to edge.
 - **Treatment:** wrap in `.photo` plus one of: `.grade` (default: warm, slightly desaturated, lifted, film-like), `.duo` (green shadows/cream highlights) or `.duo-dusty`. Add `.grain` to all of them. Duo is for "at rest" (wall tiles, roster hover thumbs, anything with type over it); full grade is for "in focus". Hovering a duo tile can release it to `.grade`: that is the wall's core interaction.
 - **Type and photos:** a headline may overlap a photo edge by up to one line; a woven label may sit across the edge. Type on a photo only with `.duo` or `.scrim`. Captions go under the image in `.caption`, never on it.
@@ -104,7 +111,7 @@ Things are sewn, not animated: a pull, then a soft stop.
 
 - Easing: `ease-out` (arrivals), `ease-inout` (two-way state), `ease-stitch` (draws, wipes, underlines). Durations: `quick` 180ms (hover/press), `base` 420ms (state), `slow` 900ms (entrances). JS constants in `src/lib/design.ts` (`EASE`, `DUR`, `STAGGER` = 80ms).
 - Entrances play once. Headline lines rise 0.4em with an 80ms stagger (`.enter` with `--d`, or the existing `.clip` mask). Below-the-fold blocks use `<Reveal>`. Photos `.wipe-in`, stitch rules `.draw-in` (CSS scroll timelines; static elsewhere).
-- No scroll-jacking, no smooth-scroll libraries, no cursor followers except the roster thumbnail, no infinite motion except one marquee (if any) at ≥48s. Keep the existing `.slap` and hang-tag drop to the chapter.
+- No header scroll-progress stitch (removed from the vocabulary). No scroll-jacking, no smooth-scroll libraries, no cursor followers except the roster thumbnail, no infinite motion except one marquee (if any) at ≥48s. Keep the existing `.slap` and hang-tag drop to the chapter.
 - `prefers-reduced-motion: reduce`: everything renders in its final state, no transforms; already handled for every foundation class. Test it.
 
 ## 8. Page direction

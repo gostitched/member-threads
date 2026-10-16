@@ -25,12 +25,13 @@ const config: Config = {
         'green-deep': '#0D241B',
         cream: '#EEE6D9',
         beige: '#C4B19A',
-        'beige-deep': '#8C7A63',
+        // Beige as TEXT (numerals, small accents) on paper/cream: >=5.3:1. Beige itself is a fill.
+        'beige-deep': '#6A5A45',
         dusty: '#223041',
         // Roles.
         ink: '#133327',
         'ink-2': '#1F4A3A',
-        muted: '#55625A',
+        muted: '#4A564F', // >=5.5:1 on paper, cream and ash-2
         ash: '#EEE6D9',
         'ash-2': '#E4DACA',
         rule: '#D3C8B6',
@@ -54,7 +55,7 @@ const config: Config = {
         cherry: '#223041',
         hotpink: '#223041',
         grape: '#223041',
-        tangerine: '#8C7A63',
+        tangerine: '#6A5A45',
         cobalt: '#223041',
         forest: '#133327',
         blush: '#C4B19A',
@@ -78,7 +79,7 @@ const config: Config = {
       },
       fontSize: {
         // Legacy display sizes, retuned to the new scale (d0 = mast-ish, d1 = h1...).
-        label: ['11.5px', { lineHeight: '14px', letterSpacing: '0.16em' }],
+        label: ['12px', { lineHeight: '15px', letterSpacing: '0.16em' }],
         d0: ['clamp(3rem, 10vw, 9.5rem)', { lineHeight: '0.86', letterSpacing: '-0.03em' }],
         d1: ['clamp(2.5rem, 5.6vw, 5rem)', { lineHeight: '0.96', letterSpacing: '-0.025em' }],
         d2: ['clamp(1.875rem, 3.4vw, 3rem)', { lineHeight: '1.02', letterSpacing: '-0.02em' }],
@@ -93,7 +94,7 @@ const config: Config = {
         h3: ['clamp(1.375rem, 1.9vw, 1.75rem)', { lineHeight: '1.15', letterSpacing: '-0.012em' }],
         body: ['clamp(1rem, 0.96rem + 0.2vw, 1.0625rem)', { lineHeight: '1.6', letterSpacing: '0' }],
         small: ['0.875rem', { lineHeight: '1.5', letterSpacing: '0.002em' }],
-        eyebrow: ['11.5px', { lineHeight: '14px', letterSpacing: '0.18em' }],
+        eyebrow: ['12px', { lineHeight: '15px', letterSpacing: '0.18em' }],
         spec: ['12px', { lineHeight: '16px', letterSpacing: '0.06em' }],
       },
       maxWidth: { shell: '1536px', measure: '56ch', 'measure-tight': '38ch', 'measure-wide': '72ch' },

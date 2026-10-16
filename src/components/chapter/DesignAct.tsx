@@ -79,7 +79,7 @@ export default function DesignAct() {
               {b}
             </h2>
             <p className="t-body mt-7 max-w-[40ch] text-ink/85">{ACT3.body}</p>
-            <Link href={ACT3.link.href} className="link-arrow t-spec mt-8 text-ink">
+            <Link href={ACT3.link.href} className="link-arrow chapter-link mt-8 text-ink">
               <span className="link-u">{ACT3.link.label}</span>
               <Arrow />
             </Link>

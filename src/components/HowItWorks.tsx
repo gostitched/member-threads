@@ -7,7 +7,7 @@ import "@/components/home/home.css";
 
 /**
  * How it works. The heading, lead and CTA hold a sticky left column (cols
- * 1–4); four steps run down the right (cols 6–12), 96px apart, their numerals
+ * 1–5; a quiet link, not a second primary); four steps run down the right (cols 6–12), 96px apart, their numerals
  * joined by one running stitch that sews itself downward as the list scrolls
  * in. Each step: block numeral, title, one plain paragraph and a small detail
  * photograph. Anchor for the header's "How it works" link (/#how).
@@ -24,28 +24,28 @@ const STEPS: {
     n: "01",
     title: "Tell us about your group.",
     body: "Your logo, your colors, roughly how many people and when you need it. A brand guide or a few screenshots is plenty.",
-    photo: "craft-fabric-swatches",
-    caption: "Fabric, weight and color",
+    photo: "detail-swatch-book",
+    caption: "Cloth, color and weight",
   },
   {
     n: "02",
     title: "Design it with us.",
     body: "Pick styles from the catalog and your designer builds them into one collection: colors, fabric, artwork, embroidery and fit.",
-    photo: "craft-studio-cutting-table",
-    caption: "At the pattern table",
+    photo: "craft-pattern-pieces",
+    caption: "Pattern pieces, laid out",
   },
   {
     n: "03",
     title: "Approve one price.",
     body: "Review the proofs and a single quote for the whole collection. Customization is included, so the price you approve is the price you pay.",
-    photo: "craft-thread-cones",
-    caption: "Thread, matched to your colors",
+    photo: "detail-varsity-stripe-cuff",
+    caption: "Stripe, rib and trim, in the price",
   },
   {
     n: "04",
     title: "We make it. You wear it.",
     body: "We produce and deliver the collection. Every approved piece is saved to your organization, so next season starts where this one left off.",
-    photo: "detail-folded-stack-warm",
+    photo: "detail-folded-stack-color",
     caption: "Folded, counted, delivered",
   },
 ];
@@ -69,8 +69,9 @@ export default function HowItWorks() {
               From a logo and a rough idea to a finished collection, with one
               designer and one price the whole way.
             </p>
-            <Link href="/quote" className="btn-blue mt-10 w-full sm:w-auto">
-              Start a collection <Arrow className="h-[14px] w-[19px]" />
+            <Link href="/quote" className="link-arrow mt-8 text-[15px] font-medium">
+              <span className="link-u">Start a collection</span>
+              <Arrow className="h-[12px] w-[16px]" />
             </Link>
           </div>
         </div>

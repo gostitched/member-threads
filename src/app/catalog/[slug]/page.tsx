@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { product } = found;
   const image = product.images.find((i) => i.isPrimary) ?? product.images[0];
   return {
+    title: [product.name, product.styleNumber].filter(Boolean).join(' · '),
     // The first paragraph only: product descriptions run to two.
     description:
       product.description?.split(/\n\s*\n/)[0] ??

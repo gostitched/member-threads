@@ -5,10 +5,10 @@ import '@/components/home/home.css';
 
 /**
  * What Member Threads is, for a buyer landing cold. The idea made explicit as
- * a contrast: "Printed on" (a blank, a logo pressed flat, at rest in duotone)
+ * a contrast: "Printed on" (a drawn stock blank, a logo pressed flat)
  * against "Sewn in" (chenille at macro, in full grade), staggered down the
- * grid. Then three principles in columns divided by hairlines, and a closing
- * line. Server component.
+ * grid. Then three principles in columns divided by hairlines. Server
+ * component.
  */
 
 // [CONFIRM] 01: every style is cut and sewn to spec (not decorated stock blanks).
@@ -30,22 +30,22 @@ const PRINCIPLES = [
   },
 ] as const;
 
-const blank = PHOTOS['texture-canvas'];
 const sewn = PHOTOS['detail-chenille-numerals'];
 
 export default function Intro() {
   return (
     <section aria-labelledby="intro-title" className="sec bg-paper text-ink">
       <div className="shell">
-        {/* Headline cols 1–7, lead cols 8–12 on the headline's last line. */}
-        <div className="grid-12 items-end gap-y-6">
-          <div className="col-span-4 sm:col-span-8 lg:col-span-7">
+        {/* A stepped header (not the eyebrow-left / lead-right of the roster
+            that follows): headline cols 1–8, the lead dropped to cols 7–12. */}
+        <div className="grid-12 gap-y-8">
+          <div className="col-span-4 sm:col-span-8 lg:col-span-8">
             <p className="t-eyebrow fg-muted">What we do</p>
             <h2 id="intro-title" className="t-h1 mt-5">
-              Not merch. <em>A collection.</em>
+              Made to be <em>kept.</em>
             </h2>
           </div>
-          <p className="t-lead col-span-4 max-w-measure sm:col-span-7 lg:col-span-5 lg:pb-1">
+          <p className="t-lead col-span-4 max-w-measure sm:col-span-6 sm:col-start-3 lg:col-span-6 lg:col-start-7">
             We make custom collections the way a label makes a season: considered pieces, one point of view, finished
             properly. You bring the organization. We handle design, production and delivery.
           </p>
@@ -55,23 +55,27 @@ export default function Intro() {
         <div className="grid-12 mt-16 gap-y-14 sm:mt-20 lg:mt-24">
           <figure className="col-span-3 sm:col-span-4 lg:col-span-5">
             <div className="relative">
-              <div className="drift-in photo duo grain aspect-[4/5]">
-                <Image
-                  src={blank.src}
-                  width={blank.width}
-                  height={blank.height}
-                  alt={blank.alt}
-                  sizes="(min-width: 1024px) 36vw, (min-width: 640px) 48vw, 75vw"
-                  style={{ objectPosition: blank.objectPosition }}
-                />
-                {/* The logo, pressed flat onto it. */}
-                <span aria-hidden className="intro-print">
-                  <span className="stamp-grain border-2 border-current px-5 py-3 font-display text-[clamp(1.25rem,2.4vw,2rem)] font-black uppercase leading-none tracking-[-0.01em] text-ink/70 [font-stretch:125%]">
-                    Logo
-                  </span>
-                </span>
+              {/* A drawing, not a photo: the generic blank, flat, a logo pressed on. */}
+              <div className="photo grain aspect-[4/5] bg-cream">
+                <svg viewBox="0 0 400 500" className="absolute inset-0 h-full w-full" role="img" aria-label="Drawing of a plain stock T-shirt with a rectangular logo printed flat on the chest">
+                  <path
+                    d="M128 92 L170 76 Q200 100 230 76 L272 92 L348 150 L318 204 L290 190 L290 436 L110 436 L110 190 L82 204 L52 150 Z"
+                    fill="#E2D8C7"
+                    stroke="#133327"
+                    strokeOpacity="0.35"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+                  <path d="M170 76 Q200 112 230 76" fill="none" stroke="#133327" strokeOpacity="0.35" strokeWidth="1.5" />
+                  <g opacity="0.55">
+                    <rect x="162" y="168" width="76" height="38" fill="none" stroke="#133327" strokeWidth="3" />
+                    <text x="200" y="194" textAnchor="middle" fontFamily="var(--font-display)" fontWeight="900" fontSize="20" fill="#133327" letterSpacing="1">
+                      LOGO
+                    </text>
+                  </g>
+                </svg>
               </div>
-              <span className="woven absolute -top-3 left-4">Printed on</span>
+              <span className="woven woven-beige woven-lg absolute -top-4 left-4">Printed on</span>
             </div>
             <figcaption className="caption">A stock blank, a logo pressed flat on the front</figcaption>
           </figure>
@@ -88,7 +92,7 @@ export default function Intro() {
                   style={{ objectPosition: sewn.objectPosition }}
                 />
               </div>
-              <span className="woven-green woven absolute -top-3 left-4">Sewn in</span>
+              <span className="woven-green woven woven-lg absolute -top-4 left-4">Sewn in</span>
             </div>
             <figcaption className="caption">Chenille numerals, stitched into twill</figcaption>
           </figure>
@@ -109,12 +113,6 @@ export default function Intro() {
           ))}
         </ul>
 
-        <Reveal className="home-gap">
-          <span aria-hidden className="draw-in stitch-rule w-24" />
-          <p className="t-h2 mt-8 max-w-[22ch]">
-            Pieces your members keep reaching for, <em>season after season.</em>
-          </p>
-        </Reveal>
       </div>
     </section>
   );

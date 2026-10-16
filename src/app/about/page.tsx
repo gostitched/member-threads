@@ -6,7 +6,6 @@ import Photo from '@/components/chrome/Photo';
 import { Arrow } from '@/components/SiteHeader';
 import { FRAME } from '@/components/frame';
 import { FOUNDER, OFFER, ORIGIN, STITCHED } from '@/lib/about';
-import type { PhotoSlug } from '@/lib/photos';
 import { SEGMENTS } from '@/lib/site';
 import '@/components/chrome/chrome.css';
 
@@ -26,19 +25,11 @@ const FACTS = [
 /** Cell dividers for the facts table: 2 columns on phones, 4 on desktop. */
 const FACT_CELL = ['pl-0', 'border-l pl-4 lg:pl-8', 'pl-0 lg:border-l lg:pl-8', 'border-l pl-4 lg:pl-8'] as const;
 
-/** Duo thumbnails for the roster (mood images, not customers). */
-const SEGMENT_PHOTO: Partial<Record<string, PhotoSlug>> = {
-  campus: 'segment-campus-walk',
-  company: 'segment-company-coffee-team',
-  nonprofit: 'segment-nonprofit-cleanup',
-  athletic: 'segment-athletic-run-club',
-  social: 'segment-social-lawn-bowls',
-};
 
 /**
  * An editorial story page. The founder line in the display serif beside the
  * founder (the one real portrait on the site) with a woven label across the
- * corner; the facts as a hairline table. Why we exist, set against two craft
+ * top corner; the facts as a hairline table. Why we exist, set against two craft
  * plates. The story as roster rows. What every organization gets, on cream.
  * Stitched Group in the page's one green band. Who it's for as the roster,
  * and the way in.
@@ -69,21 +60,22 @@ export default function AboutPage() {
           {/* Founder: 4:5, bleeds off the right edge on desktop. */}
           <figure className="relative col-span-4 -mx-5 mt-14 sm:col-span-6 sm:col-start-3 sm:mx-0 lg:col-span-5 lg:col-start-8 lg:mr-[calc(-1*max(3.5rem,(100vw_-_1536px)/2_+_3.5rem))] lg:mt-0">
             {FOUNDER.photo ? (
+              /* Head and shoulders: the frame zooms to the face so the stole and its marks fall out of frame. */
               <div className="photo grade grain aspect-[4/5]">
                 <Image
                   src={FOUNDER.photo}
-                  alt={`${FOUNDER.name}, founder of Member Threads, smiling on a university campus`}
+                  alt={`${FOUNDER.name}, founder of Member Threads, smiling`}
                   width={FOUNDER.width}
                   height={FOUNDER.height}
                   priority
-                  sizes="(min-width: 1536px) 680px, (min-width: 1024px) 44vw, (min-width: 640px) 75vw, 100vw"
-                  style={{ objectPosition: '50% 30%' }}
+                  sizes="(min-width: 1024px) 1200px, 100vw"
+                  className="mt-founder"
                 />
               </div>
             ) : (
               <div className="aspect-[4/5] bg-cream" />
             )}
-            <span className="woven woven-lg absolute -bottom-4 left-5 z-10 sm:-left-6 lg:-left-10">
+            <span className="woven woven-lg absolute -top-4 left-5 z-10 sm:-left-6 lg:-left-10">
               No. 001 · {FOUNDER.name}, {FOUNDER.role.toLowerCase()}
             </span>
           </figure>
@@ -113,12 +105,12 @@ export default function AboutPage() {
 
           <figure className="col-span-4 mt-6 sm:col-span-5 lg:col-span-7 lg:mt-16">
             <Photo
-              slug="craft-cutting-fabric"
+              slug="lifestyle-fence-pair"
               ratio="landscape"
               motion="wipe-in"
               sizes="(min-width: 1536px) 860px, (min-width: 1024px) 56vw, (min-width: 640px) 60vw, 100vw"
             />
-            <figcaption className="caption">Cloth, cut to pattern</figcaption>
+            <figcaption className="caption">Worn by choice</figcaption>
           </figure>
           <figure className="col-span-3 col-start-2 sm:col-span-3 sm:col-start-6 sm:mt-24 lg:col-span-4 lg:col-start-9 lg:mt-48">
             <Photo
@@ -147,9 +139,9 @@ export default function AboutPage() {
             {ORIGIN.story.map((s, i) => (
               <li key={s.title} className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-x-8">
                 <span aria-hidden className="stitch-rule draw-in col-span-2 mb-8" />
-                <p className="t-block pt-1 text-[clamp(1.25rem,2.4vw,2.25rem)]">{s.when}</p>
+                <p className="t-block pt-1 text-beige-deep">{String(i + 1).padStart(2, '0')}</p>
                 <Reveal delay={i * 80} className="pb-14 lg:pb-20">
-                  <p className="t-spec fg-muted">Entry {String(i + 1).padStart(2, '0')}</p>
+                  <p className="t-spec fg-muted">{s.when}</p>
                   <h3 className="t-h3 mt-3">{s.title}</h3>
                   <p className="t-body mt-4 max-w-[52ch] text-ink/90">{s.body}</p>
                 </Reveal>
@@ -224,42 +216,25 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <ol className="mt-16 border-t border-rule lg:mt-24">
-            {SEGMENTS.map((s, i) => {
-              const slug = SEGMENT_PHOTO[s.id];
-              return (
-                <li key={s.id} className="border-b border-rule">
-                  <Reveal delay={i * 60} className="grid-12 items-start gap-y-4 py-8 lg:py-10">
-                    <span className="t-spec fg-muted col-span-1 pt-2 lg:col-span-1">{String(i + 1).padStart(2, '0')}</span>
-                    <div className="col-span-3 sm:col-span-7 lg:col-span-5">
-                      <h3 className="t-h2">{s.title}</h3>
-                    </div>
-                    <div className="col-span-3 col-start-2 sm:col-span-5 sm:col-start-2 lg:col-span-4 lg:col-start-7">
-                      <p className="t-body text-ink/90">{s.body}</p>
-                      <ul className="mt-4 flex flex-wrap gap-2" aria-label="Typical pieces">
-                        {s.pieces.map((p) => (
-                          <li key={p} className="tag">
-                            {p}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    {slug && (
-                      <div className="hidden sm:col-span-2 sm:col-start-7 sm:block lg:col-span-2 lg:col-start-11">
-                        <Photo slug={slug} ratio="landscape" treatment="duo" sizes="(min-width: 1024px) 220px, 180px" />
-                      </div>
-                    )}
-                  </Reveal>
-                </li>
-              );
-            })}
+          <ol className="mt-14 border-t border-rule lg:mt-20">
+            {SEGMENTS.map((s, i) => (
+              <li key={s.id} className="border-b border-rule">
+                <div className="grid-12 items-baseline gap-y-1 py-5 lg:py-6">
+                  <span className="t-spec fg-muted col-span-1">{String(i + 1).padStart(2, '0')}</span>
+                  <h3 className="t-h3 col-span-3 sm:col-span-3 lg:col-span-4">{s.label}</h3>
+                  <p className="t-body col-span-3 col-start-2 text-ink/90 sm:col-span-4 sm:col-start-5 lg:col-span-7 lg:col-start-6">
+                    {s.body}
+                  </p>
+                </div>
+              </li>
+            ))}
           </ol>
 
           <div className="mt-12 flex flex-wrap items-center gap-x-10 gap-y-2">
-            <Link href="/catalog" className="link-arrow t-spec">
+            <Link href="/catalog" className="link-arrow text-[15px] font-medium">
               <span className="link-u">Browse the catalog</span> <Arrow className="h-3 w-4" />
             </Link>
-            <Link href="/work" className="link-arrow t-spec">
+            <Link href="/work" className="link-arrow text-[15px] font-medium">
               <span className="link-u">See the collections</span> <Arrow className="h-3 w-4" />
             </Link>
           </div>

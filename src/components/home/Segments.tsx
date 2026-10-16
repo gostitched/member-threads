@@ -19,11 +19,11 @@ import "./home.css";
  */
 
 const PEEK: Record<(typeof SEGMENTS)[number]["id"], PhotoSlug> = {
-  campus: "segment-campus-walk",
+  campus: "lifestyle-park-picnic",
   company: "segment-company-coffee-team",
-  nonprofit: "segment-nonprofit-cleanup",
-  athletic: "segment-athletic-run-club",
-  social: "segment-social-lawn-bowls",
+  nonprofit: "segment-nonprofit-garden",
+  athletic: "segment-athletic-rowing",
+  social: "segment-social-croquet",
 };
 
 export default function Segments() {
@@ -75,12 +75,13 @@ export default function Segments() {
                 key={s.id}
                 className="roster-row hairline-b grid-12 gap-y-3 py-8 lg:items-baseline lg:py-10"
                 onPointerMove={(e) => follow(e, i)}
+              onPointerEnter={(e) => follow(e, i)}
               >
                 <span className="t-spec col-span-4 text-beige sm:col-span-8 lg:col-span-1">
                   No. {String(i + 1).padStart(2, "0")}
                 </span>
                 <h3 className="col-span-4 sm:col-span-8 lg:col-span-6">
-                  <span className="roster-name t-h1">{s.label}</span>
+                  <span className="roster-name t-h1 roster-size">{s.label}</span>
                   <span className="sr-only">: {s.title}</span>
                 </h3>
                 <div className="col-span-4 mt-2 sm:col-span-6 lg:col-span-5 lg:mt-0">

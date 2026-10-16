@@ -95,14 +95,18 @@ export default function SizeChart({
           ))}
         </div>
       </div>
-      <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
+      <p className="t-spec fg-muted mb-3 sm:hidden" aria-hidden>
+        Swipe for every size →
+      </p>
+      <div className="relative">
+      <div className="-mr-5 overflow-x-auto pr-5 sm:mr-0 sm:pr-0" tabIndex={0} role="region" aria-label="Size chart, scrolls sideways">
         <table className="w-full min-w-[520px] border-collapse text-left" onPointerLeave={() => setHot(null)}>
           <caption className="sr-only">
             Garment measurements by size, in {shown === 'in' ? 'inches' : 'centimetres'}, measured flat
           </caption>
           <thead>
             <tr className="border-b border-ink">
-              <th scope="col" className="t-eyebrow fg-muted w-40 py-3 pr-4 font-semibold">
+              <th scope="col" className="t-eyebrow fg-muted sticky left-0 z-[1] w-28 bg-paper py-3 pr-4 font-semibold sm:w-40">
                 Size
               </th>
               {sizes.map((s) => (
@@ -122,7 +126,7 @@ export default function SizeChart({
           <tbody>
             {measurements.map((m) => (
               <tr key={m} className="border-b border-[var(--rule-c)]">
-                <th scope="row" className="t-small whitespace-nowrap py-3.5 pr-4 font-medium">
+                <th scope="row" className="t-small sticky left-0 z-[1] whitespace-nowrap bg-paper py-3.5 pr-4 font-medium shadow-[1px_0_0_var(--rule-c)] sm:shadow-none">
                   {m}
                 </th>
                 {sizes.map((s) => {
@@ -143,6 +147,9 @@ export default function SizeChart({
             ))}
           </tbody>
         </table>
+      </div>
+      {/* Edge fade: there is more table to the right. */}
+      <span aria-hidden className="pointer-events-none absolute -right-5 top-0 h-full w-12 bg-gradient-to-l from-paper to-transparent sm:hidden" />
       </div>
     </div>
   );

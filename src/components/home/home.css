@@ -299,3 +299,6 @@
   .seam-answer,
   .seam-entry[data-open='true'] .seam-answer { transform: none; transition: opacity 200ms ease !important; }
 }
+
+/* Roster names sit a step under the section heads (~56px at 1440). */
+.roster-size { font-size: clamp(2.125rem, 3.9vw, 3.75rem); line-height: 1.02; }

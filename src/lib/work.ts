@@ -220,7 +220,16 @@ export type WorkItem = {
    *   hero    the collection page's wide opening frame
    *   detail  a texture or craft frame for the lookbook spread
    */
-  mood?: { wall: PhotoSlug; hero: PhotoSlug; detail: PhotoSlug; detailNote: string };
+  mood?: {
+    wall: PhotoSlug;
+    hero: PhotoSlug;
+    detail: PhotoSlug;
+    detailNote: string;
+    /** A macro for the Details section, beside the drawings. */
+    macro?: { slug: PhotoSlug; note: string };
+    /** 'duo' when the shot's own colour fights the palette. */
+    heroTone?: 'duo';
+  };
 };
 
 const PALETTE_NOTE = 'Concept palette. Every color is matched to Pantone before production.';
@@ -304,7 +313,7 @@ const capHoll: Drawn = { kind: 'cap', color: IVORY, trim: NAVY, rope: CLARET, de
 const ARCHIVE: WorkItem[] = [
   {
     id: 'ashford', slug: 'ashford-business-society', no: 1,
-    mood: { wall: 'segment-campus-walk', hero: 'segment-campus-walk', detail: 'detail-chenille-numerals', detailNote: 'Burgundy on cream, the way twill sits on fleece' },
+    mood: { wall: 'segment-campus-walk', hero: 'segment-campus-walk', detail: 'detail-rib-navy', detailNote: 'Heathered rib with a fleck of burgundy', macro: { slug: 'detail-fabric-houndstooth', note: 'Heritage cloth, warm and plain' } },
     title: 'Ashford Business Society', sector: 'Concept collection · Fall recruitment', category: 'campus',
     vibe: 'Collegiate heritage',
     method: 'Tackle twill', qty: '438 pc',
@@ -399,7 +408,7 @@ const ARCHIVE: WorkItem[] = [
   },
   {
     id: 'halden', slug: 'halden-works', no: 2,
-    mood: { wall: 'segment-company-coffee-team', hero: 'segment-company-coffee-team', detail: 'detail-folded-stack-warm', detailNote: 'Heavyweight fleece, folded and kept' },
+    mood: { wall: 'segment-company-coffee-team', hero: 'segment-company-coffee-team', detail: 'detail-zipper-canvas', detailNote: 'Canvas, webbing and hardware, the workwear register' },
     title: 'Halden Works', sector: 'Concept collection · New-hire kit', category: 'company',
     vibe: 'Quiet, tonal workwear',
     method: 'Embroidery', qty: '328 pc',
@@ -494,7 +503,7 @@ const ARCHIVE: WorkItem[] = [
   },
   {
     id: 'riverbend', slug: 'riverbend-5k', no: 3,
-    mood: { wall: 'segment-nonprofit-cleanup', hero: 'segment-nonprofit-cleanup', detail: 'texture-canvas', detailNote: 'The linen ground of the race tee' },
+    mood: { wall: 'segment-nonprofit-cleanup', hero: 'segment-nonprofit-cleanup', detail: 'detail-knit-stack-trio', detailNote: 'Cream, camel and mustard, close to linen and marigold', macro: { slug: 'detail-embroidery-satin', note: 'Satin stitch, the way the script is filled' }, heroTone: 'duo' },
     title: 'Riverbend Literacy Fund', sector: 'Concept collection · Charity 5K', category: 'nonprofit',
     vibe: 'Riverside, warm and plain-spoken',
     method: 'Screen printing', qty: '528 pc',
@@ -584,7 +593,7 @@ const ARCHIVE: WorkItem[] = [
   },
   {
     id: 'eastline', slug: 'eastline-run-club', no: 4,
-    mood: { wall: 'segment-athletic-run-club', hero: 'segment-athletic-run-club', detail: 'lifestyle-sweatsuit-portrait', detailNote: 'Fleece for the coffee after the long run' },
+    mood: { wall: 'segment-athletic-run-club', hero: 'segment-athletic-run-club', detail: 'lifestyle-sweatsuit-portrait', detailNote: 'Fleece for the coffee after the long run', macro: { slug: 'craft-studio-cutting-table', note: 'The cutting table, where each style starts' } },
     title: 'Eastline Run Club', sector: 'Concept collection · Members’ issue', category: 'athletic',
     vibe: 'Road running, safety orange',
     method: 'Screen printing', qty: '396 pc',
@@ -629,7 +638,7 @@ const ARCHIVE: WorkItem[] = [
       { label: 'The collection', assets: ['e-plate'] },
       { label: 'Race day', assets: ['e-tall'] },
       { label: 'The pieces', assets: ['e-crew', 'e-tee', 'e-cap'], captions: ['Arched crewneck · 60', 'Members’ tee · 120', 'Cap · 72'] },
-      { label: 'Up close', assets: ['e-macro', 'e-tag'], captions: ['Twill, outlined', 'Hang-tag'] },
+      { label: 'Up close', assets: ['e-macro', 'e-swatch'], captions: ['Twill, outlined', 'Color card'] },
       { label: 'Palette', kind: 'swatches', assets: [] },
     ],
     assets: [
@@ -679,7 +688,7 @@ const ARCHIVE: WorkItem[] = [
   },
   {
     id: 'holloway', slug: 'holloway-club', no: 5,
-    mood: { wall: 'segment-social-lawn-bowls', hero: 'segment-social-garden-table', detail: 'detail-embroidery-needle', detailNote: 'Satin stitch going down, the way the crest is made' },
+    mood: { wall: 'segment-social-lawn-bowls', hero: 'segment-social-lawn-bowls', detail: 'product-crewneck-knit-hanger', detailNote: 'A heavy knit in the club’s colors, the weight a spring capsule asks for' },
     title: 'The Holloway Club', sector: 'Concept collection · Spring capsule', category: 'social',
     vibe: 'Embroidered, members only',
     method: 'Embroidery', qty: '276 pc',

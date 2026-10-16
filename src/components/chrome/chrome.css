@@ -30,30 +30,6 @@
 }
 .mt-head[data-scrolled='true'] .mt-logo { transform: scale(0.86); }
 
-/* Scroll progress: a running stitch sews itself along the header's bottom
-   edge as you read. Scroll-timeline only; absent elsewhere. */
-.mt-progress { display: none; }
-@supports (animation-timeline: scroll()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .mt-progress {
-      display: block;
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -1px;
-      height: 2px;
-      background-image: repeating-linear-gradient(90deg, theme('colors.dusty') 0 8px, transparent 8px 14px);
-      opacity: 0;
-      animation: mt-progress linear both;
-      animation-timeline: scroll(root block);
-      transition: opacity var(--dur-base) ease;
-    }
-    .mt-head[data-scrolled='true'] .mt-progress { opacity: 0.55; }
-    .mt-head[data-open='true'] .mt-progress { opacity: 0; }
-  }
-}
-@keyframes mt-progress { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-
 /* Nav link: sentence case, 14px. Hover sews an underline in from the left;
    the current page carries a running stitch, permanently. */
 .mt-nav {
@@ -116,7 +92,11 @@
 /* ---- Footer ------------------------------------------------------------- */
 /* THREADS, cropped by the bottom edge. Each letter rises out of the hem as
    the footer comes into view. */
-.mt-mast-wrap {
+.mt-mast-frame { container-type: inline-size; }
+.mt-mast-wrap,
+.mt-mast-wrap.t-mast {
+  /* "THREADS" runs ~6.2em wide in Archivo 900/125: fill the frame exactly. */
+  font-size: 15.8cqw;
   overflow: hidden;
   /* Crop ~18% of the cap height off the bottom. */
   height: 0.62em;
@@ -183,8 +163,8 @@
   content: '';
   position: absolute;
   inset: -6px;
-  border: 1px dashed theme('colors.cream');
-  opacity: 0.55;
+  border: 1px dashed theme('colors.ink');
+  opacity: 0.5;
 }
 
 /* ---- Quote: the request plate -------------------------------------------- */
@@ -207,4 +187,11 @@
 @media (prefers-reduced-motion: reduce) {
   .mt-menu, .mt-menu-item, .mt-sewing { animation: none !important; }
   .mt-logo, .mt-menu-link .mt-menu-name { transition: none; }
+}
+
+/* ---- About: founder, head and shoulders ---------------------------------- */
+.photo > img.mt-founder {
+  object-position: 50% 0%;
+  transform: scale(2.1);
+  transform-origin: 52% 11%;
 }

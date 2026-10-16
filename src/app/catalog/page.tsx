@@ -8,6 +8,7 @@ import { parseExplorerState } from '@/lib/catalog/explorer-state';
 import { PHOTOS } from '@/lib/photos';
 
 export const metadata: Metadata = {
+  title: 'Catalog',
   description:
     'The Member Threads catalog: heavyweight hoodies, quarter-zips, polos, rugbys, outerwear and hats for clubs, companies, nonprofits and teams. Customized to your organization from 36 pieces per style, design included.',
 };
@@ -58,7 +59,7 @@ export default async function CatalogPage({
   const { products } = catalog;
   const initial = parseExplorerState(params);
   const range = styleRange(products);
-  const swatches = PHOTOS['craft-fabric-swatches'];
+  const cloth = PHOTOS['detail-fabric-rolls'];
 
   return (
     <div className="ct-scope">
@@ -124,49 +125,6 @@ export default async function CatalogPage({
         </section>
       )}
 
-      {/* ── How a style becomes yours ──────────────────────────────────────── */}
-      <section className="band-cream sec overflow-x-clip" aria-labelledby="ct-change">
-        <div className="shell grid-12 gap-y-12">
-          <figure className="col-span-4 sm:col-span-6 lg:col-span-5">
-            <div className="ct-bleed-l">
-              <div className="photo grade grain wipe-in aspect-[4/5]">
-                <Image
-                  src={swatches.src}
-                  alt={swatches.alt}
-                  width={swatches.width}
-                  height={swatches.height}
-                  sizes="(min-width: 1536px) 680px, (min-width: 1024px) 45vw, (min-width: 640px) 75vw, 100vw"
-                  style={{ objectPosition: swatches.objectPosition }}
-                />
-              </div>
-            </div>
-            <figcaption className="caption">Reference · Cloth, before it is a collection</figcaption>
-          </figure>
-
-          <div className="col-span-4 sm:col-span-8 lg:col-span-6 lg:col-start-7 lg:pt-6">
-            <p className="t-eyebrow fg-muted">Every style is a starting point</p>
-            <h2 id="ct-change" className="t-h1 mt-5 max-w-[14ch]">
-              Start from the style. <em>Change</em> the rest.
-            </h2>
-            <p className="t-lead mt-7 max-w-measure">
-              Each piece is an established pattern with a known fit and fabric. Your designer takes it from there.
-            </p>
-            <ol className="mt-12 border-t border-[var(--rule-c)]">
-              {CHANGES.map(([k, v], i) => (
-                <li
-                  key={k}
-                  className="grid grid-cols-[2.5rem_minmax(0,1fr)] items-baseline gap-x-4 border-b border-[var(--rule-c)] py-5 sm:grid-cols-[3rem_9rem_minmax(0,1fr)]"
-                >
-                  <span className="t-spec fg-muted">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="t-h3">{k}</span>
-                  <span className="t-body col-start-2 mt-1 text-ink/85 sm:col-start-3 sm:mt-0">{v}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
-
       {/* ── The way out for anything that isn't in the catalog ─────────────── */}
       <section className="sec overflow-x-clip" aria-labelledby="ct-beyond">
         <div className="shell grid-12 items-center gap-y-14">
@@ -216,6 +174,49 @@ export default async function CatalogPage({
           </div>
         </div>
       </section>
+      {/* ── How a style becomes yours ──────────────────────────────────────── */}
+      <section className="band-cream sec overflow-x-clip" aria-labelledby="ct-change">
+        <div className="shell grid-12 gap-y-12">
+          <figure className="col-span-4 sm:col-span-6 lg:col-span-5">
+            <div className="ct-bleed-l">
+              <div className="photo grade grain wipe-in aspect-[4/5]">
+                <Image
+                  src={cloth.src}
+                  alt={cloth.alt}
+                  width={cloth.width}
+                  height={cloth.height}
+                  sizes="(min-width: 1536px) 680px, (min-width: 1024px) 45vw, (min-width: 640px) 75vw, 100vw"
+                  style={{ objectPosition: cloth.objectPosition }}
+                />
+              </div>
+            </div>
+            <figcaption className="caption">Reference · Cotton on the roll, before it is a collection</figcaption>
+          </figure>
+
+          <div className="col-span-4 sm:col-span-8 lg:col-span-6 lg:col-start-7 lg:pt-6">
+            <p className="t-eyebrow fg-muted">Every style is a starting point</p>
+            <h2 id="ct-change" className="t-h1 mt-5 max-w-[14ch]">
+              Start from the style. <em>Change</em> the rest.
+            </h2>
+            <p className="t-lead mt-7 max-w-measure">
+              Each piece is an established pattern with a known fit and fabric. Your designer takes it from there.
+            </p>
+            <ol className="mt-12 border-t border-[var(--rule-c)]">
+              {CHANGES.map(([k, v], i) => (
+                <li
+                  key={k}
+                  className="grid grid-cols-[2.5rem_minmax(0,1fr)] items-baseline gap-x-4 border-b border-[var(--rule-c)] py-5 sm:grid-cols-[3rem_9rem_minmax(0,1fr)]"
+                >
+                  <span className="t-spec fg-muted">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="t-h3">{k}</span>
+                  <span className="t-body col-start-2 mt-1 text-ink/85 sm:col-start-3 sm:mt-0">{v}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

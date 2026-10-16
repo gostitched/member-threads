@@ -13,11 +13,12 @@
  */
 
 import type { CatalogProduct } from '@/lib/catalog/types';
-import { EMPTY_HANGER, buildDefs, ctaMarkup, dividerMarkup, itemMarkup, paintVars, type Mount } from './art';
+import { EMPTY_HANGER, buildDefs, ctaMarkup, dividerMarkup, esc, itemMarkup, paintVars, type Mount } from './art';
 import { paintOf } from '@/lib/catalog/util';
 import { RackSound } from './sound';
 
-export type Slot = { p: CatalogProduct } | { div: { id: string; name: string; count: number; no?: number } } | { cta: true };
+/** `sec`: this piece opens a section of the rack; a spec-line marker sits over it on the rail. */
+export type Slot = { p: CatalogProduct; sec?: { name: string; count: number; no: number } } | { div: { id: string; name: string; count: number; no?: number } } | { cta: true };
 /** wake: the first run, the longest. category: a full run. search: a short shuffle, keeping what still matches. */
 export type RunMode = 'intro' | 'wake' | 'category' | 'search' | 'none';
 
@@ -34,6 +35,8 @@ export interface RackCallbacks {
   onHover?: (href: string) => void;
   /** Navigate. Called once a garment is lifted off the rail. */
   onOpen: (href: string) => void;
+  /** The empty rack's "Clear filters". */
+  onClear?: () => void;
 }
 
 interface Layout {
@@ -51,6 +54,9 @@ interface Layout {
   iw: number;
   tube: number;
   bendR: number;
+  pw: number;
+  ph: number;
+  plateTop: number;
 }
 
 interface Spring {
@@ -213,11 +219,15 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     const slot = (W - 2 * x0) / per;
     const gw = Math.round(Math.min(slot * 1.04, 400));
     const gh = Math.round(gw * 0.85);
-    const railPad = 30;
-    const infoTop = railPad + 23 + gh + (mobile ? 8 : 14);
-    const rowH = infoTop + (mobile ? 96 : 94) + (mobile ? 18 : 36);
+    const railPad = mobile ? 26 : 30;
+    // Each piece hangs in front of a cream 4:5 plate, one gutter narrower than its slot.
+    const pw = Math.round(Math.min(slot - (mobile ? 10 : 24), gw));
+    const ph = Math.round(pw * 1.25);
+    const plateTop = railPad + 14;
+    const infoTop = plateTop + ph + (mobile ? 10 : 16);
+    const rowH = infoTop + (mobile ? 84 : 94) + (mobile ? 14 : 40);
     const iw = Math.max(80, Math.round(Math.min(slot, gw) - (mobile ? 10 : 28)));
-    return { W, per, mobile, turn, x0, slot, gw, gh, railPad, infoTop, rowH, iw, tube, bendR };
+    return { W, per, mobile, turn, x0, slot, gw, gh, railPad, infoTop, rowH, iw, tube, bendR, pw, ph, plateTop };
   }
   function applyLayoutVars() {
     const s = rowsEl.style;
@@ -228,6 +238,9 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     s.setProperty('--rowH', `${lay.rowH}px`);
     s.setProperty('--iw', `${lay.iw}px`);
     s.setProperty('--tube', `${lay.tube}px`);
+    s.setProperty('--pw', `${lay.pw}px`);
+    s.setProperty('--ph', `${lay.ph}px`);
+    s.setProperty('--plateTop', `${lay.plateTop}px`);
     head.style.paddingInline = `${lay.x0 + (lay.mobile ? 4 : 10)}px ${lay.x0}px`;
   }
   const slotLeft = (k: number) => lay.x0 + k * lay.slot + (lay.slot - lay.gw) / 2;
@@ -302,11 +315,17 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
   }
 
   // ── building the rack ──────────────────────────────────────────────────────
-  function makeItem(p: CatalogProduct, stream: boolean): HTMLElement {
+  function makeItem(p: CatalogProduct, stream: boolean, sec?: { name: string; count: number; no: number }): HTMLElement {
     const el = document.createElement(stream ? 'div' : 'a');
     const { html, mount, photo, cutout } = itemMarkup(p, stream);
     el.className = `rk-g${stream ? ' rk-stream' : ''}${photo ? ' rk-ph' : ''}${cutout ? ' rk-co' : ''}`;
     el.innerHTML = html;
+    if (sec && !stream) {
+      const m = document.createElement('span');
+      m.className = 'rk-sec';
+      m.innerHTML = `${sec.no ? `<b>${String(sec.no).padStart(2, '0')}</b> ` : ''}${esc(sec.name)} <i>· ${String(sec.count).padStart(2, '0')}</i>`;
+      el.prepend(m);
+    }
     if (stream) {
       el.setAttribute('aria-hidden', 'true');
     } else {
@@ -357,7 +376,8 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     const msg = document.createElement('div');
     msg.className = 'rk-empty';
     msg.style.top = `${lay.railPad + 20 + lay.gh * 0.42}px`;
-    msg.innerHTML = `<h3>No styles <em>match</em>.</h3><p>Try another search, or tell us what you need and we&rsquo;ll source it.</p><a class="btn-blue" href="/quote" data-nav>Start a collection</a>`;
+    msg.innerHTML = `<h3>No styles <em>match</em>.</h3><p>Try another search, or tell us what you need and we&rsquo;ll source it.</p><div class="rk-empty-ctas"><button type="button" class="btn-outline btn-sm">Clear filters</button><a class="btn-blue btn-sm" href="/quote" data-nav>Start a collection</a></div>`;
+    msg.querySelector('button')?.addEventListener('click', () => cb.onClear?.());
     wrap.appendChild(msg);
     return wrap;
   }
@@ -391,7 +411,7 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
       for (let k = 0; k < lay.per; k++) {
         const s = hung[r * lay.per + k];
         if (!s) continue;
-        const node = 'div' in s ? makeDivider(s.div) : 'cta' in s ? makeCta() : makeItem(s.p, false);
+        const node = 'div' in s ? makeDivider(s.div) : 'cta' in s ? makeCta() : makeItem(s.p, false, s.sec);
         node.style.left = `${slotLeft(k)}px`;
         el.appendChild(node);
         row.items.push(node);

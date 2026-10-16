@@ -21,7 +21,7 @@ const ASSURANCES = ['Design included', 'No upcharges', 'From 36 per style'] as c
 /**
  * A calm intake page. The display line (personalised once a name has been
  * typed on the home page) with the lead beside it; then two columns: the
- * three next steps and the woven reassurances, sticky on the left; the
+ * three next steps and the reassurances, sticky on the left; the
  * request plate on the right, which frames the Stitched form.
  */
 export default async function QuotePage({ searchParams }: { searchParams: Promise<{ piece?: string }> }) {
@@ -67,9 +67,10 @@ export default async function QuotePage({ searchParams }: { searchParams: Promis
                 ))}
               </ol>
 
-              <ul className="mt-4 flex flex-wrap gap-2.5" aria-label="Good to know">
-                {ASSURANCES.map((g) => (
-                  <li key={g} className="woven woven-beige">
+              <ul className="t-spec mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-rule pt-6" aria-label="Good to know">
+                {ASSURANCES.map((g, i) => (
+                  <li key={g} className="flex items-center gap-3">
+                    {i > 0 && <span aria-hidden>·</span>}
                     {g}
                   </li>
                 ))}
@@ -81,19 +82,20 @@ export default async function QuotePage({ searchParams }: { searchParams: Promis
           <div className="order-1 col-span-4 min-w-0 sm:col-span-8 lg:order-2 lg:col-span-8">
             {piece && (
               <div className="mb-8 flex flex-col items-start gap-3 border-b border-rule pb-8">
-                <span className="woven woven-green">You picked</span>
+                <p className="t-eyebrow fg-muted">You picked</p>
                 <p className="t-h2">{piece.slice(0, 200)}</p>
                 <p className="t-body text-ink/90">Mention it in the form and your designer will start from there.</p>
               </div>
             )}
-            <RequestForm />
-            <p className="t-body mt-6 text-ink/90">
-              Prefer email? Write to{' '}
-              <a href={`mailto:${CONTACT.email}`} className="link-u font-medium">
+            <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="t-body max-w-[44ch] text-ink/90">
+                Prefer email? Send your organization, the pieces and your date.
+              </p>
+              <a href={`mailto:${CONTACT.email}`} className="btn-outline btn-sm shrink-0 normal-case tracking-normal">
                 {CONTACT.email}
-              </a>{' '}
-              with your organization, the pieces and your date.
-            </p>
+              </a>
+            </div>
+            <RequestForm />
           </div>
         </div>
       </div>

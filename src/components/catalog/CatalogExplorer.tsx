@@ -43,22 +43,25 @@ function haystack(p: CatalogProduct): string {
  */
 function buildSlots(results: CatalogProduct[], narrowed: boolean, categories: Array<[string, number]>): Slot[] {
   // The tag for ordering something the rack doesn't carry. The rack hangs it on its first run.
+  // The way out for anything not on the rack is the panel under it (one hang tag a page).
   if (!results.length) return [];
-  return [...hang(results, narrowed, categories), { cta: true }];
+  return hang(results, narrowed, categories);
 }
 function hang(results: CatalogProduct[], narrowed: boolean, categories: Array<[string, number]>): Slot[] {
   if (narrowed) return results.map((p) => ({ p }));
-  const slots: Slot[] = results.filter((p) => p.isFeatured).map((p) => ({ p }));
+  const featured = results.filter((p) => p.isFeatured);
+  const slots: Slot[] = featured.map((p, i) => (i === 0 ? { p, sec: { name: 'Featured', count: featured.length, no: 0 } } : { p }));
   let no = 0;
-  const section = (id: string, name: string, count: number, ps: CatalogProduct[]) => {
+  // Each section opens with a spec-line marker over its first piece, not a sign of its own.
+  const section = (name: string, count: number, ps: CatalogProduct[]) => {
     if (!ps.length) return;
-    slots.push({ div: { id, name, count, no: ++no } });
-    for (const p of ps) slots.push({ p });
+    no += 1;
+    ps.forEach((p, i) => slots.push(i === 0 ? { p, sec: { name, count, no } } : { p }));
   };
   for (const [name, count] of categories)
-    section(name, name, count, results.filter((p) => p.category === name && !p.isFeatured));
+    section(name, count, results.filter((p) => p.category === name && !p.isFeatured));
   const loose = results.filter((p) => !p.category);
-  section('other', 'Other', loose.length, loose.filter((p) => !p.isFeatured));
+  section('Other', loose.length, loose.filter((p) => !p.isFeatured));
   return slots;
 }
 
@@ -124,6 +127,10 @@ export default function CatalogExplorer({
   const [mounted, setMounted] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const mobileSearchRef = useRef<HTMLInputElement>(null);
+  const [searchOpen, setSearchOpen] = useState(Boolean(initial.q));
+  const [tucked, setTucked] = useState(false);
+  const clearRef = useRef<() => void>(() => {});
   const bandRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const rowsRef = useRef<HTMLDivElement>(null);
@@ -198,6 +205,12 @@ export default function CatalogExplorer({
   }, [indexed, state.category, state.family, state.q]);
 
   const narrowed = Boolean(state.category || state.family || state.q);
+  // Search reaches past the category: how many styles match the words alone.
+  const wider = useMemo(() => {
+    const terms = state.q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length || !(state.category || state.family)) return 0;
+    return indexed.filter(({ text }) => terms.every((t) => text.includes(t))).length;
+  }, [indexed, state.q, state.category, state.family]);
   const slots = useMemo(() => buildSlots(results, narrowed, categories), [results, narrowed, categories]);
   // What streams past between one rack and the next: stock from elsewhere in the catalog.
   const pool = useMemo(
@@ -211,6 +224,7 @@ export default function CatalogExplorer({
       {
         onHover: (href) => routerRef.current.prefetch(href),
         onOpen: (href) => routerRef.current.push(href),
+        onClear: () => clearRef.current(),
       }
     );
     rackRef.current = rack;
@@ -254,8 +268,41 @@ export default function CatalogExplorer({
 
   function clearAll() {
     setSearchDraft('');
+    setSearchOpen(false);
     set({ category: null, family: null, q: '' }, 'category');
   }
+  clearRef.current = clearAll;
+
+  // The mobile search field takes focus as it opens.
+  useEffect(() => {
+    if (searchOpen) mobileSearchRef.current?.focus({ preventScroll: true });
+  }, [searchOpen]);
+
+  // Mobile: the bar tucks away while scrolling down the rack, and returns on the way up.
+  useEffect(() => {
+    let last = window.scrollY;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const y = window.scrollY;
+        const mobile = window.innerWidth < 640;
+        const band = bandRef.current;
+        const head = document.querySelector<HTMLElement>('body header')?.getBoundingClientRect().height ?? 72;
+        // The bar is stuck once the marker just above it has scrolled under the header.
+        const stuck = band ? band.getBoundingClientRect().top <= head + 1 : false;
+        if (!mobile || Math.abs(y - last) < 6) return;
+        setTucked(y > last && stuck && !searchOpen);
+        last = y;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [searchOpen]);
 
 
   // The toolbar sticks under the site header, whatever height the header is at this
@@ -288,8 +335,80 @@ export default function CatalogExplorer({
           <span aria-hidden>×</span>
         </button>
       )}
+      {wider > results.length && (
+        <button
+          type="button"
+          onClick={() => set({ category: null, family: null }, 'category')}
+          className="link-arrow ml-3 text-ink"
+        >
+          <span className="link-u">
+            {wider} {wider === 1 ? 'match' : 'matches'} in all styles
+          </span>
+          <span aria-hidden>→</span>
+        </button>
+      )}
     </>
   );
+
+  const searchIcon = (
+    <svg width="15" height="15" viewBox="0 0 13 13" aria-hidden className="shrink-0">
+      <circle cx="5.5" cy="5.5" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M9 9l3.2 3.2" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+  const chips = [['All', products.length] as [string, number], ...categories].map(([name, n]) => {
+    const on = name === 'All' ? state.category === null : state.category === name;
+    return (
+      <button
+        key={name}
+        type="button"
+        aria-pressed={on}
+        onClick={(e) => {
+          e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: smooth() });
+          pickCategory(name === 'All' ? null : name);
+        }}
+        className="chip shrink-0 whitespace-nowrap px-3.5"
+      >
+        {name}
+        <span className="ct-chip-n">{String(n).padStart(2, '0')}</span>
+      </button>
+    );
+  });
+  const viewToggle = (
+    <div className="flex items-center gap-1" role="group" aria-label="View">
+      {(['rack', 'index'] as const).map((v, i) => (
+        <span key={v} className="flex items-center gap-1">
+          {i > 0 && (
+            <span aria-hidden className="text-rule">
+              /
+            </span>
+          )}
+          <button type="button" aria-pressed={state.view === v} onClick={() => set({ view: v }, 'none')} className="ct-toggle">
+            <span>{v === 'rack' ? 'Rack' : 'List'}</span>
+          </button>
+        </span>
+      ))}
+    </div>
+  );
+  const soundToggle =
+    state.view === 'rack' ? (
+      <button
+        type="button"
+        aria-pressed={soundOn}
+        onClick={() => setSoundOn(rackRef.current?.toggleSound() ?? false)}
+        className="ct-toggle gap-2 whitespace-nowrap"
+      >
+        <svg width="16" height="14" viewBox="0 0 16 14" aria-hidden fill="none">
+          <path d="M1 5h3l4-3.5v11L4 9H1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+          {soundOn ? (
+            <path d="M11 4.5c1 1.4 1 3.6 0 5M13.2 2.5c2 2.6 2 6.4 0 9" stroke="currentColor" strokeWidth="1.3" />
+          ) : (
+            <path d="M11 5l4 4M15 5l-4 4" stroke="currentColor" strokeWidth="1.3" />
+          )}
+        </svg>
+        <span className="sr-only sm:not-sr-only xl:sr-only 2xl:not-sr-only">Sound {soundOn ? 'on' : 'off'}</span>
+      </button>
+    ) : null;
 
   return (
     <div style={headVar}>
@@ -308,41 +427,83 @@ export default function CatalogExplorer({
       )}
 
       {/* ── Toolbar ────────────────────────────────────────────────────────── */}
+      {/* Mobile: the view controls sit above the bar, so the bar itself is one row. */}
+      <div className="shell flex items-center justify-end gap-4 pb-1 sm:hidden">
+        {viewToggle}
+        {soundToggle}
+      </div>
       <div ref={bandRef} style={{ scrollMarginTop: headH ?? 72 }} />
-      <div ref={barRef} className="ct-bar sticky z-30 border-y border-[var(--rule-c)] bg-paper">
-        <div className="shell flex flex-wrap items-center gap-x-8 gap-y-1 py-2 xl:flex-nowrap">
+      <div
+        ref={barRef}
+        className="ct-bar sticky z-30 border-y border-[var(--rule-c)] bg-paper transition-transform duration-[420ms] ease-out motion-reduce:transition-none"
+        style={tucked ? { transform: `translateY(calc(-100% - ${headH ?? 72}px))` } : undefined}
+      >
+        {/* Mobile: chips and a search icon that opens into a field. */}
+        <div className="shell flex h-[52px] items-center gap-2 sm:hidden">
+          {searchOpen ? (
+            <>
+              <label className="ct-search min-w-0 flex-1 text-ink">
+                {searchIcon}
+                <span className="sr-only">Search styles</span>
+                <input
+                  ref={mobileSearchRef}
+                  type="search"
+                  value={searchDraft}
+                  onChange={(e) => setSearchDraft(e.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="Search all styles"
+                />
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchDraft('');
+                  setSearchOpen(false);
+                }}
+                className="ct-toggle min-w-[44px] justify-center"
+                aria-label="Close search"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
+                  <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.4" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                aria-expanded={false}
+                aria-label="Search styles"
+                className="ct-toggle -ml-2 min-w-[44px] shrink-0 justify-center text-ink"
+              >
+                {searchIcon}
+              </button>
+              <div
+                className="-mr-5 flex min-w-0 flex-1 gap-1.5 overflow-x-auto py-1 pr-5 [mask-image:linear-gradient(to_right,#000_calc(100%-36px),transparent)] [scrollbar-width:none]"
+                role="group"
+                aria-label="Category"
+              >
+                {chips}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="shell hidden flex-wrap items-center gap-x-8 gap-y-1 py-2 sm:flex xl:flex-nowrap">
           <div
-            className="-mx-5 flex min-w-0 flex-auto gap-1.5 overflow-x-auto px-5 py-1 [mask-image:linear-gradient(to_right,#000_calc(100%-44px),transparent)] [scrollbar-width:none] sm:-mx-8 sm:px-8 lg:-mx-14 lg:px-14 xl:mx-0 xl:px-0 xl:[mask-image:none]"
+            className="-mx-8 flex min-w-0 flex-auto gap-1.5 overflow-x-auto px-8 py-1 [mask-image:linear-gradient(to_right,#000_calc(100%-44px),transparent)] [scrollbar-width:none] lg:-mx-14 lg:px-14 xl:mx-0 xl:px-0 xl:[mask-image:none]"
             role="group"
             aria-label="Category"
           >
-            {[['All', products.length] as [string, number], ...categories].map(([name, n]) => {
-              const on = name === 'All' ? state.category === null : state.category === name;
-              return (
-                <button
-                  key={name}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={(e) => {
-                    e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: smooth() });
-                    pickCategory(name === 'All' ? null : name);
-                  }}
-                  className="chip shrink-0 whitespace-nowrap px-3.5"
-                >
-                  {name}
-                  <span className="ct-chip-n">{String(n).padStart(2, '0')}</span>
-                </button>
-              );
-            })}
+            {chips}
           </div>
 
           <div className="flex w-full items-center justify-between gap-6 xl:w-auto xl:flex-none xl:justify-end">
             <label className="ct-search min-w-0 flex-1 text-ink sm:max-w-sm xl:w-44 xl:flex-none">
-              <svg width="14" height="14" viewBox="0 0 13 13" aria-hidden className="shrink-0">
-                <circle cx="5.5" cy="5.5" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
-                <path d="M9 9l3.2 3.2" stroke="currentColor" strokeWidth="1.3" />
-              </svg>
-              <span className="sr-only">Search styles</span>
+              {searchIcon}
+              <span className="sr-only">Search all styles</span>
               <input
                 ref={searchRef}
                 type="search"
@@ -356,40 +517,8 @@ export default function CatalogExplorer({
                 /
               </kbd>
             </label>
-
-            <div className="flex items-center gap-2" role="group" aria-label="View">
-              {(['rack', 'index'] as const).map((v, i) => (
-                <span key={v} className="flex items-center gap-2">
-                  {i > 0 && (
-                    <span aria-hidden className="text-rule">
-                      /
-                    </span>
-                  )}
-                  <button type="button" aria-pressed={state.view === v} onClick={() => set({ view: v }, 'none')} className="ct-toggle">
-                    <span>{v === 'rack' ? 'Rack' : 'List'}</span>
-                  </button>
-                </span>
-              ))}
-            </div>
-
-            {state.view === 'rack' && (
-              <button
-                type="button"
-                aria-pressed={soundOn}
-                onClick={() => setSoundOn(rackRef.current?.toggleSound() ?? false)}
-                className="ct-toggle min-w-[44px] justify-center gap-2 whitespace-nowrap"
-              >
-                <svg width="16" height="14" viewBox="0 0 16 14" aria-hidden fill="none">
-                  <path d="M1 5h3l4-3.5v11L4 9H1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-                  {soundOn ? (
-                    <path d="M11 4.5c1 1.4 1 3.6 0 5M13.2 2.5c2 2.6 2 6.4 0 9" stroke="currentColor" strokeWidth="1.3" />
-                  ) : (
-                    <path d="M11 5l4 4M15 5l-4 4" stroke="currentColor" strokeWidth="1.3" />
-                  )}
-                </svg>
-                <span className="sr-only sm:not-sr-only xl:sr-only 2xl:not-sr-only">Sound {soundOn ? 'on' : 'off'}</span>
-              </button>
-            )}
+            {viewToggle}
+            {soundToggle}
           </div>
         </div>
       </div>

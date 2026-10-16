@@ -63,7 +63,9 @@ export default function Dossier({
     const el = root.current;
     if (!el) return;
     el.scrollTop = 0;
-    back.current?.focus({ preventScroll: true });
+    // Focus moves into the dialog; the ring shows only for keyboard visitors.
+    const keyboard = document.activeElement?.matches(':focus-visible');
+    (keyboard ? back.current : el)?.focus({ preventScroll: true });
     if (prefersReducedMotion()) return;
     const bg = el.querySelector<HTMLElement>('[data-bg]');
     const photo = el.querySelector<HTMLElement>('[data-d]');
@@ -161,13 +163,13 @@ export default function Dossier({
       <div data-bg className="wk-dossier fixed inset-0" />
 
       {/* ── Top bar ── */}
-      <div data-fade className="relative">
-        <div className="shell flex min-h-[72px] items-center justify-between gap-4 hairline-b">
+      <div data-fade className="wk-dossier sticky top-0 z-10">
+        <div className="shell flex min-h-[64px] items-center justify-between gap-4 hairline-b sm:min-h-[72px]">
           <button ref={back} type="button" onClick={onClose} className="link-arrow group text-[14px] font-medium">
             <ArrowBack className="h-3 w-4 transition-transform duration-base ease-out group-hover:-translate-x-1" />
             <span className="link-u">All collections</span>
           </button>
-          <span className="woven hidden sm:inline-flex">{drop(project.no)} · Concept collection</span>
+          <span className="t-spec hidden text-muted sm:inline">{drop(project.no)} · Concept collection</span>
           {onNext && next ? (
             <button type="button" onClick={onNext} className="link-arrow text-[14px] font-medium">
               <span className="link-u">
@@ -186,7 +188,7 @@ export default function Dossier({
         <figure className="col-span-4 sm:col-span-8 lg:col-span-7">
           <div data-d className="relative">
             {project.mood && (
-              <MoodPhoto slug={project.mood.wall} ratio="landscape" treatment="grade" priority sizes="(min-width: 1536px) 860px, (min-width: 1024px) 56vw, 92vw" />
+              <MoodPhoto slug={project.mood.wall} ratio="landscape" treatment={project.mood.heroTone ?? 'grade'} className="wk-focus" priority sizes="(min-width: 1536px) 860px, (min-width: 1024px) 56vw, 92vw" />
             )}
             <span className="wk-no woven woven-green">{drop(project.no)}</span>
           </div>
@@ -220,8 +222,9 @@ export default function Dossier({
           </dl>
 
           <div data-fade className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-            <Link href={`/work/${project.slug}`} className="btn-blue">
-              See the full collection <Arrow />
+            <Link href={`/work/${project.slug}`} className="link-arrow group text-[15px] font-medium">
+              <span className="link-u">See the full collection</span>
+              <Arrow />
             </Link>
             <ShareButton w={project} />
           </div>
@@ -233,7 +236,7 @@ export default function Dossier({
             <h3 id="wk-dossier-pieces" className="t-spec">The pieces</h3>
             <p className="t-spec text-muted">{String(rows.length).padStart(2, '0')} styles · Drawn flats</p>
           </div>
-          <ul className="wk-strip -mx-5 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:px-0 lg:gap-8 lg:grid-cols-5">
+          <ul className="wk-strip -mx-5 mt-6 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:px-0 lg:gap-8 lg:grid-cols-5">
             {rows.map((r) => (
               <li key={r.no} className="w-[62vw] shrink-0 snap-start sm:w-auto">
                 <div className="relative aspect-square bg-cream">

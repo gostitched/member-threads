@@ -81,7 +81,7 @@ export function describe(look: Look, name = DEFAULT_NAME) {
     look.construction && 'contrast topstitching',
   ].filter(Boolean);
   return (
-    `${name === YOUR_NAME ? 'Your' : possessive(name).replace("'", '’')} oversized, boxy hoodie in ${look.colorSet ? `the ${c.name.toLowerCase()} colorway` : 'undyed'}, 420 GSM fleece` +
+    `${name === YOUR_NAME ? 'Your' : possessive(name).replace("'", '’')} oversized, boxy hoodie in ${look.colorSet ? `the ${c.name.toLowerCase()} colorway` : 'undyed'}, 400 GSM fleece` +
     (bits.length ? `, with ${bits.join(', ')}` : '') +
     '.'
   );

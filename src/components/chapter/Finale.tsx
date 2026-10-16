@@ -1,25 +1,20 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { register } from '@/lib/reveal';
 import { YOUR_NAME, useOrgName } from '@/lib/name';
 import { useVibe } from '@/lib/vibe';
-import { PHOTOS } from '@/lib/photos';
-import { COLORWAYS, FINALE, colorwayIndex, named } from '@/lib/chapter';
+import { COLORWAYS, FINALE, colorwayIndex } from '@/lib/chapter';
 
 /**
  * The chapter's close: a full-bleed cream band (the home page's one dark band
  * is the roster further down). Three serif lines set like roster rows, each
  * numbered and sewn under with a running stitch that runs off the left edge;
- * then the lead and one primary. On the right, a macro of a needle laying
- * satin stitch bleeds off the viewport edge, and a hang tag carrying the
- * organization's name and colorway drops in on its string across the photo's
- * edge. With reduced motion it is simply there.
+ * then the lead, one primary and a sentence-case link. Beside them, the page's
+ * one hang tag drops in on a string from the band's top edge, carrying the
+ * organization's name and colorway. With reduced motion it is simply there.
  */
-
-const PHOTO = PHOTOS['detail-embroidery-needle'];
 
 const Arrow = () => (
   <svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden>
@@ -78,7 +73,7 @@ export default function Finale() {
     <section aria-labelledby="finale-title" className="chapter-close band-cream sec-lg relative overflow-hidden">
       <div ref={ref} data-in={shown} className="chapter-finale shell relative">
         <div className="grid-12 items-start gap-y-16">
-          <div className="col-span-4 sm:col-span-8 lg:col-span-7">
+          <div className="col-span-4 sm:col-span-8 lg:col-span-7 lg:self-center">
             <h2 id="finale-title" className="chapter-finale-title">
               {FINALE.lines.map((l, i) => {
                 const words = l.split(' ');
@@ -86,7 +81,7 @@ export default function Finale() {
                 return (
                   <span key={l} className="chapter-finale-row" style={{ '--d': `${i * 80}ms`, '--i': i } as React.CSSProperties}>
                     <span aria-hidden className="chapter-finale-no t-spec fg-muted num">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="chapter-finale-line t-h1">
+                    <span className="chapter-finale-line t-h2">
                       {words.join(' ')} {i === last ? <em>{tail}</em> : tail}
                     </span>
                     <span aria-hidden className="chapter-finale-stitch stitch-rule" />
@@ -94,30 +89,20 @@ export default function Finale() {
                 );
               })}
             </h2>
-            <p className="chapter-finale-after t-lead mt-12 max-w-[34ch] lg:max-w-[30ch] xl:max-w-[36ch]">{FINALE.body}</p>
+            <p className="chapter-finale-after t-lead mt-12 max-w-[36ch]">{FINALE.body}</p>
             <div className="chapter-finale-after mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-8">
-              <Link href={FINALE.primary.href} className="btn-blue max-w-full">
-                <span className="truncate">{named(FINALE.primary.label, name, isDefault || name.length > 18)}</span>
+              <Link href={FINALE.primary.href} className="btn-blue">
+                {FINALE.primary.label}
                 <Arrow />
               </Link>
-              <Link href={FINALE.secondary.href} className="link-arrow t-spec">
+              <Link href={FINALE.secondary.href} className="link-arrow chapter-link">
                 <span className="link-u">{FINALE.secondary.label}</span>
                 <Arrow />
               </Link>
             </div>
           </div>
 
-          <div className="relative col-span-4 self-stretch sm:col-span-8 lg:col-span-5 lg:col-start-8 lg:flex lg:flex-col lg:justify-end">
-            <div className="chapter-finale-photo photo grade grain wipe-in aspect-[4/5]">
-              <Image
-                src={PHOTO.src}
-                alt={PHOTO.alt}
-                width={PHOTO.width}
-                height={PHOTO.height}
-                sizes="(min-width: 1024px) 42vw, 100vw"
-                style={{ objectPosition: PHOTO.objectPosition }}
-              />
-            </div>
+          <div className="order-first col-span-4 flex justify-center sm:col-span-8 lg:order-none lg:col-span-4 lg:col-start-8 lg:justify-center lg:pt-4">
             <div className="chapter-tag-hang">
               <span aria-hidden className="chapter-tag-string" />
               <div className="chapter-tag-swing">

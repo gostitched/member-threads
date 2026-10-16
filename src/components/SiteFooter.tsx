@@ -77,18 +77,20 @@ export default function SiteFooter() {
         <div className="flex flex-col-reverse items-start gap-5 border-t border-cream/15 py-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="t-spec fg-muted">© {new Date().getFullYear()} Member Threads. All rights reserved.</p>
           {/* [CONFIRM] "Est. 2023" as the brand's founding line (DESIGN.md). */}
-          <span className="woven woven-beige">Est. 2023 · A Stitched Group company</span>
+          <p className="t-spec text-beige">Est. 2023 · A Stitched Group company</p>
         </div>
       </div>
 
-      {/* The mast. Decorative: the name is already on the page. */}
-      <div aria-hidden className="mt-mast-wrap t-mast mt-8 select-none px-3 text-cream sm:px-5 lg:px-8" style={{ fontSize: 'clamp(3rem, 15vw, 24rem)' }}>
-        <div className="mt-mast">
-          {MAST.map((c, i) => (
-            <span key={i} style={{ ['--i' as string]: i }}>
-              {c}
-            </span>
-          ))}
+      {/* The mast, set to the frame's width. Decorative: the name is already on the page. */}
+      <div aria-hidden className={`${FRAME} mt-mast-frame mt-8`}>
+        <div className="mt-mast-wrap t-mast select-none text-cream">
+          <div className="mt-mast">
+            {MAST.map((c, i) => (
+              <span key={i} style={{ ['--i' as string]: i }}>
+                {c}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

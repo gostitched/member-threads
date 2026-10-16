@@ -24,7 +24,7 @@ export const ORIGIN = {
   whyBody:
     'The usual answer is a promo catalog and a logo on a blank tee. It gets handed out once and ends up in a drawer. We think the people who show up for your organization deserve something they reach for on their own: the right fabric, a considered fit, colors that are actually yours, finished with the care of a real apparel brand.',
   /**
-   * The story as roster rows. `when` is only set where the date is on file.
+   * The story as numbered rows. `when` is a year only where the date is on file (2023); otherwise a plain word.
    * [CONFIRM] "worked directly with manufacturers" and "fabric, fit, color, label" detail, carried over from the Stitched story.
    */
   story: [
@@ -34,7 +34,7 @@ export const ORIGIN = {
       body: 'Ethan Scher started making apparel in 2023 for his own college clubs. The options were the same everywhere: pick a blank from a catalog, press a logo on it, hope people wear it.',
     },
     {
-      when: 'Then',
+      when: 'Next',
       title: 'Built properly, from the fabric up.',
       body: 'So he went further. He worked directly with manufacturers to build the pieces properly: the fabric, the fit, the color, the label inside the neck. Members wore them. Other clubs asked for the same.',
     },

@@ -58,7 +58,7 @@
   border-radius: 1px;
   background: theme('colors.green');
   color: theme('colors.cream');
-  font: 600 10.5px/1 var(--font-sans), sans-serif;
+  font: 600 12px/1 var(--font-sans), sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -323,7 +323,7 @@
   background: theme('colors.cream');
   outline: 1px dashed theme('colors.ink / 30%');
   outline-offset: -4px;
-  font: 600 10.5px/1.3 var(--font-sans), sans-serif;
+  font: 600 12px/1.3 var(--font-sans), sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: theme('colors.ink');
@@ -393,7 +393,7 @@
   pointer-events: none;
 }
 .rk-dk {
-  font: 600 10px/1 var(--font-sans), sans-serif;
+  font: 600 12px/1 var(--font-sans), sans-serif;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: theme('colors.beige');
@@ -496,7 +496,7 @@
 }
 .rk-empty h3 em { font-style: italic; }
 .rk-empty p { margin: 0; font-size: 16px; color: theme('colors.ink'); }
-.rk-empty a { margin-top: 10px; }
+.rk-empty-ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
 
 /* Lifted off, on its way to the product page. */
 .rk-fly {
@@ -526,7 +526,7 @@
 
 @media (max-width: 659px) {
   .rk-nm { font-size: 17px; margin-top: 4px; }
-  .rk-no, .rk-pr { font-size: 11px; }
+  .rk-no, .rk-pr { font-size: 12px; }
   .rk-dk { display: none; }
     .rk-vw,
   .rk-tag { display: none; }
@@ -538,9 +538,9 @@
   .rk-cta-body::before { top: 8px; width: 10px; height: 10px; margin-left: -5px; }
   .rk-cta h3 { font-size: 18px; }
   .rk-cta p { font-size: 13px; }
-  .rk-cta .rk-ck { font-size: 10.5px; }
+  .rk-cta .rk-ck { font-size: 12px; }
   .rk-cta a { padding: 8px 12px; min-height: 40px; font-size: 13px; white-space: normal; }
-  .rk-plate { gap: 8px; font-size: 9.5px; }
+  .rk-plate { gap: 8px; font-size: 12px; }
   .rk-plate .rk-k,
   .rk-count .rk-x { display: none; }
   .rk-count { padding-bottom: 9px; }
@@ -550,4 +550,45 @@
   .rk-g,
   .rk-lift,
   .rk-gm { transition: none; }
+}
+
+/* ── Plates: every piece hangs in front of a cream 4:5 plate ───────────────── */
+.rk-run > a.rk-g::before {
+  content: '';
+  position: absolute;
+  left: calc((var(--gw) - var(--pw)) / 2);
+  top: var(--plateTop);
+  width: var(--pw);
+  height: var(--ph);
+  background: theme('colors.cream');
+  pointer-events: none;
+  transition: outline-color 0.18s ease;
+  outline: 1px dashed transparent;
+  outline-offset: -8px;
+}
+@media (hover: hover) {
+  .rk-run:not(.rk-anim) > a.rk-g.is-hot::before { outline-color: theme('colors.ink / 30%'); }
+}
+.rk-run > a.rk-g:focus-visible::before { outline: 2px solid theme('colors.dusty'); outline-offset: 2px; }
+.rk-info { left: calc((var(--gw) - var(--pw)) / 2); width: var(--pw); }
+
+/* Section marker: a spec line on the rail over the piece that opens the section. */
+.rk-sec {
+  position: absolute;
+  left: calc((var(--gw) - var(--pw)) / 2);
+  top: calc(var(--railPad) - 30px);
+  z-index: 3;
+  display: flex;
+  gap: 0.5em;
+  font: 500 12px/16px var(--font-sans), sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: theme('colors.ink');
+  pointer-events: none;
+}
+.rk-sec b { font-weight: 600; color: theme('colors.muted'); }
+.rk-sec i { font-style: normal; color: theme('colors.muted'); }
+@media (max-width: 659px) {
+  .rk-sec i { display: none; }
 }

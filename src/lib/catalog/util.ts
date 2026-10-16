@@ -72,6 +72,8 @@ export function colorFamily(hex: string | null | undefined): ColorFamily | null 
   if (s < 0.18 || l < 0.1 || l > 0.93) return 'neutral';
   // Pale warm tints (cream, oat, bone, stone) read as neutrals too.
   if (l > 0.68 && s < 0.5 && h >= 20 && h <= 60) return 'neutral';
+  // Muted warm mid-tones (khaki, sand, tan) are khakis, not rusts.
+  if (s < 0.4 && l > 0.4 && h >= 25 && h < 68) return 'yellow';
   if (h < 12 || h >= 345) return l > 0.72 ? 'pink' : 'red';
   if (h < 40) return l < 0.3 ? 'red' : 'orange';
   if (h < 68) return 'yellow';
@@ -118,12 +120,17 @@ export function spectrum(products: CatalogProduct[]): SpectrumSwatch[] {
   }
   // Rotated so the band starts at crimson: hues just under 360 are reds, and belong at
   // the start next to the other reds, not stranded at the far end beside the greys.
+  // Grouped in the same order as the family chips under the band, so each chip
+  // names a run of the strip: neutrals light to dark, then each hue family.
+  const order = COLOR_FAMILIES.map((f) => f.id as ColorFamily);
   const hueKey = (h: number) => (h + 20) % 360;
-  const chromatic = out
-    .filter((s) => s.family !== 'neutral')
-    .sort((a, b) => hueKey(a.hsl.h) - hueKey(b.hsl.h) || a.hsl.l - b.hsl.l);
-  const neutral = out.filter((s) => s.family === 'neutral').sort((a, b) => b.hsl.l - a.hsl.l);
-  return [...chromatic, ...neutral].map(({ hsl: _hsl, ...rest }) => rest);
+  return out
+    .sort(
+      (a, b) =>
+        order.indexOf(a.family) - order.indexOf(b.family) ||
+        (a.family === 'neutral' ? b.hsl.l - a.hsl.l : hueKey(a.hsl.h) - hueKey(b.hsl.h) || a.hsl.l - b.hsl.l)
+    )
+    .map(({ hsl: _hsl, ...rest }) => rest);
 }
 
 /** A colourway's paint: its hex, or a mid grey when the dashboard has none. */

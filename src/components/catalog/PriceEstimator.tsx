@@ -26,6 +26,7 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
   const maxQ = Math.max(MAX_QTY, Math.round((tiers[tiers.length - 1]?.minQuantity ?? minQ) * 1.6));
   const [qty, setQty] = useState(minQ);
   const [draft, setDraft] = useState<string | null>(null);
+  const [underMin, setUnderMin] = useState(false);
 
   if (tiers.length === 0) return null;
 
@@ -43,9 +44,32 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
 
   const commitDraft = () => {
     if (draft === null) return;
-    setQty(clamp(Number(draft.replace(/[^\d]/g, ''))));
+    const n = Number(draft.replace(/[^\d]/g, ''));
+    setUnderMin(n < minQ);
+    setQty(clamp(n));
     setDraft(null);
   };
+  const set = (q: number) => {
+    setUnderMin(false);
+    setDraft(null);
+    setQty(clamp(q));
+  };
+  // − and + step along the ladder: 36 → 72 → 144 → 300, then by the hundred.
+  const starts = tiers.map((t) => Math.max(t.minQuantity, minQ));
+  const stepUp = () => {
+    const nextStart = starts.find((q) => q > qty);
+    set(nextStart ?? Math.floor(qty / 100) * 100 + 100);
+  };
+  const stepDown = () => {
+    const top = starts[starts.length - 1];
+    if (qty > top + 100) return set(Math.ceil(qty / 100) * 100 - 100);
+    const prev = [...starts].reverse().find((q) => q < qty);
+    set(prev ?? minQ);
+  };
+  const upLabel = (() => {
+    const nextStart = starts.find((q) => q > qty);
+    return nextStart ? `Step up to ${nextStart} pieces` : 'Add 100 pieces';
+  })();
 
   return (
     <div>
@@ -74,7 +98,7 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
                 <th scope="row" className="p-0 font-normal">
                   <button
                     type="button"
-                    onClick={() => setQty(from)}
+                    onClick={() => set(from)}
                     aria-pressed={on}
                     className="flex w-full items-center gap-3 py-2.5 pl-4 text-left"
                   >
@@ -100,7 +124,7 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
           Quantity
         </label>
         <div className="ct-stepper flex items-center gap-2">
-          <button type="button" onClick={() => setQty((q) => clamp(q - 1))} disabled={qty <= minQ} aria-label="One fewer piece">
+          <button type="button" onClick={stepDown} disabled={qty <= minQ} aria-label="Step down a price tier">
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
               <path d="M1 6h10" stroke="currentColor" strokeWidth="1.5" />
             </svg>
@@ -112,12 +136,17 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
             min={minQ}
             max={HARD_MAX}
             value={draft ?? qty}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              const n = Number(e.target.value);
+              setUnderMin(e.target.value !== '' && n < minQ);
+            }}
+            aria-invalid={underMin || undefined}
             onBlur={commitDraft}
             onKeyDown={(e) => e.key === 'Enter' && commitDraft()}
-            aria-describedby={`${id}-note`}
+            aria-describedby={`${id}-min ${id}-note`}
           />
-          <button type="button" onClick={() => setQty((q) => clamp(q + 1))} aria-label="One more piece">
+          <button type="button" onClick={stepUp} aria-label={upLabel}>
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
               <path d="M1 6h10M6 1v10" stroke="currentColor" strokeWidth="1.5" />
             </svg>
@@ -125,7 +154,11 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
         </div>
       </div>
 
-      <div className="ct-range mt-2">
+      <p id={`${id}-min`} className="t-small mt-2 text-right text-alert" aria-live="polite">
+        {underMin ? `Minimum is ${minQ}. Sizes can be mixed to reach it.` : ''}
+      </p>
+
+      <div className="ct-range">
         <span className="ct-range-track" aria-hidden />
         <span className="ct-range-fill" style={{ left: 13, width: `calc(${pos} * (100% - 26px))` }} aria-hidden />
         {tiers.slice(1).map((t) => (
@@ -142,10 +175,7 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
           max={1}
           step={0.001}
           value={pos}
-          onChange={(e) => {
-            setDraft(null);
-            setQty(qtyAt(Number(e.target.value)));
-          }}
+          onChange={(e) => set(qtyAt(Number(e.target.value)))}
           className="range"
           aria-label="Quantity, by slider"
           aria-valuetext={`${qty.toLocaleString('en-US')} pieces`}

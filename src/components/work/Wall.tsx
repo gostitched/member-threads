@@ -7,7 +7,7 @@ import WorkArt from './art';
 import { EASE_OUT, prefersReducedMotion, rectsBy } from './flip';
 import { Arrow, MoodPhoto, type Ratio } from './ui';
 import { CATEGORIES, categoryOf, drop, pad3, pieces, scheduleOf, type WorkCategory, type WorkItem } from '@/lib/work';
-import { NAME_MAX, YOUR_NAME, possessive, useOrgName } from '@/lib/name';
+import { NAME_MAX, YOUR_NAME, useOrgName } from '@/lib/name';
 import './work.css';
 
 /**
@@ -189,7 +189,6 @@ export default function WorkWall({ projects }: { projects: WorkItem[] }) {
           {shown.map((p, i) => (
             <Tile key={p.id} p={p} i={i} onOpen={() => openProject(p.id)} hidden={open?.pid === p.id} />
           ))}
-          <Reserved i={shown.length} no={projects.length + 1} />
         </div>
       </div>
 
@@ -240,7 +239,7 @@ function Tile({ p, i, onOpen, hidden }: { p: WorkItem; i: number; onOpen: () => 
       >
         <div className="relative">
           <span className="wk-no woven">{drop(p.no)} · Concept</span>
-          <div data-flip={p.id} style={{ visibility: hidden ? 'hidden' : undefined }}>
+          <div data-flip={p.id} className={p.mood?.heroTone === 'duo' ? 'wk-keep-duo' : undefined} style={{ visibility: hidden ? 'hidden' : undefined }}>
             {p.mood ? (
               <MoodPhoto slug={p.mood.wall} ratio={pos.ratio} sizes={pos.sizes} treatment="release" alt="" priority={i < 2} />
             ) : null}
@@ -258,31 +257,13 @@ function Tile({ p, i, onOpen, hidden }: { p: WorkItem; i: number; onOpen: () => 
             <span>{p.title}</span>
             <Arrow className="h-3 w-4 shrink-0 self-center" />
           </h2>
-          <p className="t-spec mt-2 text-muted">
-            {cat?.label} · {pieces(p)} pieces · {p.method}
+          <p className="t-spec mt-2 flex flex-wrap gap-x-1 text-muted">
+            <span className="whitespace-nowrap">{cat?.label}</span>
+            <span className="whitespace-nowrap">· {pieces(p)} pieces</span>
+            <span className="hidden whitespace-nowrap 2xl:inline">· {p.method}</span>
           </p>
         </div>
       </Link>
-    </article>
-  );
-}
-
-/** The slot after the last collection: the next roster number, held open. */
-function Reserved({ i, no }: { i: number; no: number }) {
-  return (
-    <article className={`wk-tile relative ${POS_CLASS[Math.min(i, 5)]}`}>
-      <a href="#your-collection" className="wk-tile-link group">
-        <div className="wk-reserved text-ink">
-          <span className="woven woven-beige relative z-[1] self-start">{drop(no)} · Reserved</span>
-          <p className="t-h2 relative z-[1] max-w-[12ch]">
-            Yours, <em>next</em>.
-          </p>
-        </div>
-        <p className="t-spec mt-6 flex items-center gap-3 text-muted sm:mt-7">
-          Put your name on it
-          <Arrow className="h-3 w-4 transition-transform duration-base ease-out group-hover:translate-x-1" />
-        </p>
-      </a>
     </article>
   );
 }
@@ -325,7 +306,7 @@ function Filters({
  * straight into the line; it's the same name everywhere on the site.
  */
 function Ending({ count }: { count: number }) {
-  const { name, raw, set, isDefault } = useOrgName();
+  const { raw, set } = useOrgName();
   const chars = Math.max((raw || YOUR_NAME).length, 5);
   return (
     <section id="your-collection" aria-labelledby="wk-yours" className="band-cream sec scroll-mt-20">
@@ -360,7 +341,7 @@ function Ending({ count }: { count: number }) {
           </p>
           <p className="t-spec mt-5 text-muted">From 36 per style · Design included · One clear price</p>
           <Link href="/quote" className="btn-blue mt-10 w-full sm:w-auto">
-            {isDefault ? 'Start your collection' : `Start ${possessive(name).replace("'", '’')} collection`}
+            Start a collection
             <Arrow className="h-3 w-4" />
           </Link>
         </div>

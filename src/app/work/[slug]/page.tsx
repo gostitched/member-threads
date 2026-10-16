@@ -71,8 +71,8 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
             <MoodPhoto
               slug={w.mood.hero}
               ratio="portrait"
-              className="lg:aspect-[21/9]"
-              treatment="grade"
+              treatment={w.mood.heroTone ?? 'grade'}
+              className="wk-focus lg:aspect-[21/9]"
               priority
               sizes="100vw"
             />
@@ -95,6 +95,8 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
                 {w.vibe}.
               </p>
             )}
+            <p className="caption">Photograph above: mood reference, not this organization or its collection</p>
+            <ShareButton w={w} className="mt-3" />
           </div>
 
           {/* The spec panel: the page's one label object, sewn across the photo's edge. */}
@@ -156,7 +158,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
           {w.mood && (
             <figure className="col-span-3 col-start-2 sm:col-span-4 sm:col-start-5 lg:col-span-3 lg:col-start-10 lg:mt-40">
               <MoodPhoto slug={w.mood.detail} ratio="portrait" wipe sizes="(min-width: 1024px) 24vw, (min-width: 640px) 50vw, 75vw" />
-              <figcaption className="caption">Mood · {w.mood.detailNote}</figcaption>
+              <figcaption className="caption">Mood reference · {w.mood.detailNote}</figcaption>
             </figure>
           )}
 
@@ -252,29 +254,40 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
       {close.length > 0 && (
         <section aria-labelledby="wk-close" className="sec">
           <div className="shell grid-12 gap-y-12">
-            <p className="t-spec col-span-4 text-muted sm:col-span-8 lg:col-span-2">03 · Up close</p>
+            <p className="t-spec col-span-4 text-muted sm:col-span-8 lg:col-span-2">03 · Details</p>
             <h2 id="wk-close" className="t-h1 col-span-4 sm:col-span-8 lg:col-span-6 lg:col-start-3">
-              Where the <em>care</em> shows.
+              Up <em>close</em>.
             </h2>
-            {close.map((a, i) => (
+            {close[0]?.art && (
+              <figure className="col-span-4 sm:col-span-5 lg:col-span-6 lg:col-start-3 lg:mt-8">
+                <div className="wipe-in relative aspect-[4/3] overflow-hidden">
+                  <WorkArt art={close[0].art} label={close[0].alt} className="absolute inset-0 h-full w-full" />
+                </div>
+                <figcaption className="caption">{closeCaps[0] ? `${closeCaps[0]} · ` : ''}Concept drawing</figcaption>
+              </figure>
+            )}
+            {w.mood?.macro && (
+              <figure className="col-span-3 col-start-2 sm:col-span-3 sm:col-start-6 lg:col-span-3 lg:col-start-10 lg:mt-40">
+                <MoodPhoto slug={w.mood.macro.slug} ratio="portrait" wipe sizes="(min-width: 1024px) 24vw, (min-width: 640px) 38vw, 75vw" />
+                <figcaption className="caption">Mood reference · {w.mood.macro.note}</figcaption>
+              </figure>
+            )}
+            {close[1]?.art && (
               <figure
-                key={a.id}
                 className={
-                  i === 0
-                    ? 'col-span-4 sm:col-span-5 lg:col-span-6 lg:col-start-3 lg:mt-8'
+                  w.mood?.macro
+                    ? 'col-span-3 sm:col-span-3 sm:col-start-2 lg:col-span-3 lg:col-start-5 lg:-mt-8'
                     : 'col-span-3 col-start-2 sm:col-span-3 sm:col-start-6 lg:col-span-3 lg:col-start-10 lg:mt-48'
                 }
               >
-                <div className={`wipe-in relative overflow-hidden ${i === 0 ? 'aspect-[4/3]' : 'aspect-square bg-cream'}`}>
-                  {a.art && (
-                    <div className={i === 0 ? 'absolute inset-0' : 'absolute inset-[12%]'}>
-                      <WorkArt art={a.art} label={a.alt} className="h-full w-full" />
-                    </div>
-                  )}
+                <div className="wipe-in relative aspect-square overflow-hidden bg-cream">
+                  <div className="absolute inset-[12%]">
+                    <WorkArt art={close[1].art} label={close[1].alt} className="h-full w-full" />
+                  </div>
                 </div>
-                <figcaption className="caption">{closeCaps[i] ?? a.alt}</figcaption>
+                <figcaption className="caption">{closeCaps[1] ? `${closeCaps[1]} · ` : ''}Concept drawing</figcaption>
               </figure>
-            ))}
+            )}
           </div>
         </section>
       )}
@@ -295,8 +308,8 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
                 <li key={c.name}>
                   <div className="wk-label text-ink" style={{ background: c.hex, color: dark(c.hex) ? '#EEE6D9' : '#133327' }}>
                     <span className="relative z-[1] flex items-baseline justify-between gap-3 bg-cream px-3 py-2.5 text-ink">
-                      <span className="t-spec">{c.name}</span>
-                      <span className="t-spec num text-muted">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="t-spec" style={{ color: '#133327' }}>{c.name}</span>
+                      <span className="t-spec num" style={{ color: '#55625A' }}>{String(i + 1).padStart(2, '0')}</span>
                     </span>
                   </div>
                   <p className="t-spec mt-4 flex justify-between gap-3">
@@ -311,7 +324,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
       )}
 
       {/* ── 7. Next collection ──────────────────────────────────────────── */}
-      <section aria-labelledby="wk-next" className="sec-sm">
+      <section aria-labelledby="wk-next" className="sec-sm pb-[var(--sec)]">
         <div className="shell">
           <p className="t-spec hairline flex justify-between pt-5 text-muted">
             <span>Next collection</span>
@@ -321,10 +334,10 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
             <div className="col-span-4 sm:col-span-8 lg:col-span-5">
               <p className="t-spec text-muted">{categoryOf(next)?.title}</p>
               <h2 id="wk-next" className="t-h1 mt-4">
-                <span className="link-u">{next.title}</span>
+                {next.title}
               </h2>
               <p className="t-spec mt-5 flex items-center gap-3">
-                {next.sector}
+                <span className="link-u">{next.sector}</span>
                 <Arrow className="h-3 w-4 transition-transform duration-base ease-out group-hover:translate-x-1" />
               </p>
             </div>
@@ -337,24 +350,6 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
         </div>
       </section>
 
-      <section aria-label="Start a collection" className="pb-[var(--sec)]">
-        <div className="shell">
-          <div className="hairline flex flex-col gap-8 pt-10 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="t-h2">
-                Make one for <em>your</em> members.
-              </p>
-              <p className="t-body mt-3 max-w-[48ch]">From 36 pieces per style, design included, one clear price.</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-              <ShareButton w={w} />
-              <Link href="/quote" className="btn-blue">
-                Start a collection <Arrow />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

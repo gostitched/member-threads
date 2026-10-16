@@ -32,7 +32,10 @@ export default function ProductMedia({
   size = 'thumb',
   className = '',
   priority = false,
+  outlined = false,
 }: {
+  /** Firm ink edge on the drawing (see GarmentArt). */
+  outlined?: boolean;
   product: CatalogProduct;
   colorIndex?: number;
   imageIndex?: number;
@@ -67,6 +70,7 @@ export default function ProductMedia({
       kind={garmentKind(product)}
       color={paintOf(colorway)}
       className={`h-full w-full ${className}`}
+      outlined={outlined}
       label={`${product.name}${colorway ? ` in ${colorway.name}` : ''}`}
     />
   );

@@ -9,12 +9,23 @@
  * Files: /public/photos/<slug>.webp, max 2400px long edge, WebP q78, metadata stripped.
  * Grade: every non-texture image got the same subtle house grade (blacks lifted ~6/255,
  * highlights rolled off ~3.5%, slight warm shift R x1.02 / B x0.965). Textures are ungraded.
- * Crops: craft-embroidery-machine-cap (top 12%, removes a machine maker's wordmark) and
- * craft-thread-cones (top 17%, removes a partial thread label).
+ * Corrective re-grades: craft-thread-cones (hue pulled from chartreuse toward olive, less saturation),
+ * detail-knit-stack-window (less saturation), craft-studio-cutting-table (shadows lifted, contrast lowered).
+ * Crops: craft-embroidery-machine-cap (top 12%, removes a machine maker's wordmark),
+ * craft-thread-cones (top 17%, removes a partial thread label), craft-studio-cutting-table
+ * (left 25%, removes a branded tin on the windowsill).
+ * Product plates (role 'product') are logo-free stock garments that stand in for catalog styles.
+ * Grounds and lighting vary. No suitable plate was found for heavyweight-hoodie,
+ * rugby-shirt, quilted-vest or five-panel-cap.
  * Full credits: /public/photos/CREDITS.md
  */
 
-export type PhotoRole = 'hero' | 'segment' | 'craft' | 'detail' | 'lifestyle' | 'texture';
+export type PhotoRole = 'hero' | 'segment' | 'craft' | 'detail' | 'lifestyle' | 'texture' | 'product';
+/** Catalog style slugs from src/lib/catalog/local.ts */
+export type PhotoProduct =
+  | 'heavyweight-hoodie' | 'quarter-zip' | 'embroidered-polo' | 'heavyweight-crewneck'
+  | 'heavyweight-tee' | 'long-sleeve-tee' | 'rugby-shirt' | 'coach-jacket' | 'quilted-vest'
+  | 'fleece-sweatpant' | 'club-short' | 'dad-hat' | 'five-panel-cap' | 'canvas-tote';
 export type PhotoSegment = 'campus' | 'company' | 'nonprofit' | 'athletic' | 'social';
 /**
  * The image's overall brightness where text would sit.
@@ -38,6 +49,8 @@ export interface Photo {
   alt: string;
   role: PhotoRole;
   segment?: PhotoSegment;
+  /** For role 'product': the catalog style this image suits. These are stand-in mood plates, not the actual product. */
+  product?: PhotoProduct;
   /** CSS object-position that keeps the subject in frame when cropped */
   objectPosition: string;
   tone: PhotoTone;
@@ -185,7 +198,7 @@ export const PHOTOS = {
   'craft-studio-cutting-table': {
     src: '/photos/craft-studio-cutting-table.webp',
     width: 2400,
-    height: 1601,
+    height: 2134,
     alt: 'A maker working at a large pattern-cutting table in a moody, window-lit studio, scissors and tools laid out on striped fabric',
     role: 'craft',
     objectPosition: '50% 55%',
@@ -272,16 +285,8 @@ export const PHOTOS = {
     tone: 'dark',
     credit: { photographer: 'Moonstarious Project', source: 'Unsplash', url: 'https://unsplash.com/photos/a-close-up-of-a-cloth-on-a-table-R2Z3xE7nsB8' },
   },
-  'detail-embroidery-needle': {
-    src: '/photos/detail-embroidery-needle.webp',
-    width: 2400,
-    height: 1603,
-    alt: 'Close-up of an embroidery needle laying white satin stitches on dark fabric inside a green hoop',
-    role: 'detail',
-    objectPosition: '60% 50%',
-    tone: 'dark',
-    credit: { photographer: 'PJ Wallace', source: 'Unsplash', url: 'https://unsplash.com/photos/a-sewing-machine-needle-creating-white-stitches-on-dark-fabric-6tilGbJNkcU' },
-  },
+  /** @deprecated Soft focus at the needle. Use 'detail-embroidery-satin' instead. Kept so existing references don't break. */
+
   'detail-corduroy-cap': {
     src: '/photos/detail-corduroy-cap.webp',
     width: 1602,
@@ -322,6 +327,249 @@ export const PHOTOS = {
     tone: 'dark',
     credit: { photographer: 'Divazus Fabric Store', source: 'Unsplash', url: 'https://unsplash.com/photos/green-textile-in-close-up-image-zLex1iJO8bc' },
   },
+  'product-heavyweight-tee-hanger': {
+    src: '/photos/product-heavyweight-tee-hanger.webp',
+    width: 2400,
+    height: 1600,
+    alt: 'A plain white crewneck T-shirt on a wooden hanger against a warm off-white wall',
+    role: 'product',
+    product: 'heavyweight-tee',
+    objectPosition: '50% 45%',
+    tone: 'light',
+    credit: { photographer: 'Avtar Singh', source: 'Unsplash', url: 'https://unsplash.com/photos/a-plain-white-t-shirt-hangs-on-a-wooden-hanger-8ACmRoleM24' },
+  },
+  'product-crewneck-knit-hanger': {
+    src: '/photos/product-crewneck-knit-hanger.webp',
+    width: 1743,
+    height: 2400,
+    alt: 'A chestnut-brown knit crewneck hanging on a white hanger in soft window light',
+    // A hand knit, not a fleece crewneck: kept as texture, not mapped to MT-04.
+    role: 'detail',
+    objectPosition: '50% 45%',
+    tone: 'light',
+    credit: { photographer: 'Yuliia Pakhomova', source: 'Unsplash', url: 'https://unsplash.com/photos/a-brown-knitted-sweater-hangs-on-a-white-hanger-g3AwbdZut70' },
+  },
+  'product-dad-hat-linen': {
+    src: '/photos/product-dad-hat-linen.webp',
+    width: 1600,
+    height: 2400,
+    alt: 'An unbranded natural-linen six-panel dad hat resting on a dark navy surface in low light',
+    role: 'product',
+    product: 'dad-hat',
+    objectPosition: '50% 30%',
+    tone: 'dark',
+    credit: { photographer: 'Benjamin R.', source: 'Unsplash', url: 'https://unsplash.com/photos/a-hat-on-a-persons-head-gcZcCqpGEw0' },
+  },
+  'product-canvas-tote-detail': {
+    src: '/photos/product-canvas-tote-detail.webp',
+    width: 2400,
+    height: 1920,
+    alt: 'Close-up of a natural cotton canvas tote with woven webbing handles on a white ground',
+    role: 'product',
+    product: 'canvas-tote',
+    objectPosition: '45% 55%',
+    tone: 'light',
+    credit: { photographer: 'Mel Poole', source: 'Unsplash', url: 'https://unsplash.com/photos/brown-tote-bag-on-white-surface--zBSu3rYjNs' },
+  },
+  'product-quarter-zip-rib': {
+    src: '/photos/product-quarter-zip-rib.webp',
+    width: 1600,
+    height: 2400,
+    alt: 'Close-up of a taupe rib-knit quarter-zip pullover with a metal zip, worn over a cream tee',
+    role: 'product',
+    product: 'quarter-zip',
+    objectPosition: '50% 45%',
+    tone: 'dark',
+    credit: { photographer: 'Laurenz Heymann', source: 'Unsplash', url: 'https://unsplash.com/photos/a-man-wearing-a-gray-sweater-with-a-zipper-LlTOg2mWZP4' },
+  },
+  'product-coach-jacket-rack': {
+    src: '/photos/product-coach-jacket-rack.webp',
+    width: 2400,
+    height: 1601,
+    alt: 'A row of olive-green cotton jackets hanging on a dark rail against a warm grey wall',
+    role: 'product',
+    product: 'coach-jacket',
+    objectPosition: '70% 60%',
+    tone: 'dark',
+    credit: { photographer: 'Deyan Sight', source: 'Unsplash', url: 'https://unsplash.com/photos/a-row-of-green-suits-hanging-on-a-rail-OhjG66NrPqk' },
+  },
+  'product-sweatpant-drawcord': {
+    src: '/photos/product-sweatpant-drawcord.webp',
+    width: 2400,
+    height: 1442,
+    alt: 'Close-up of a mustard fleece waistband with metal eyelets and a pale-blue tied drawcord',
+    role: 'product',
+    product: 'fleece-sweatpant',
+    objectPosition: '40% 45%',
+    tone: 'light',
+    credit: { photographer: 'lilartsy', source: 'Unsplash', url: 'https://unsplash.com/photos/orange-and-white-shorts-5hzGB5ktcw8' },
+  },
+  'product-club-shorts-stack': {
+    src: '/photos/product-club-shorts-stack.webp',
+    width: 1600,
+    height: 2400,
+    alt: 'Fleece and twill drawstring shorts in heather grey, charcoal, black and white laid flat',
+    role: 'product',
+    product: 'club-short',
+    objectPosition: '50% 55%',
+    tone: 'light',
+    credit: { photographer: 'TuanAnh Blue', source: 'Unsplash', url: 'https://unsplash.com/photos/a-group-of-three-shorts-sitting-next-to-each-other-ZgDpz1A9-U4' },
+  },
+  'product-polo-pique-flatlay': {
+    src: '/photos/product-polo-pique-flatlay.webp',
+    width: 2400,
+    height: 1600,
+    alt: 'Pique knit polos in cream, camel, pale grey and navy loosely laid on a white table',
+    role: 'product',
+    product: 'embroidered-polo',
+    objectPosition: '50% 50%',
+    tone: 'light',
+    credit: { photographer: 'TuanAnh Blue', source: 'Unsplash', url: 'https://unsplash.com/photos/a-pile-of-clothing-sitting-on-top-of-a-white-table-Tcy7f54MhTw' },
+  },
+  'product-long-sleeve-rack': {
+    src: '/photos/product-long-sleeve-rack.webp',
+    width: 1667,
+    height: 2400,
+    alt: 'A white rail of cream, oat and white long- and short-sleeve tees on white hangers in a bright corner',
+    role: 'product',
+    product: 'long-sleeve-tee',
+    objectPosition: '55% 60%',
+    tone: 'light',
+    credit: { photographer: 'Dinh Ng.', source: 'Unsplash', url: 'https://unsplash.com/photos/white-long-sleeve-shirt-on-white-clothes-hanger-jYz3EGBhDpk' },
+  },
+  'detail-rib-navy': {
+    src: '/photos/detail-rib-navy.webp',
+    width: 2400,
+    height: 1600,
+    alt: 'Macro of chunky heathered navy rib knit with burgundy flecks',
+    role: 'detail',
+    objectPosition: '50% 50%',
+    tone: 'dark',
+    credit: { photographer: 'Maria Kovalets', source: 'Unsplash', url: 'https://unsplash.com/photos/a-close-up-of-a-knitted-material-FRCr3ezYFLg' },
+  },
+  'detail-rib-cuff-grey': {
+    src: '/photos/detail-rib-cuff-grey.webp',
+    width: 1590,
+    height: 2400,
+    alt: 'Close-up of pale grey rib-knit cuffs in raking light',
+    role: 'detail',
+    objectPosition: '50% 40%',
+    tone: 'light',
+    credit: { photographer: 'Courtney Smith', source: 'Unsplash', url: 'https://unsplash.com/photos/white-textile-in-close-up-photography-jqhrI9IhK3k' },
+  },
+  'detail-knit-stack-trio': {
+    src: '/photos/detail-knit-stack-trio.webp',
+    width: 1600,
+    height: 2400,
+    alt: 'Three folded knits stacked: cream chunky rib, camel jersey and mustard sweater knit',
+    role: 'detail',
+    objectPosition: '50% 50%',
+    tone: 'light',
+    credit: { photographer: 'Olga Kozachenko', source: 'Unsplash', url: 'https://unsplash.com/photos/white-and-gray-knit-textile-o9dtfshlJ60' },
+  },
+  'detail-varsity-stripe-cuff': {
+    src: '/photos/detail-varsity-stripe-cuff.webp',
+    width: 1600,
+    height: 2400,
+    alt: 'Close-up of a grey and cream rib-knit cuff with a red varsity stripe over navy',
+    role: 'detail',
+    objectPosition: '50% 55%',
+    tone: 'light',
+    credit: { photographer: 'Dorice Legault', source: 'Unsplash', url: 'https://unsplash.com/photos/gray-red-and-white-sock-vefzt_9qg-c' },
+  },
+  'detail-zipper-canvas': {
+    src: '/photos/detail-zipper-canvas.webp',
+    width: 2400,
+    height: 1600,
+    alt: 'Macro of a chunky antique-nickel zipper and pull on navy canvas with tan webbing tape',
+    role: 'detail',
+    objectPosition: '50% 50%',
+    tone: 'dark',
+    credit: { photographer: 'Mohamed Marey', source: 'Unsplash', url: 'https://unsplash.com/photos/a-metal-zipper-on-blue-and-brown-fabric-pCb3rHZZCTA' },
+  },
+
+  'detail-swatch-book': {
+    src: '/photos/detail-swatch-book.webp',
+    width: 1590,
+    height: 2400,
+    alt: 'A tailoring swatch book with fanned suiting cloth strips in cream, grey and navy',
+    role: 'detail',
+    objectPosition: '50% 55%',
+    tone: 'dark',
+    credit: { photographer: 'Yasamine June', source: 'Unsplash', url: 'https://unsplash.com/photos/a-close-up-of-a-piece-of-cloth-on-a-table-9pFE-9CWEBI' },
+  },
+  'detail-fabric-houndstooth': {
+    src: '/photos/detail-fabric-houndstooth.webp',
+    width: 1800,
+    height: 2400,
+    alt: 'Folded fabrics in rust cotton, tan micro-houndstooth and chocolate brown',
+    role: 'detail',
+    objectPosition: '50% 50%',
+    tone: 'dark',
+    credit: { photographer: 'Victor Volkov', source: 'Unsplash', url: 'https://unsplash.com/photos/a-close-up-of-a-brown-and-black-fabric-t3mSDMjd9ZY' },
+  },
+  'detail-folded-stack-color': {
+    src: '/photos/detail-folded-stack-color.webp',
+    width: 2400,
+    height: 2237,
+    alt: 'A tight stack of folded garments in powder blue, mustard, rust stripe and denim',
+    role: 'detail',
+    objectPosition: '50% 50%',
+    tone: 'dark',
+    credit: { photographer: 'Zoe', source: 'Unsplash', url: 'https://unsplash.com/photos/brown-and-black-textile-on-black-textile-ZRcD8IxeXUw' },
+  },
+  'detail-embroidery-satin': {
+    src: '/photos/detail-embroidery-satin.webp',
+    width: 2400,
+    height: 2400,
+    alt: 'Close-up of hand embroidery in a wooden hoop: blush and crimson satin-stitch roses with green leaves on natural cotton',
+    role: 'detail',
+    objectPosition: '50% 50%',
+    tone: 'light',
+    credit: { photographer: 'Gio Gix', source: 'Unsplash', url: 'https://unsplash.com/photos/green-and-red-floral-textile-iKO49WSTJaU' },
+  },
+  'craft-pattern-pieces': {
+    src: '/photos/craft-pattern-pieces.webp',
+    width: 2400,
+    height: 1569,
+    alt: 'Hands laying out cut fabric pattern pieces on a dark wooden workbench beside scissors and thread',
+    role: 'craft',
+    objectPosition: '55% 50%',
+    tone: 'dark',
+    credit: { photographer: 'Kelly Sikkema', source: 'Unsplash', url: 'https://unsplash.com/photos/person-in-black-long-sleeve-shirt-holding-red-round-ornament-4LjWS2TtmEk' },
+  },
+  'segment-nonprofit-garden': {
+    src: '/photos/segment-nonprofit-garden.webp',
+    width: 2400,
+    height: 1602,
+    alt: 'A volunteer in a striped shirt and gloves kneeling to tend a community garden bed in warm afternoon light',
+    role: 'segment',
+    segment: 'nonprofit',
+    objectPosition: '55% 50%',
+    tone: 'light',
+    credit: { photographer: 'Hasan Hasanzadeh', source: 'Unsplash', url: 'https://unsplash.com/photos/a-woman-kneeling-down-in-a-garden-holding-an-apple--4lNMuL4qJ4' },
+  },
+  'segment-social-croquet': {
+    src: '/photos/segment-social-croquet.webp',
+    width: 2400,
+    height: 1600,
+    alt: 'Wooden croquet mallets and balls lying on a freshly mown lawn',
+    role: 'segment',
+    segment: 'social',
+    objectPosition: '55% 55%',
+    tone: 'light',
+    credit: { photographer: 'Troy Taylor', source: 'Unsplash', url: 'https://unsplash.com/photos/red-and-white-balls-on-green-grass-kN5nJA9LpZc' },
+  },
+  'lifestyle-park-picnic': {
+    src: '/photos/lifestyle-park-picnic.webp',
+    width: 1600,
+    height: 2400,
+    alt: 'Friends gathered on picnic blankets on a shaded lawn under tall trees',
+    role: 'lifestyle',
+    objectPosition: '50% 75%',
+    tone: 'dark',
+    credit: { photographer: 'Jonathan Borba', source: 'Unsplash', url: 'https://unsplash.com/photos/people-enjoying-a-picnic-in-a-sunny-park-nQjwhL5TKM8' },
+  },
 } as const satisfies Record<string, Photo>;
 
 export type PhotoSlug = keyof typeof PHOTOS;
@@ -332,6 +580,14 @@ export function getPhoto(slug: PhotoSlug): Photo {
 
 export function photosByRole(role: PhotoRole): Photo[] {
   return Object.values(PHOTOS).filter((p: Photo) => p.role === role);
+}
+
+export function photosForProduct(product: PhotoProduct): Photo[] {
+  return Object.values(PHOTOS).filter((p: Photo) => p.product === product);
+}
+
+export function photosForSegment(segment: PhotoSegment): Photo[] {
+  return Object.values(PHOTOS).filter((p: Photo) => p.segment === segment);
 }
 
 export function photoForSegment(segment: PhotoSegment): Photo | undefined {

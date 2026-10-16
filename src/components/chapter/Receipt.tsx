@@ -109,7 +109,7 @@ export default function Receipt({
       <div className="mt-5 flex items-center justify-between gap-3">
         <span aria-hidden className="chapter-slip-code t-spec fg-muted">{SLIP.code}</span>
         {onReset && lines.length > 1 && (
-          <button type="button" onClick={onReset} className="link-u t-spec chapter-reset">
+          <button type="button" onClick={onReset} className="link-u chapter-link chapter-reset">
             Start over
           </button>
         )}

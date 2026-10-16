@@ -53,6 +53,13 @@
   @media (min-width: 640px) { :root { --gutter: 24px; } }
   @media (min-width: 1024px) { :root { --gutter: 32px; } }
 
+  /* Anchors and focused fields land below the sticky header (72/84/92px). */
+  html { scroll-padding-top: 88px; }
+  @media (min-width: 640px) { html { scroll-padding-top: 100px; } }
+  @media (min-width: 1024px) { html { scroll-padding-top: 108px; } }
+  input, select, textarea, [id] { scroll-margin-top: 88px; }
+  @media (min-width: 640px) { input, select, textarea, [id] { scroll-margin-top: 100px; } }
+  @media (min-width: 1024px) { input, select, textarea, [id] { scroll-margin-top: 108px; } }
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -123,7 +130,7 @@
     background-color: theme('colors.green');
     color: theme('colors.cream');
     --fg: theme('colors.cream');
-    --fg-muted: rgba(238, 230, 217, 0.68);
+    --fg-muted: rgba(238, 230, 217, 0.8);
     --rule-c: rgba(238, 230, 217, 0.16);
     --focus: theme('colors.beige');
     --stitch-c: theme('colors.beige');
@@ -133,13 +140,16 @@
     background-color: theme('colors.dusty');
     color: theme('colors.cream');
     --fg: theme('colors.cream');
-    --fg-muted: rgba(238, 230, 217, 0.66);
+    --fg-muted: rgba(238, 230, 217, 0.8);
     --rule-c: rgba(238, 230, 217, 0.16);
     --focus: theme('colors.beige');
     --stitch-c: theme('colors.beige');
     --thread: theme('colors.beige');
   }
   .fg-muted { color: var(--fg-muted); }
+  /* Small caps on dark bands: cream at 80% (7.5:1), never beige (3.1:1). */
+  .band-green :is(.t-eyebrow, .label, .t-spec, .caption),
+  .band-dusty :is(.t-eyebrow, .label, .t-spec, .caption) { color: var(--fg-muted); }
 
   /* ---- Type styles ---------------------------------------------------------
      Family + weight + width + size + leading + tracking in one class. Colour
@@ -238,8 +248,8 @@
     font-family: var(--font-sans);
     font-weight: 600;
     font-stretch: 100%;
-    font-size: 11.5px;
-    line-height: 14px;
+    font-size: 12px;
+    line-height: 15px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
@@ -283,8 +293,8 @@
     font-family: var(--font-mono);
     font-weight: 600;
     font-stretch: 100%;
-    font-size: 11.5px;
-    line-height: 14px;
+    font-size: 12px;
+    line-height: 15px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
   }
@@ -305,9 +315,9 @@
     font-family: var(--font-sans);
     font-weight: 600;
     font-stretch: 100%;
-    font-size: 10.5px;
+    font-size: 12px;
     line-height: 1;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     white-space: nowrap;
   }
@@ -326,7 +336,7 @@
   .woven-green { background-color: theme('colors.green'); color: theme('colors.cream'); }
   .woven-beige { background-color: theme('colors.beige'); color: theme('colors.ink'); }
   .woven-dusty { background-color: theme('colors.dusty'); color: theme('colors.cream'); }
-  .woven-lg { font-size: 12px; padding: 0.85em 1.2em 0.8em; }
+  .woven-lg { font-size: 13px; padding: 0.85em 1.2em 0.8em; }
 
   /* Tag: a quiet outlined chip for lists of items (garments, fabrics). */
   .tag {
@@ -491,8 +501,8 @@
     margin-bottom: 0.5rem;
     font-family: var(--font-sans);
     font-weight: 600;
-    font-size: 11.5px;
-    line-height: 14px;
+    font-size: 12px;
+    line-height: 15px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--fg-muted);

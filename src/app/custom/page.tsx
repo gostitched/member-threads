@@ -59,7 +59,7 @@ export default function CustomPage() {
             </p>
             <div className="enter mt-10" style={{ ['--d' as string]: '360ms' }}>
               <Link href="/quote" className="btn-blue">
-                Describe the piece <Arrow className="h-3.5 w-[18px]" />
+                Start a collection <Arrow className="h-3.5 w-[18px]" />
               </Link>
             </div>
           </div>
@@ -88,27 +88,31 @@ export default function CustomPage() {
             </h2>
           </div>
 
+          {/* The sheet sits on the cream band, ink on cream. On phones it crops to
+              the garment so the pins stay legible; the table below is the key. */}
           <figure className="mt-14 lg:mt-20">
-            <div className="relative">
-              <Image
-                src="/chapter/harbor-working-drawing.svg"
-                alt="Working drawing of a club hoodie: flat sketch with measurements, embroidery and trim notes, and colour cards"
-                width={1600}
-                height={1100}
-                sizes="(min-width: 1536px) 1424px, 92vw"
-                className="lift block h-auto w-full"
-                unoptimized
-              />
-              {CHOOSE.map((c, i) => (
-                <span
-                  key={c.title}
-                  aria-hidden
-                  className="mt-pin t-spec flex h-7 w-7 items-center justify-center bg-cream text-ink sm:h-9 sm:w-9"
-                  style={{ left: `${c.pin.x}%`, top: `${c.pin.y}%` }}
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-              ))}
+            <div className="relative aspect-[4/5] overflow-hidden sm:aspect-auto sm:overflow-visible">
+              <div className="relative -ml-[24%] -mt-[15%] w-[217%] sm:m-0 sm:w-full">
+                <Image
+                  src="/about/working-drawing.svg"
+                  alt="Working drawing of a club hoodie: flat sketch with measurements, trim notes and colour cards"
+                  width={1600}
+                  height={1100}
+                  sizes="(min-width: 1536px) 1424px, (min-width: 640px) 92vw, 217vw"
+                  className="block h-auto w-full"
+                  unoptimized
+                />
+                {CHOOSE.map((c, i) => (
+                  <span
+                    key={c.title}
+                    aria-hidden
+                    className="mt-pin t-spec flex h-8 w-8 items-center justify-center bg-ink text-cream sm:h-9 sm:w-9"
+                    style={{ left: `${c.pin.x}%`, top: `${c.pin.y}%` }}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                ))}
+              </div>
             </div>
             <figcaption className="caption">Working drawing · Style MT-HD01 · An example sheet</figcaption>
           </figure>
@@ -141,19 +145,15 @@ export default function CustomPage() {
             </h2>
           </div>
 
-          {/* Three craft plates, staggered. */}
+          {/* Two craft plates, offset. */}
           <div className="grid-12 mt-14 gap-y-10 lg:mt-20">
-            <figure className="col-span-2 sm:col-span-3 lg:col-span-4">
-              <Photo slug="detail-chenille-numerals" ratio="square" motion="wipe-in" sizes="(min-width: 1024px) 31vw, (min-width: 640px) 36vw, 48vw" />
-              <figcaption className="caption">Chenille</figcaption>
+            <figure className="col-span-3 sm:col-span-4 lg:col-span-5">
+              <Photo slug="detail-corduroy-cap" ratio="portrait" motion="wipe-in" sizes="(min-width: 1024px) 39vw, (min-width: 640px) 48vw, 72vw" />
+              <figcaption className="caption">Corduroy cap</figcaption>
             </figure>
-            <figure className="col-span-2 mt-16 sm:col-span-3 sm:mt-24 lg:col-span-4 lg:mt-32">
-              <Photo slug="detail-embroidery-needle" ratio="portrait" motion="wipe-in" sizes="(min-width: 1024px) 31vw, (min-width: 640px) 36vw, 48vw" />
-              <figcaption className="caption">Satin stitch</figcaption>
-            </figure>
-            <figure className="col-span-3 col-start-2 sm:col-span-2 sm:col-start-7 sm:mt-10 lg:col-span-4 lg:col-start-9 lg:mt-12">
-              <Photo slug="detail-fabric-rolls" ratio="square" motion="wipe-in" sizes="(min-width: 1024px) 31vw, (min-width: 640px) 24vw, 72vw" />
-              <figcaption className="caption">Cotton, by the roll</figcaption>
+            <figure className="col-span-3 col-start-2 sm:col-span-3 sm:col-start-6 sm:mt-32 lg:col-span-4 lg:col-start-8 lg:mt-48">
+              <Photo slug="texture-sherpa-fleece" ratio="square" motion="wipe-in" sizes="(min-width: 1024px) 31vw, (min-width: 640px) 36vw, 72vw" />
+              <figcaption className="caption">Sherpa fleece, up close</figcaption>
             </figure>
           </div>
 
@@ -196,7 +196,7 @@ export default function CustomPage() {
             <div className="col-span-4 sm:col-span-6 lg:col-span-4 lg:col-start-9">
               <p className="t-lead">Tell us what it is and who it’s for. Your designer takes it from there.</p>
               <Link href="/quote" className="btn-blue mt-10">
-                Describe the piece <Arrow className="h-3.5 w-[18px]" />
+                Start a collection <Arrow className="h-3.5 w-[18px]" />
               </Link>
             </div>
           </div>

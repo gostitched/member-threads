@@ -24,7 +24,7 @@ body:has(.rk) { background: theme('colors.paper'); }
 .ct-chip-n {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
   opacity: 0.62;
@@ -39,6 +39,7 @@ body:has(.rk) { background: theme('colors.paper'); }
 }
 .ct-search:hover { border-bottom-color: color-mix(in srgb, currentColor 60%, transparent); }
 .ct-search:focus-within { border-bottom-color: currentColor; box-shadow: 0 1px 0 0 currentColor; }
+.ct-search:has(input:focus-visible) { outline: 2px solid theme('colors.dusty'); outline-offset: 2px; }
 .ct-search input {
   width: 100%;
   min-width: 0;
@@ -56,14 +57,16 @@ body:has(.rk) { background: theme('colors.paper'); }
   height: 20px;
   border: 1px solid var(--rule-c);
   border-radius: 2px;
-  font: 500 11px/1 var(--font-sans), sans-serif;
+  font: 500 12px/1 var(--font-sans), sans-serif;
   color: var(--fg-muted);
 }
 /* Plain-text toggles: Rack / List, Sound. The pressed one is underlined. */
 .ct-toggle {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 44px;
+  min-width: 44px;
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 14px;
@@ -223,6 +226,7 @@ body:has(.rk) { background: theme('colors.paper'); }
 }
 .ct-range .range::-webkit-slider-thumb { box-shadow: none; border-color: theme('colors.paper'); }
 .ct-range .range:focus-visible { outline: none; }
+.ct-range:has(.range:focus-visible) { outline: 2px solid theme('colors.dusty'); outline-offset: 2px; }
 .ct-range .range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px theme('colors.paper'), 0 0 0 4px var(--focus); }
 .ct-range .range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px theme('colors.paper'), 0 0 0 4px var(--focus); }
 
@@ -311,4 +315,24 @@ details[open] .ct-plus::after { transform: rotate(0deg); }
   .ct-plus::before,
   .ct-plus::after { transition: none; }
   .ct-tick { animation: none; }
+}
+
+/* Visible focus on the catalog's own controls. */
+.ct-toggle:focus-visible,
+.ct-plate:focus-visible,
+.ct-scope summary:focus-visible { outline: 2px solid theme('colors.dusty'); outline-offset: 2px; }
+
+/* Product photographs come from different studios: some on white, some on near-black.
+   One shared tone so the set reads as one: blacks lifted and whites pulled down a
+   touch, then a cream multiply that warms white grounds toward the plates. */
+.ct-unify img { filter: saturate(0.8) contrast(0.9) sepia(0.1) brightness(1.03) !important; }
+.ct-unify::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #EEE6D9;
+  mix-blend-mode: multiply;
+  opacity: 0.32;
+  pointer-events: none;
 }

@@ -32,7 +32,7 @@ import {
 
 // ── Sheet layout, in sheet units ────────────────────────────────────────────
 
-const U = { w: 1400, h: 960 };
+const U = { w: 1500, h: 960 };
 type Box = { x: number; y: number; w: number; h?: number };
 const at = ({ x, y, w, h }: Box): React.CSSProperties => ({
   left: `${(x / U.w) * 100}%`,
@@ -41,9 +41,9 @@ const at = ({ x, y, w, h }: Box): React.CSSProperties => ({
   ...(h !== undefined ? { height: `${(h / U.h) * 100}%` } : {}),
 });
 
-const GARMENT = { x: 264, y: 34, size: 872 };
+const GARMENT = { x: 314, y: 34, size: 872 };
 /** The drawing sheet behind the garment; the chips cross its edges. */
-const PLATE = { x: 214, y: 0, w: 972, h: 960 };
+const PLATE = { x: 264, y: 0, w: 972, h: 960 };
 /** Matches the house cut in Hoodie. */
 const CUT = { w: 48, l: -70 };
 
@@ -58,10 +58,10 @@ function anchor(c: Callout): [number, number] {
 
 /** Where each chip sits: left chips end at x, right chips start at x (y is the chip's centre). */
 const LABEL: Record<Custom, [number, number]> = {
-  construction: [262, 380], patch: [262, 510], color: [262, 640], rib: [262, 830],
-  liner: [1138, 120], trims: [1138, 250], embroidery: [1138, 380], print: [1138, 510],
+  construction: [290, 380], patch: [290, 510], color: [290, 640], rib: [290, 830],
+  liner: [1210, 120], trims: [1210, 250], embroidery: [1210, 380], print: [1210, 510],
 };
-const LABEL_W = 250;
+const LABEL_W = 280;
 
 /** Two-digit roster number for a detail. */
 const no = (id: Custom) => String(CALLOUTS.findIndex((c) => c.id === id) + 1).padStart(2, '0');
@@ -248,9 +248,24 @@ function Colorways({ look, pick, className = '' }: Pick<Shared, 'look' | 'pick'>
 function NameField({ className = '' }: { className?: string }) {
   const { raw, set, clear } = useOrgName();
   const id = useId();
+  const box = useRef<HTMLDivElement>(null);
+  // Phone/tablet: once the keyboard is up, park the field just under the sticky
+  // stage so the chest stays in view while typing.
+  const keepInView = () => {
+    if (window.innerWidth >= 1024) return;
+    window.setTimeout(() => {
+      const el = box.current;
+      const stage = el?.closest('[data-stage-scope]')?.querySelector<HTMLElement>('[data-stage]');
+      if (!el || !stage) return;
+      const header = parseFloat(getComputedStyle(stage).top) || 72;
+      const target = el.getBoundingClientRect().top - (header + stage.offsetHeight + 16);
+      const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (Math.abs(target) > 4) window.scrollBy({ top: target, behavior: smooth ? 'smooth' : 'auto' });
+    }, 320);
+  };
   const count = raw.trim().length;
   return (
-    <div className={className}>
+    <div ref={box} className={className}>
       <div className="flex items-baseline justify-between gap-4">
         <label htmlFor={id} className="field-label !mb-0">{ACT1.nameLabel}</label>
         <span aria-hidden className="t-spec fg-muted num">{String(count).padStart(2, '0')} / {NAME_MAX}</span>
@@ -268,6 +283,7 @@ function NameField({ className = '' }: { className?: string }) {
           spellCheck={false}
           enterKeyHint="done"
           aria-describedby={`${id}-hint`}
+          onFocus={keepInView}
           className="field chapter-name-input pr-12"
         />
         {raw && (
@@ -306,9 +322,9 @@ function Linen() {
 }
 
 /** The woven label crossing the sheet's bottom edge: roster number and the name. */
-function SheetLabel({ name, className = '' }: { name: string; className?: string }) {
+function SheetLabel({ name, small = false, className = '' }: { name: string; small?: boolean; className?: string }) {
   return (
-    <span className={`woven woven-green woven-lg chapter-sheet-label ${className}`}>
+    <span className={`woven woven-green ${small ? '' : 'woven-lg'} chapter-sheet-label ${className}`}>
       <span className="num">No. 036</span>
       <span aria-hidden className="opacity-60">·</span>
       <span key={name} className="chapter-reweave chapter-woven-name">{name}</span>
@@ -377,7 +393,7 @@ function Desk(props: Shared) {
                   <div className="relative">
                     <Step c={c} look={look} focus={focus} press={press} setHover={setHover} name={name} align={left ? 'right' : 'left'} />
                     {burst.id === c.id && (
-                      <span key={`stamp-${burst.n}`} aria-hidden className={`chapter-added woven woven-beige slap ${left ? 'right-full mr-2' : 'left-full ml-2'}`} style={{ '--r': left ? '-3deg' : '3deg' } as React.CSSProperties}>
+                      <span key={`stamp-${burst.n}`} aria-hidden className={`chapter-added t-spec slap ${left ? 'right-full mr-2' : 'left-full ml-2'}`}>
                         {ACT1.added}
                       </span>
                     )}
@@ -419,50 +435,59 @@ function Stacked({ look, focus, uid, press, pick, setHover, burst, name, lines, 
 
   return (
     <div>
-      <div className="chapter-sheet relative mx-auto max-w-[44rem] sm:mx-8 md:mx-auto">
-        <Linen />
-        <span aria-hidden className="chapter-crop left-3 top-3" />
-        <span aria-hidden className="chapter-crop right-3 top-3 rotate-90" />
-        <p aria-hidden className="t-spec fg-muted absolute right-4 top-4 z-10">MT-HD01</p>
-        <div className="relative mx-auto w-[94%] pt-6">
-          <div className={settle(burst)}>
-            <Hoodie look={look} focus={focus} uid={`${uid}-m`} name={name} />
+      {/* The stage sticks under the header while the controls scroll beneath it,
+          so every keystroke and tap shows on the garment. */}
+      <div data-stage-scope className="relative">
+        <div data-stage className="chapter-stage-m sticky top-[72px] z-20">
+          <div className="chapter-sheet relative mx-auto max-w-[44rem] overflow-visible sm:mx-8 md:mx-auto">
+            <Linen />
+            <span aria-hidden className="chapter-crop left-3 top-3" />
+            <span aria-hidden className="chapter-crop right-3 top-3 rotate-90" />
+            <p aria-hidden className="t-spec fg-muted absolute right-4 top-3 z-10">MT-HD01</p>
+            <div className="chapter-stage-box relative mx-auto">
+              <div className={settle(burst)}>
+                <Hoodie look={look} focus={focus} uid={`${uid}-m`} name={name} />
+              </div>
+              {CALLOUTS.map((c) => {
+                const [px, py] = c.pin ?? c.at;
+                return (
+                  <span
+                    key={c.id}
+                    aria-hidden
+                    data-active={focus === c.id || lit === c.id || undefined}
+                    data-on={isOn(look, c.id) || undefined}
+                    className="chapter-pin"
+                    style={{ left: `${((px - VIEW.x) / VIEW.size) * 100}%`, top: `${((py - VIEW.y) / VIEW.size) * 100}%` }}
+                  >
+                    {no(c.id)}
+                  </span>
+                );
+              })}
+            </div>
+            <div className="absolute bottom-0 left-5 z-10 translate-y-1/2 sm:left-8">
+              <SheetLabel name={name} small />
+            </div>
           </div>
-          {CALLOUTS.map((c) => {
-            const [px, py] = c.pin ?? c.at;
-            return (
-              <span
-                key={c.id}
-                aria-hidden
-                data-active={focus === c.id || lit === c.id || undefined}
-                data-on={isOn(look, c.id) || undefined}
-                className="chapter-pin"
-                style={{ left: `${((px - VIEW.x) / VIEW.size) * 100}%`, top: `${((py - VIEW.y) / VIEW.size) * 100}%` }}
-              >
-                {no(c.id)}
-              </span>
-            );
-          })}
         </div>
-      </div>
-      <div className="relative z-10 mx-auto flex max-w-[44rem] -translate-y-1/2 px-5 sm:px-8">
-        <SheetLabel name={name} />
+
+        <div className="shell mx-auto max-w-[44rem] pb-4 pt-12">
+          <NameField />
+          <Colorways look={look} pick={pick} className="mt-10" />
+          <div className="mt-10">
+            <div className="flex items-baseline justify-between gap-4">
+              <p className="field-label !mb-0">{ACT1.details}</p>
+              <p className="t-spec fg-muted">Each +$0</p>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {CALLOUTS.map((c) => (
+                <Step key={c.id} c={c} look={look} focus={focus} press={press} setHover={setHover} name={name} className="w-full justify-start" />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="shell mx-auto mt-8 max-w-[44rem]">
-        <NameField />
-        <Colorways look={look} pick={pick} className="mt-10" />
-        <div className="mt-10">
-          <div className="flex items-baseline justify-between gap-4">
-            <p className="field-label !mb-0">{ACT1.details}</p>
-            <p className="t-spec fg-muted">Each +$0</p>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {CALLOUTS.map((c) => (
-              <Step key={c.id} c={c} look={look} focus={focus} press={press} setHover={setHover} name={name} className="w-full justify-start" />
-            ))}
-          </div>
-        </div>
+      <div className="shell mx-auto max-w-[44rem]">
         <div className="mx-auto mt-14 max-w-[26rem]">
           <Receipt lines={lines} focus={focus} name={name} look={look} rev={burst.n} onReset={reset} setHover={setHover} />
         </div>
