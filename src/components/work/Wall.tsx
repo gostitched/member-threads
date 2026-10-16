@@ -1,157 +1,76 @@
 'use client';
 
 import Link from 'next/link';
-import { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import Dossier, { LEAD_SIZES, STRIP_SIZES } from './Dossier';
-import Media, { preloadAsset } from './Media';
-import { EASE_IN, EASE_OUT, REST, fromFrame, prefersReducedMotion, rectsBy } from './flip';
-import { linkPoints, links, panelSpot } from './geometry';
-import { layoutStream, layoutWall, type Layout, type Placed } from '@/lib/work-layout';
-import { CATEGORIES, leadOf, pieces, stripOf, type WorkCategory, type WorkItem } from '@/lib/work';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import Dossier from './Dossier';
+import WorkArt from './art';
+import { EASE_OUT, prefersReducedMotion, rectsBy } from './flip';
+import { Arrow, MoodPhoto, type Ratio } from './ui';
+import { CATEGORIES, categoryOf, drop, pad3, pieces, scheduleOf, type WorkCategory, type WorkItem } from '@/lib/work';
 import { NAME_MAX, YOUR_NAME, possessive, useOrgName } from '@/lib/name';
-import { useDrag } from '@/lib/motion';
 import './work.css';
 
 /**
- * The Collections wall.
+ * The members' wall: every concept collection as one tile on an asymmetric grid.
  *
- * DEFAULT  every collection, as one composed collage.
- * HOVER    one piece → the rest of the wall recedes, that collection's pieces come
- *          forward, green thread joins them, and the collection is named in the space left.
- * CLICK    the collection assembles itself out of the collage into a dossier (./Dossier).
- * CASE     the dossier links on to /work/[slug].
- *
- * Hover, keyboard focus and a first tap all reach the same highlight; nothing depends
- * on hover. The wall is still when nobody is touching it.
+ * REST    photos sit in duotone, each with its roster number sewn across the top edge
+ *         and its product flat on a cream plate across the bottom corner.
+ * HOVER   the tile releases into full colour; the flat lifts.
+ * FILTER  segment chips; tiles that stay slide to their new places.
+ * OPEN    a tile opens the dossier (./Dossier) over the wall, its photo travelling into
+ *         place; the URL becomes /work?project=<slug> so back closes it. The tile is a
+ *         real link to /work/<slug>, so a modified click or no script still goes there.
+ * CLOSE   the org-name line: the next roster number is theirs.
  */
 
 type Filter = 'all' | WorkCategory;
-type Active = { pid: string; anchor: string | null; via: 'pointer' | 'focus' | 'tap'; spot: { x: number; y: number } };
-type Open = { pid: string; from: Map<string, DOMRect> | null };
+type Open = { pid: string; from: DOMRect | null };
 
-const U = (n: number) => `calc(var(--u) * ${n})`;
-const PANEL = { w: 27, h: 17 };
-/** Depth of the ink header band on the desktop wall, in wall units. */
-const BAND = 15;
+/** Frame per position on the wall. Spans and offsets live in work.css (.wk-pos-*). */
+const POS: { ratio: Ratio; side: 'left' | 'right'; sizes: string }[] = [
+  { ratio: 'portrait', side: 'right', sizes: '(min-width: 1536px) 640px, (min-width: 1024px) 42vw, (min-width: 640px) 75vw, 92vw' },
+  { ratio: 'landscape', side: 'left', sizes: '(min-width: 1536px) 760px, (min-width: 1024px) 50vw, (min-width: 640px) 75vw, 70vw' },
+  { ratio: 'square', side: 'right', sizes: '(min-width: 1536px) 500px, (min-width: 1024px) 33vw, (min-width: 640px) 75vw, 92vw' },
+  { ratio: 'tall', side: 'left', sizes: '(min-width: 1536px) 640px, (min-width: 1024px) 42vw, (min-width: 640px) 75vw, 70vw' },
+  { ratio: 'portrait', side: 'right', sizes: '(min-width: 1536px) 500px, (min-width: 1024px) 33vw, (min-width: 640px) 75vw, 92vw' },
+];
+const POS_CLASS = ['wk-pos-0', 'wk-pos-1', 'wk-pos-2', 'wk-pos-3', 'wk-pos-4', 'wk-pos-5'];
 
 export default function WorkWall({ projects }: { projects: WorkItem[] }) {
   const [filter, setFilter] = useState<Filter>('all');
-  const [active, setActive] = useState<Active | null>(null);
   const [open, setOpen] = useState<Open | null>(null);
   const [closing, setClosing] = useState(false);
 
   const shown = useMemo(() => (filter === 'all' ? projects : projects.filter((p) => p.category === filter)), [projects, filter]);
-  const desk = useMemo(() => layoutWall(shown), [shown]);
-  const stream = useMemo(() => layoutStream(desk), [desk]);
 
-  const deskRef = useRef<HTMLDivElement>(null);
-  const streamRef = useRef<HTMLDivElement>(null);
-  const leaveTimer = useRef<number | undefined>(undefined);
-  const switchTimer = useRef<number | undefined>(undefined);
-  const touch = useRef(false);
-  const away = useRef<Animation[]>([]);
+  const wallRef = useRef<HTMLDivElement>(null);
   const before = useRef<Map<string, DOMRect> | null>(null);
   const pushed = useRef(false);
   const lastFocus = useRef<HTMLElement | null>(null);
-  const warmed = useRef(new Set<string>());
-
-  /**
-   * Once someone reaches for a project, fetch what its assembled view will show at the
-   * size it will show it: the lead and the strip, nothing else. Once per project.
-   */
-  const warm = useCallback(
-    (pid: string) => {
-      if (warmed.current.has(pid)) return;
-      warmed.current.add(pid);
-      const p = projects.find((x) => x.id === pid);
-      if (!p) return;
-      preloadAsset(leadOf(p), LEAD_SIZES);
-      stripOf(p).forEach((a) => preloadAsset(a, STRIP_SIZES));
-    },
-    [projects],
-  );
-
-  /** Only one of the two compositions is displayed at a time. */
-  const canvas = useCallback(() => {
-    const d = deskRef.current;
-    return d && d.offsetParent !== null ? { el: d, layout: desk } : { el: streamRef.current, layout: stream };
-  }, [desk, stream]);
-
-  // ── highlight ────────────────────────────────────────────────────────────
-
-  const activate = useCallback(
-    (pid: string, anchor: string | null, via: Active['via']) => {
-      window.clearTimeout(leaveTimer.current);
-      if (open) return;
-      warm(pid);
-      const { el, layout } = canvas();
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      const u = r.width / 100;
-      const header = 120;
-      const members = layout.items.filter((p) => p.project.id === pid);
-      const spot = panelSpot(
-        members,
-        { top: (header - r.top) / u, bottom: (window.innerHeight - r.top) / u },
-        PANEL,
-        layout.h,
-        linkPoints(links(members)),
-      );
-      setActive((a) => (a && a.pid === pid && a.via === via ? { ...a, anchor: a.anchor ?? anchor } : { pid, anchor, via, spot }));
-    },
-    [canvas, open, warm],
-  );
-
-  const release = useCallback((delay = 160) => {
-    window.clearTimeout(leaveTimer.current);
-    leaveTimer.current = window.setTimeout(() => setActive(null), delay);
-  }, []);
-
-  useEffect(() => () => {
-    window.clearTimeout(leaveTimer.current);
-    window.clearTimeout(switchTimer.current);
-  }, []);
-
-  // A panel placed for one scroll position is wrong for another.
-  useEffect(() => {
-    if (!active || active.via === 'tap') return;
-    const off = () => setActive(null);
-    window.addEventListener('scroll', off, { passive: true, once: true });
-    return () => window.removeEventListener('scroll', off);
-  }, [active]);
-
-  // Everything else on the page dims with the wall, the site header included.
-  useEffect(() => {
-    document.body.toggleAttribute('data-wk-dim', !!active);
-    return () => document.body.removeAttribute('data-wk-dim');
-  }, [active]);
 
   // ── filter ───────────────────────────────────────────────────────────────
 
   const choose = (f: Filter) => {
     if (f === filter) return;
-    before.current = rectsBy(canvas().el, 'data-asset');
-    setActive(null);
+    before.current = rectsBy(wallRef.current, 'data-tile');
     setFilter(f);
   };
 
-  // The pieces that stay slide to their new places; the ones arriving fade up.
+  // Tiles that stay slide to their new places; the ones arriving rise in.
   useLayoutEffect(() => {
     const prev = before.current;
     before.current = null;
-    const el = canvas().el;
+    const el = wallRef.current;
     if (!prev || !el || prefersReducedMotion()) return;
-    const vh = window.innerHeight;
     let n = 0;
-    el.querySelectorAll<HTMLElement>('[data-asset]').forEach((node) => {
+    el.querySelectorAll<HTMLElement>('[data-tile]').forEach((node) => {
       const dst = node.getBoundingClientRect();
-      if (dst.top > vh + 100) return;
-      const src = prev.get(node.dataset.asset!);
+      const src = prev.get(node.dataset.tile!);
       if (src) {
-        node.animate([fromFrame(src, dst), REST], { duration: 620, easing: EASE_OUT });
+        node.animate([{ transform: `translate(${src.left - dst.left}px, ${src.top - dst.top}px)` }, { transform: 'none' }], { duration: 620, easing: EASE_OUT });
       } else {
-        node.animate([{ opacity: 0, transform: 'scale(0.96)' }, { opacity: 1, transform: 'none' }], {
-          duration: 480, delay: 90 + n++ * 14, easing: EASE_OUT, fill: 'backwards',
+        node.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], {
+          duration: 620, delay: 60 + n++ * 80, easing: EASE_OUT, fill: 'backwards',
         });
       }
     });
@@ -160,63 +79,27 @@ export default function WorkWall({ projects }: { projects: WorkItem[] }) {
 
   // ── open / close ─────────────────────────────────────────────────────────
 
+  const photoRect = (pid: string) =>
+    wallRef.current?.querySelector<HTMLElement>(`[data-flip="${pid}"]`)?.getBoundingClientRect() ?? null;
+
   const openProject = useCallback(
     (pid: string, animate = true) => {
       const project = projects.find((p) => p.id === pid);
       if (!project) return;
-      window.clearTimeout(leaveTimer.current);
       lastFocus.current = document.activeElement as HTMLElement | null;
-      const el = canvas().el;
-      const reduced = !animate || prefersReducedMotion();
-      let from: Map<string, DOMRect> | null = null;
-
-      if (el && !reduced) {
-        from = new Map();
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        // Everything that isn't this project leaves the frame, each piece out the
-        // side it's nearest to; this project's pieces are handed to the dossier.
-        el.querySelectorAll<HTMLElement>('[data-asset], [data-away]').forEach((node) => {
-          const r = node.getBoundingClientRect();
-          if (node.dataset.project === pid && node.dataset.asset) {
-            from!.set(node.dataset.asset, r);
-            return;
-          }
-          if (r.bottom < 0 || r.top > vh) return;
-          const dx = r.left + r.width / 2 - vw / 2;
-          const dy = r.top + r.height / 2 - vh / 2;
-          const len = Math.hypot(dx, dy) || 1;
-          const push = vw * 0.32;
-          away.current.push(
-            node.animate(
-              [{ transform: 'none', opacity: 1 }, { transform: `translate(${(dx / len) * push}px, ${(dy / len) * push * 0.55}px) scale(0.97)`, opacity: 0 }],
-              { duration: 420, easing: EASE_IN, fill: 'both' },
-            ),
-          );
-        });
-      }
-
-      setActive(null);
+      const from = animate && !prefersReducedMotion() ? photoRect(pid) : null;
       if (animate) {
         window.history.pushState({ wk: project.slug }, '', `?project=${project.slug}`);
         pushed.current = true;
       }
       setOpen({ pid, from });
     },
-    [projects, canvas],
+    [projects],
   );
 
-  const startClose = useCallback(() => {
-    setClosing(true);
-    away.current.forEach((a) => {
-      a.updatePlaybackRate(1.15);
-      a.reverse();
-    });
-  }, []);
+  const startClose = useCallback(() => setClosing(true), []);
 
   const finishClose = useCallback(() => {
-    away.current.forEach((a) => a.cancel());
-    away.current = [];
     setClosing(false);
     setOpen(null);
     lastFocus.current?.focus({ preventScroll: true });
@@ -243,6 +126,8 @@ export default function WorkWall({ projects }: { projects: WorkItem[] }) {
         startClose();
       } else if (project && !open) {
         openProject(project.id, false);
+      } else if (project && open && project.id !== open.pid) {
+        setOpen({ pid: project.id, from: null });
       }
     };
     window.addEventListener('popstate', sync);
@@ -256,58 +141,9 @@ export default function WorkWall({ projects }: { projects: WorkItem[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const openIndex = open ? shown.findIndex((p) => p.id === open.pid) : -1;
-  const openProjectItem = open ? projects.find((p) => p.id === open.pid) : undefined;
-  const next = openIndex >= 0 && shown.length > 1 ? shown[(openIndex + 1) % shown.length] : null;
-
-  const wallRect = useCallback(
-    (assetId: string) => canvas().el?.querySelector<HTMLElement>(`[data-asset="${assetId}"]`)?.getBoundingClientRect() ?? null,
-    [canvas],
-  );
-
-  // ── pointer plumbing shared by both compositions ─────────────────────────
-
-  const handlers = {
-    enter: (p: Placed, e: React.PointerEvent) => {
-      if (e.pointerType !== 'mouse') return;
-      window.clearTimeout(switchTimer.current);
-      // Switching projects waits for the pointer to settle for a beat, so crossing
-      // other work on the way to the panel's button doesn't swap the project out.
-      if (active && active.pid !== p.project.id) {
-        window.clearTimeout(leaveTimer.current);
-        switchTimer.current = window.setTimeout(() => activate(p.project.id, p.asset.id, 'pointer'), 90);
-      } else {
-        activate(p.project.id, p.asset.id, 'pointer');
-      }
-    },
-    leave: (e: React.PointerEvent) => {
-      if (e.pointerType !== 'mouse') return;
-      window.clearTimeout(switchTimer.current);
-      release();
-    },
-    down: (e: React.PointerEvent) => {
-      touch.current = e.pointerType !== 'mouse';
-    },
-    click: (p: Placed) => {
-      // A first tap highlights; only a tap on a project already highlighted by a tap
-      // opens it. (The tap also focuses the piece's button, which highlights it "by
-      // focus" a moment earlier — that doesn't count as the first tap.)
-      if (touch.current && !(active?.pid === p.project.id && active.via === 'tap')) {
-        activate(p.project.id, p.asset.id, 'tap');
-        return;
-      }
-      openProject(p.project.id);
-    },
-    focus: (p: Placed) => activate(p.project.id, p.asset.id, 'focus'),
-    blur: () => release(60),
-    panelEnter: () => {
-      window.clearTimeout(leaveTimer.current);
-      window.clearTimeout(switchTimer.current);
-    },
-    panelLeave: (e: React.PointerEvent) => e.pointerType === 'mouse' && release(),
-    dismiss: () => setActive(null),
-    open: (pid: string) => openProject(pid),
-  };
+  const openItem = open ? projects.find((p) => p.id === open.pid) : undefined;
+  const openIndex = openItem ? projects.indexOf(openItem) : -1;
+  const next = openIndex >= 0 && projects.length > 1 ? projects[(openIndex + 1) % projects.length] : null;
 
   const counts = useMemo(() => {
     const m = new Map<WorkCategory, number>();
@@ -315,325 +151,188 @@ export default function WorkWall({ projects }: { projects: WorkItem[] }) {
     return m;
   }, [projects]);
 
-  const filters = (
-    <Filters filter={filter} onChoose={choose} counts={counts} />
-  );
+  const first = projects[0]?.no ?? 1;
+  const last = projects[projects.length - 1]?.no ?? projects.length;
 
   return (
     <div className="wk">
-      {/* ── Desktop: the composed collage, headline set into its first band ── */}
-      <div className="hidden lg:block">
-        <Canvas
-          ref={deskRef}
-          layout={desk}
-          mode="desk"
-          active={active}
-          openPid={open?.pid ?? null}
-          h={handlers}
-          head={
-            <>
-              {/* The header band: a cream panel behind the headline. */}
-              <div aria-hidden className="wk-band" style={{ height: `calc(${U(BAND)} + 1.25rem)` }} />
-              <h1 data-away className="absolute left-0" style={{ top: U(1.2) }}>
-                <span className="clip">
-                  <span className="caps block text-d1 text-ink" style={{ animationDelay: '60ms' }}>
-                    Collections
-                  </span>
-                </span>
-                <span className="clip mt-2">
-                  <span className="block font-sans text-[clamp(1.125rem,1.5vw,1.375rem)] font-medium leading-none text-uv" style={{ animationDelay: '150ms' }}>
-                    Five concept collections, one for every kind of organization.
-                  </span>
-                </span>
-              </h1>
-              <div data-away className="absolute right-0" style={{ top: U(1.4) }}>
-                {filters}
-              </div>
-            </>
-          }
-        />
-      </div>
-
-      {/* ── Phone and tablet: a vertical editorial stream ── */}
-      <div className="lg:hidden">
-        <div className="mb-8 mt-4 overflow-hidden rounded-[24px] bg-electric-lit pb-5 pt-7 text-ink">
-          <h1 className="px-5">
-            <span className="clip"><span className="caps block text-d1">Collections</span></span>
-          </h1>
-          <p className="mt-3 max-w-[30ch] px-5 text-[0.9375rem] leading-snug text-ink/70">
-            Five concept collections, one for every kind of organization.
+      {/* ── Header ── */}
+      <header className="shell pb-16 pt-14 lg:pb-24 lg:pt-24">
+        <div className="grid-12 items-end gap-y-8">
+          <div className="col-span-4 sm:col-span-8 lg:col-span-8">
+            <p className="t-spec enter flex items-center gap-3 text-muted">
+              <span>Collections</span>
+              <span aria-hidden className="stitch-rule w-10" />
+              <span>{drop(first)}–{pad3(last)}</span>
+            </p>
+            <h1 className="t-display mt-5 lg:mt-6">
+              <span className="enter block" style={{ ['--d' as string]: '80ms' }}>The members’</span>
+              <span className="enter block" style={{ ['--d' as string]: '160ms' }}><em>wall</em>.</span>
+            </h1>
+          </div>
+          <p className="t-lead enter col-span-4 max-w-[34ch] sm:col-span-6 lg:col-span-4 lg:pb-3" style={{ ['--d' as string]: '240ms' }}>
+            Five concept collections, one for each kind of organization we make for. Worked examples, not clients: the pieces, the palette, the finishes and the count.
           </p>
-          <div className="mt-5 overflow-x-auto px-5 py-1 [scrollbar-width:none]">{filters}</div>
         </div>
-        <Canvas ref={streamRef} layout={stream} mode="stream" active={active} openPid={open?.pid ?? null} h={handlers} />
-      </div>
 
-      {/* Phone: the project named in a bar, since there's no negative space to spare. */}
-      {active?.via === 'tap' && (
-        <MobilePanel project={projects.find((p) => p.id === active.pid)!} onOpen={() => openProject(active.pid)} onClose={() => setActive(null)} />
-      )}
+        <div className="hairline mt-12 flex flex-col gap-4 pt-5 lg:mt-20 lg:flex-row lg:items-center lg:justify-between">
+          <Filters filter={filter} onChoose={choose} counts={counts} total={projects.length} />
+          <p className="t-spec text-muted" aria-live="polite">
+            Showing {pad3(shown.length).slice(1)} of {pad3(projects.length).slice(1)}
+          </p>
+        </div>
+      </header>
+
+      {/* ── The wall ── */}
+      <div className="shell pb-[var(--sec)]">
+        <div ref={wallRef} className="wk-wall grid-12" data-n={shown.length}>
+          {shown.map((p, i) => (
+            <Tile key={p.id} p={p} i={i} onOpen={() => openProject(p.id)} hidden={open?.pid === p.id} />
+          ))}
+          <Reserved i={shown.length} no={projects.length + 1} />
+        </div>
+      </div>
 
       <Ending count={projects.length} />
 
-      {open && openProjectItem && (
+      {open && openItem && (
         <Dossier
           key="dossier"
-          project={openProjectItem}
+          project={openItem}
           from={open.from}
           closing={closing}
           onClose={requestClose}
           onClosed={finishClose}
-          next={next && next.id !== open.pid ? next : null}
+          next={next}
           onNext={
-            next && next.id !== open.pid
+            next
               ? () => {
                   window.history.replaceState({ wk: next.slug }, '', `?project=${next.slug}`);
                   setOpen({ pid: next.id, from: null });
                 }
               : null
           }
-          wallRect={wallRect}
+          wallRect={photoRect}
         />
       )}
     </div>
   );
 }
 
-// ── the canvas ──────────────────────────────────────────────────────────────
+// ── a tile ──────────────────────────────────────────────────────────────────
 
-type Handlers = {
-  enter: (p: Placed, e: React.PointerEvent) => void;
-  leave: (e: React.PointerEvent) => void;
-  down: (e: React.PointerEvent) => void;
-  click: (p: Placed) => void;
-  focus: (p: Placed) => void;
-  blur: () => void;
-  panelEnter: () => void;
-  panelLeave: (e: React.PointerEvent) => void;
-  dismiss: () => void;
-  open: (pid: string) => void;
-};
-
-const Canvas = forwardRef<
-  HTMLDivElement,
-  { layout: Layout; mode: 'desk' | 'stream'; active: Active | null; openPid: string | null; h: Handlers; head?: React.ReactNode }
->(function Canvas({ layout, mode, active, openPid, h, head }, ref) {
-  const desk = mode === 'desk';
-  const on = active?.pid ?? null;
-  const members = useMemo(() => (on ? layout.items.filter((p) => p.project.id === on) : []), [layout, on]);
-  const paths = useMemo(() => (desk && on ? links(members) : []), [desk, on, members]);
-  const project = members[0]?.project;
-  const firstOf = new Set<string>();
-
+function Tile({ p, i, onOpen, hidden }: { p: WorkItem; i: number; onOpen: () => void; hidden: boolean }) {
+  const pos = POS[i % POS.length];
+  const flat = scheduleOf(p)[0]?.flat;
+  const cat = categoryOf(p);
   return (
-    <div
-      ref={ref}
-      className={`wk-canvas relative ${desk ? 'wk-desk' : 'wk-stream'}`}
-      data-active={on ? '' : undefined}
-      style={{ height: U(layout.h) }}
-    >
-      {head}
-
-      {/* The rest of the page drops back behind the project. */}
-      <div className="wk-dim" data-on={on ? '' : undefined} onClick={h.dismiss} aria-hidden />
-
-      {layout.items.map((p) => {
-        const mine = p.project.id === on;
-        // One control per project, on its first piece in reading order; the other
-        // pieces respond to the pointer but stay out of the tab order.
-        const primary = !firstOf.has(p.project.id);
-        firstOf.add(p.project.id);
-        return <Piece key={p.asset.id} p={p} mine={mine} primary={primary} desk={desk} hidden={openPid === p.project.id} h={h} />;
-      })}
-
-      {/* Credits: a few pieces carry their collection's number and name, like picture credits. */}
-      {layout.items.filter((p) => p.credit).map((p) => (
-        <p
-          key={`c-${p.asset.id}`}
-          data-away
-          aria-hidden
-          className={`wk-credit ${p.credit === 'left' || p.credit === 'below-end' ? 'text-right' : ''} ${p.project.id === on ? 'is-on' : ''} ${
-            desk && (p.credit === 'below' || p.credit === 'below-end' ? p.y + p.h + 0.9 : p.credit === 'right-end' ? p.y + p.h - 3 : p.y + 0.3) < BAND ? 'on-ink' : ''
-          }`}
-          style={{
-            left: p.credit === 'right' || p.credit === 'right-end' ? U(p.x + p.w + 1.1) : p.credit === 'left' ? U(p.x - 1.1) : p.credit === 'below-end' ? U(p.x + p.w) : U(p.x + (desk ? 0.2 : 0)),
-            top: p.credit === 'below' || p.credit === 'below-end' ? U(p.y + p.h + (desk ? 0.9 : 2.4)) : p.credit === 'right-end' ? `calc(${U(p.y + p.h)} - 3.9em)` : U(p.y + 0.3),
-            transform: p.credit === 'left' || p.credit === 'below-end' ? 'translateX(-100%)' : undefined,
-          }}
-        >
-          {p.project.title}
-        </p>
-      ))}
-
-      {/* The lines that join a project's pieces. */}
-      {desk && on && (
-        <svg key={on} className="wk-lines" viewBox={`0 0 100 ${layout.h}`} aria-hidden>
-          {paths.map((l, i) => (
-            <g key={i} style={{ animationDelay: `${i * 35}ms` }}>
-              <path d={l.d} pathLength={1} />
-              <rect x={l.a.x - 0.22} y={l.a.y - 0.22} width={0.44} height={0.44} />
-              <rect x={l.b.x - 0.22} y={l.b.y - 0.22} width={0.44} height={0.44} />
-            </g>
-          ))}
-        </svg>
-      )}
-
-      {/* The project, named in the space the dimmed work leaves. */}
-      {desk && on && project && active && active.via !== 'tap' && (
-        <div
-          key={`p-${on}`}
-          className="wk-panel"
-          style={{ left: U(active.spot.x), top: U(active.spot.y), width: U(PANEL.w) }}
-          role="status"
-        >
-          <p className="caps text-d3 text-ink">{project.title}</p>
-          <p className="mt-2 text-[0.9375rem] text-muted">
-            {project.sector}
-            {pieces(project) ? ` · ${pieces(project)} pieces` : ''}
+    <article data-tile={p.id} className={`wk-tile relative ${POS_CLASS[i]}`}>
+      <Link
+        href={`/work/${p.slug}`}
+        scroll={false}
+        className="wk-tile-link"
+        aria-label={`${drop(p.no)}, ${p.title}. ${p.sector}. Open the collection`}
+        onClick={(e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+          e.preventDefault();
+          onOpen();
+        }}
+      >
+        <div className="relative">
+          <span className="wk-no woven">{drop(p.no)} · Concept</span>
+          <div data-flip={p.id} style={{ visibility: hidden ? 'hidden' : undefined }}>
+            {p.mood ? (
+              <MoodPhoto slug={p.mood.wall} ratio={pos.ratio} sizes={pos.sizes} treatment="release" alt="" priority={i < 2} />
+            ) : null}
+          </div>
+          {flat?.art && (
+            <div className="wk-flat" data-side={pos.side} aria-hidden>
+              <div className="absolute inset-[8%]">
+                <WorkArt art={flat.art} className="h-full w-full" />
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="wk-cap mt-6 sm:mt-7" data-side={pos.side}>
+          <h2 className="wk-title t-h3 flex items-baseline gap-3">
+            <span>{p.title}</span>
+            <Arrow className="h-3 w-4 shrink-0 self-center" />
+          </h2>
+          <p className="t-spec mt-2 text-muted">
+            {cat?.label} · {pieces(p)} pieces · {p.method}
           </p>
-          <button
-            type="button"
-            onClick={() => h.open(project.id)}
-            onPointerEnter={h.panelEnter}
-            onPointerLeave={h.panelLeave}
-            onFocus={h.panelEnter}
-            onBlur={h.blur}
-            className="btn-blue pointer-events-auto mt-5 px-5 py-2.5 text-[0.9375rem]"
-          >
-            View collection <span aria-hidden>→</span>
-          </button>
         </div>
-      )}
-    </div>
-  );
-});
-
-/**
- * One piece on the wall. It can be picked up and dragged with a mouse or pen, and
- * springs back to its place on release; on a phone a touch stays a tap (and a scroll).
- */
-function Piece({ p, mine, primary, desk, hidden, h }: { p: Placed; mine: boolean; primary: boolean; desk: boolean; hidden: boolean; h: Handlers }) {
-  const drag = useDrag<HTMLDivElement>({ touch: false });
-  return (
-    <div
-      ref={drag.ref}
-      data-asset={p.asset.id}
-      data-project={p.project.id}
-      className={`wk-item ${p.role === 'garment' ? 'is-cut' : p.asset.kind === 'artifact' && !p.asset.art?.t.match(/swatch/) ? 'is-cut' : 'is-rect'} ${p.asset.src ? 'is-photo' : ''} ${mine ? 'is-on' : ''} ${drag.dragging ? 'is-held' : ''}`}
-      style={{
-        ...drag.style,
-        left: U(p.x), top: U(p.y), width: U(p.w), height: U(p.h),
-        zIndex: drag.dragging ? 200 : mine ? 60 + p.z : p.z,
-        visibility: hidden ? 'hidden' : undefined,
-      }}
-      onPointerEnter={(e) => h.enter(p, e)}
-      onPointerLeave={h.leave}
-      onPointerDown={(e) => {
-        h.down(e);
-        drag.handlers.onPointerDown(e);
-      }}
-      onClickCapture={drag.handlers.onClickCapture}
-      onDragStart={drag.handlers.onDragStart}
-      onClick={() => h.click(p)}
-    >
-      {primary && (
-        <button
-          type="button"
-          className="wk-hit"
-          aria-label={`${p.project.title}, ${p.project.sector}. Open collection`}
-          onFocus={() => h.focus(p)}
-          onBlur={h.blur}
-        />
-      )}
-      <div className="wk-lift">
-        <div className="wk-media">
-          <Media
-            asset={p.asset}
-            labelled={false}
-            eager={p.eager && p.role !== 'bit'}
-            sizes={desk ? `${(p.w * 0.94).toFixed(1)}vw` : `${Math.round(p.w)}vw`}
-          />
-        </div>
-      </div>
-    </div>
+      </Link>
+    </article>
   );
 }
 
-// ── pieces ──────────────────────────────────────────────────────────────────
+/** The slot after the last collection: the next roster number, held open. */
+function Reserved({ i, no }: { i: number; no: number }) {
+  return (
+    <article className={`wk-tile relative ${POS_CLASS[Math.min(i, 5)]}`}>
+      <a href="#your-collection" className="wk-tile-link group">
+        <div className="wk-reserved text-ink">
+          <span className="woven woven-beige relative z-[1] self-start">{drop(no)} · Reserved</span>
+          <p className="t-h2 relative z-[1] max-w-[12ch]">
+            Yours, <em>next</em>.
+          </p>
+        </div>
+        <p className="t-spec mt-6 flex items-center gap-3 text-muted sm:mt-7">
+          Put your name on it
+          <Arrow className="h-3 w-4 transition-transform duration-base ease-out group-hover:translate-x-1" />
+        </p>
+      </a>
+    </article>
+  );
+}
+
+// ── filters ─────────────────────────────────────────────────────────────────
 
 function Filters({
   filter,
   onChoose,
   counts,
+  total,
 }: {
   filter: Filter;
   onChoose: (f: Filter) => void;
   counts: Map<WorkCategory, number>;
+  total: number;
 }) {
-  const tabs: { id: Filter; label: string; title?: string }[] = [
-    { id: 'all', label: 'All' },
-    ...CATEGORIES.filter((c) => counts.get(c.id)).map((c) => ({ id: c.id, label: c.label, title: c.title })),
+  const tabs: { id: Filter; label: string; title?: string; n: number }[] = [
+    { id: 'all', label: 'All', n: total },
+    ...CATEGORIES.filter((c) => counts.get(c.id)).map((c) => ({ id: c.id, label: c.label, title: c.title, n: counts.get(c.id) ?? 0 })),
   ];
   return (
-    <nav aria-label="Filter collections by category">
-      <ul className="flex items-center gap-1.5 whitespace-nowrap">
-        {tabs.map((t) => {
-          const on = t.id === filter;
-          return (
-            <li key={t.id}>
-              <button
-                type="button"
-                onClick={() => onChoose(t.id)}
-                aria-pressed={on}
-                aria-label={t.title}
-                title={t.title}
-                className={`flex min-h-[40px] items-center rounded-full px-4 text-[0.8125rem] font-semibold transition-colors duration-200 motion-reduce:transition-none ${
-                  on ? 'bg-ink text-paper' : 'bg-ink/5 text-ink hover:bg-ink/10'
-                }`}
-              >
-                {t.label}
-              </button>
-            </li>
-          );
-        })}
+    <div className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] sm:mx-0 sm:px-0">
+      <ul className="flex items-center gap-2 whitespace-nowrap" aria-label="Filter collections by who they’re for">
+        {tabs.map((t) => (
+          <li key={t.id}>
+            <button type="button" onClick={() => onChoose(t.id)} aria-pressed={t.id === filter} title={t.title} className="chip">
+              {t.label}
+              <span className="t-spec opacity-60">{String(t.n).padStart(2, '0')}</span>
+            </button>
+          </li>
+        ))}
       </ul>
-    </nav>
-  );
-}
-
-function MobilePanel({ project, onOpen, onClose }: { project: WorkItem; onOpen: () => void; onClose: () => void }) {
-  return (
-    <div className="wk-sheet fixed inset-x-3 bottom-3 z-[65] rounded-3xl bg-white p-4 text-ink shadow-[0_0_0_1px_theme(colors.rule),0_12px_32px_rgba(19,51,39,0.12)] lg:hidden" role="status">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="caps text-[1.375rem] leading-[0.95] tracking-tight">{project.title}</p>
-          <p className="mt-1.5 text-[0.875rem] text-muted">{project.sector}</p>
-        </div>
-        <button type="button" onClick={onClose} aria-label="Clear" className="-mr-2 -mt-2 flex h-11 w-11 shrink-0 items-center justify-center text-ink/60">
-          ✕
-        </button>
-      </div>
-      <button type="button" onClick={onOpen} className="btn-blue mt-4 w-full py-3 text-[0.9375rem]">
-        View collection <span aria-hidden>→</span>
-      </button>
     </div>
   );
 }
 
 /**
- * The wall ends on the next collection: theirs. The organization's name is typed
- * straight into the headline; it's the same name everywhere on the site.
+ * The wall ends on the next roster number: theirs. The organization's name is typed
+ * straight into the line; it's the same name everywhere on the site.
  */
 function Ending({ count }: { count: number }) {
   const { name, raw, set, isDefault } = useOrgName();
-  // The input sizes to what's typed, so the name sits in the line like set type.
-  const chars = Math.max((raw || YOUR_NAME).length, 4);
+  const chars = Math.max((raw || YOUR_NAME).length, 5);
   return (
-    <section aria-label="Your collection" className="wk-next relative mt-16 overflow-hidden rounded-[24px] bg-ink text-paper lg:mt-10">
-      <div className="relative grid gap-10 px-6 py-14 sm:px-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:px-16 lg:py-20">
-        <div className="min-w-0">
-          <p className="label text-paper/60">Collection No. {String(count + 1).padStart(3, '0')}</p>
-          <h2 className="caps mt-5 text-d1">
+    <section id="your-collection" aria-labelledby="wk-yours" className="band-cream sec scroll-mt-20">
+      <div className="shell grid-12 items-end gap-y-12">
+        <div className="col-span-4 sm:col-span-8 lg:col-span-8">
+          <span className="woven woven-green">{drop(count + 1)} · Reserved</span>
+          <h2 id="wk-yours" className="t-h1 mt-8">
             <span className="block">The</span>
             <label className="block">
               <span className="sr-only">Your organization’s name</span>
@@ -648,20 +347,25 @@ function Ending({ count }: { count: number }) {
                 spellCheck={false}
                 enterKeyHint="done"
                 size={chars}
-                style={{ width: `min(100%, ${chars * 0.78 + 0.3}em)` }}
-                className="wk-name caps block max-w-full rounded-none border-b-[0.05em] border-uv-lit/50 bg-transparent pb-[0.04em] uppercase leading-[0.95] text-uv-lit caret-uv-lit outline-none placeholder:text-paper/25"
+                style={{ width: `min(100%, ${chars * 0.86 + 0.4}em)` }}
+                className="wk-name t-block block max-w-full rounded-none bg-transparent py-[0.12em] text-[clamp(2.25rem,6.4vw,6rem)] text-ink"
               />
             </label>
-            <span className="block">Collection.</span>
+            <span className="block">collection.</span>
           </h2>
-          <p className="mt-8 max-w-[38ch] text-lead text-paper/70">
-            Type your organization’s name. Then tell us who it’s for, and we’ll design the pieces around it.
-          </p>
         </div>
-        <Link href="/quote" className="btn-white self-start lg:self-end">
-          {isDefault ? 'Start your collection' : `Start ${possessive(name).replace("'", '’')} collection`} <span aria-hidden>→</span>
-        </Link>
+        <div className="col-span-4 sm:col-span-6 lg:col-span-4">
+          <p className="t-body max-w-[34ch]">
+            Type your organization’s name. Tell us who it’s for, and we’ll design the pieces around it.
+          </p>
+          <p className="t-spec mt-5 text-muted">From 36 per style · Design included · One clear price</p>
+          <Link href="/quote" className="btn-blue mt-10 w-full sm:w-auto">
+            {isDefault ? 'Start your collection' : `Start ${possessive(name).replace("'", '’')} collection`}
+            <Arrow className="h-3 w-4" />
+          </Link>
+        </div>
       </div>
     </section>
   );
 }
+

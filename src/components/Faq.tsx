@@ -1,17 +1,19 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
 import Reveal from '@/components/Reveal';
 import { CONTACT, FAQ, type FaqItem } from '@/lib/site';
+import '@/components/home/home.css';
 
 /**
- * The questions, on a raised panel. Each sits over a stitched seam with a loose
- * thread at its right end; pulling it (the whole row is the button) unpicks the
- * stitches and the panel parts, showing the answer beneath. One seam open at a
- * time; the thread in the opening sews it shut. The heading and a way to ask
- * something else hold the left column, mirroring How it works.
+ * Questions, answered. Straight on the paper, no panel. Each question sits
+ * over a running stitch with a loose thread at its right end; pulling it (the
+ * whole row is the button) unpicks the stitches right to left and the answer
+ * opens beneath: the one-glance answer in the serif, the plain sentence under
+ * it. One seam open at a time; the thread in the opening sews it shut. The
+ * heading and a way to ask something else hold the sticky left column.
  *
- * All motion is CSS (`.inside-*` in globals.css), driven by `data-open`.
+ * All motion is CSS (`.seam-*` in home/home.css), driven by `data-open`.
  */
 export default function Faq() {
   const [open, setOpen] = useState<number | null>(null);
@@ -24,30 +26,27 @@ export default function Faq() {
   };
 
   return (
-    <section aria-labelledby="faq-title" className="inside-garment overflow-x-clip pb-24 pt-4 sm:pb-32 lg:pb-40">
-      <div className="mx-auto grid w-full max-w-[1536px] grid-cols-[minmax(0,1fr)] gap-10 px-5 sm:px-8 lg:grid-cols-12 lg:gap-10 lg:px-14">
-        <Reveal className="lg:col-span-5">
-          <div className="lg:sticky lg:top-36">
-            <p className="label text-ink/60">Questions</p>
-            <h2 id="faq-title" className="caps mt-5 text-[clamp(2rem,4vw,3.75rem)] leading-[0.95] tracking-[-0.03em]">
-              Good to know.
+    <section aria-labelledby="faq-title" className="sec overflow-x-clip bg-paper text-ink">
+      <div className="shell grid-12">
+        <Reveal className="col-span-4 sm:col-span-8 lg:col-span-4">
+          <div className="lg:sticky lg:top-[calc(var(--header-h)+4rem)]">
+            <p className="t-eyebrow fg-muted">Questions</p>
+            <h2 id="faq-title" className="t-h1 mt-5">
+              Questions, <em>answered.</em>
             </h2>
-            <p className="mt-6 max-w-[26rem] text-lead text-ink/75">
+            <p className="t-lead mt-6 max-w-[30ch] sm:mt-8">
               Straight answers on price, minimums, timing and reorders. Pull a thread to open one.
             </p>
-            <p className="mt-8 text-[0.9375rem] text-ink/60">
+            <p className="t-body mt-8 text-ink/90">
               Something else?{' '}
-              <a
-                href={`mailto:${CONTACT.email}`}
-                className="font-medium text-ink underline decoration-ink/25 underline-offset-[5px] transition-colors hover:decoration-ink"
-              >
-                {CONTACT.email}
+              <a href={`mailto:${CONTACT.email}`} className="inline-flex min-h-[44px] items-center font-medium">
+                <span className="link-u">{CONTACT.email}</span>
               </a>
             </p>
           </div>
         </Reveal>
 
-        <div className="inside-label lg:col-span-7">
+        <div className="col-span-4 mt-12 sm:col-span-8 lg:col-start-6 lg:col-end-13 lg:mt-0">
           {FAQ.map((item, i) => (
             <Entry
               key={item.number}
@@ -83,7 +82,7 @@ function Entry({
   const aid = `faq-a-${item.number}`;
 
   return (
-    <div className="inside-entry" data-open={isOpen}>
+    <div className="seam-entry" data-open={isOpen}>
       <h3>
         <button
           ref={buttonRef}
@@ -92,27 +91,25 @@ function Entry({
           aria-expanded={isOpen}
           aria-controls={aid}
           onClick={onToggle}
-          className="inside-q group block w-full text-left"
+          className="seam-q"
         >
-          <span className="inside-q-row">
-            <span className="inside-q-text block">{item.question}</span>
+          <span className="seam-q-row">
+            <span aria-hidden className="t-spec fg-muted">
+              {item.number}
+            </span>
+            <span className="seam-q-text t-h3">{item.question}</span>
           </span>
-          <span aria-hidden className="relative block">
-            <Seam />
-          </span>
+          <Seam />
         </button>
       </h3>
 
-      <div id={aid} role="region" aria-labelledby={qid} inert={!isOpen} className="inside-under">
+      <div id={aid} role="region" aria-labelledby={qid} inert={!isOpen} className="seam-under">
         <div className="min-h-0 overflow-hidden">
-          <div className="inside-under-body">
-            <div className="inside-answer flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
-              <div className="min-w-0">
-                <p className="caps text-d3 text-ink">{item.answer}</p>
-                <p className="mt-3 max-w-[44ch] text-[0.9375rem] leading-relaxed text-ink/70">{item.line}</p>
-              </div>
-              <button type="button" onClick={onClose} className="inside-close">
-                <span className="label">Close</span>
+          <div className="seam-answer grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-3 pb-6 pt-6 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:pb-8">
+            <div className="col-start-2">
+              <p className="t-h2">{item.answer}</p>
+              <p className="t-body mt-4 max-w-[62ch] text-ink/90">{item.line}</p>
+              <button type="button" onClick={onClose} className="seam-close mt-6">
                 <svg viewBox="0 0 72 22" className="h-[22px] w-[60px]" fill="none" aria-hidden>
                   <path
                     d="M2 11 C 12 3, 18 19, 28 11 S 44 3, 52 11 S 64 17, 70 9"
@@ -121,6 +118,7 @@ function Entry({
                     strokeLinecap="round"
                   />
                 </svg>
+                <span className="t-eyebrow">Close</span>
               </button>
             </div>
           </div>
@@ -131,7 +129,7 @@ function Entry({
 }
 
 /** Stitches rendered per seam; smaller screens show fewer (see the count classes). */
-const STITCHES = 64;
+const STITCHES = 60;
 
 /**
  * A running stitch. Each stitch is its own element so it can be pulled out in
@@ -139,22 +137,22 @@ const STITCHES = 64;
  */
 function Seam() {
   return (
-    <span className="inside-seam pr-[4.75rem] sm:pr-24">
-      <span className="inside-stitches">
+    <span aria-hidden className="seam">
+      <span className="seam-stitches">
         {Array.from({ length: STITCHES }, (_, i) => (
           <span
             key={i}
-            className={`inside-st ${i >= 44 ? 'hidden lg:block' : i >= 26 ? 'hidden sm:block' : ''}`}
-            style={{ '--i': i } as React.CSSProperties}
+            className={`seam-st ${i >= 44 ? 'hidden lg:block' : i >= 26 ? 'hidden sm:block' : ''}`}
+            style={{ '--i': i } as CSSProperties}
           >
             <i />
           </span>
         ))}
       </span>
-      <span className="inside-tail">
+      <span className="seam-tail">
         <svg viewBox="0 0 64 30" fill="none" className="h-[30px] w-[64px] overflow-visible">
           <path
-            className="inside-tail-thread"
+            className="seam-tail-thread"
             d="M1 15 C 16 15, 22 14, 30 17 S 44 27, 52 22 S 60 10, 62 14"
             stroke="currentColor"
             strokeWidth="2.2"

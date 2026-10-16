@@ -17,7 +17,7 @@ import { EMPTY_HANGER, buildDefs, ctaMarkup, dividerMarkup, itemMarkup, paintVar
 import { paintOf } from '@/lib/catalog/util';
 import { RackSound } from './sound';
 
-export type Slot = { p: CatalogProduct } | { div: { id: string; name: string; count: number } } | { cta: true };
+export type Slot = { p: CatalogProduct } | { div: { id: string; name: string; count: number; no?: number } } | { cta: true };
 /** wake: the first run, the longest. category: a full run. search: a short shuffle, keeping what still matches. */
 export type RunMode = 'intro' | 'wake' | 'category' | 'search' | 'none';
 
@@ -207,7 +207,8 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     const mobile = per === 2;
     const turn = mobile ? 12 : Math.round(Math.max(22, Math.min(42, W * 0.024)));
     const x0 = turn + (mobile ? 12 : 20);
-    const tube = mobile ? 7 : 10;
+    // A slim rail: present, not the subject.
+    const tube = mobile ? 5 : 7;
     const bendR = mobile ? 14 : 24;
     const slot = (W - 2 * x0) / per;
     const gw = Math.round(Math.min(slot * 1.04, 400));
@@ -319,13 +320,13 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     }
     return el;
   }
-  function makeDivider(d: { id: string; name: string; count: number }): HTMLElement {
+  function makeDivider(d: { id: string; name: string; count: number; no?: number }): HTMLElement {
     const el = document.createElement('div');
     el.className = 'rk-g rk-divider';
     el.setAttribute('role', 'heading');
     el.setAttribute('aria-level', '2');
     el.dataset.slug = `div-${d.id}`;
-    el.innerHTML = dividerMarkup(d.name, d.count);
+    el.innerHTML = dividerMarkup(d.name, d.count, d.no);
     ensureState(el, `div-${d.id}`, 'div');
     return el;
   }
@@ -356,7 +357,7 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     const msg = document.createElement('div');
     msg.className = 'rk-empty';
     msg.style.top = `${lay.railPad + 20 + lay.gh * 0.42}px`;
-    msg.innerHTML = `<h3>No styles match.</h3><p>Try another search, or tell us what you need and we&rsquo;ll source it.</p><a class="btn-blue" href="/quote" data-nav>Start a collection</a>`;
+    msg.innerHTML = `<h3>No styles <em>match</em>.</h3><p>Try another search, or tell us what you need and we&rsquo;ll source it.</p><a class="btn-blue" href="/quote" data-nav>Start a collection</a>`;
     wrap.appendChild(msg);
     return wrap;
   }
@@ -797,7 +798,7 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
       if (!g.isConnected) return stopCycle(null);
       i = (i + 1) % list.length;
       paint(g, i);
-    }, 640);
+    }, 900);
   }
   function lock(g: HTMLElement) {
     stopCycle(null);
@@ -806,7 +807,7 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     const href = g.getAttribute('href')!.split('?')[0];
     g.setAttribute('href', `${href}?color=${i}`);
     const vw = g.querySelector('.rk-vw');
-    if (vw) vw.textContent = 'LOCKED / VIEW PIECE →';
+    if (vw) vw.textContent = 'Held · View →';
     // The price tag turns lemon (CSS); colour moves, layout doesn't.
     sound.nudge(panOf(g));
   }
@@ -835,7 +836,7 @@ export function createRack(els: RackElements, cb: RackCallbacks) {
     if (fine.matches) startCycle(g);
     const sibs = [...run.querySelectorAll<HTMLElement>(':scope > .rk-g')];
     const idx = sibs.indexOf(g);
-    const push = lay.mobile ? 0 : 14;
+    const push = lay.mobile ? 0 : 10;
     sibs.forEach((n, j) => {
       if (j === idx) return;
       n.style.setProperty('--push', `${j < idx ? -push : push}px`);

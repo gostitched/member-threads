@@ -209,17 +209,19 @@ export function itemMarkup(p: CatalogProduct, stream: boolean): Hung {
       .join('')}</div></div>`;
   }
   html += '</div>';
-  html += `<div class="rk-info"><div class="rk-nm">${esc(p.name)}</div><div class="rk-pr">${
-    from ? `From ${from}` : 'Priced with your collection'
-  }</div><div class="rk-vw" aria-hidden="true">${cycles ? `${p.colorways.length} colors · tap to lock` : 'View →'}</div></div>`;
+  // Style code, name, price: the spec line, the serif, the spec line.
+  const no = p.styleNumber ? `<div class="rk-no">${esc(p.styleNumber)}</div>` : '';
+  html += `<div class="rk-info">${no}<div class="rk-nm"><span>${esc(p.name)}</span></div><div class="rk-pr">${
+    from ? `<span>From</span> ${from}` : 'Priced with your collection'
+  }</div><div class="rk-vw" aria-hidden="true">${cycles ? `${p.colorways.length} colors · Click to hold` : 'View →'}</div></div>`;
   return { html, mount, photo, cutout };
 }
 
-export function dividerMarkup(name: string, count: number): string {
+export function dividerMarkup(name: string, count: number, index = 0): string {
   return `<div class="rk-swing"><svg class="rk-rings" viewBox="0 0 128 46" preserveAspectRatio="none" aria-hidden="true">
     <circle cx="14" cy="3" r="6.6" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="114" cy="3" r="6.6" fill="none" stroke="currentColor" stroke-width="1.9"/>
     <path d="M14 9.6V46M114 9.6V46" stroke="currentColor" stroke-width="1"/></svg>
-    <div class="rk-dplate"><span class="rk-dn">${esc(name)}</span><span class="sr-only">, ${count} ${count === 1 ? 'piece' : 'pieces'}</span></div></div>`;
+    <div class="rk-dplate"><span class="rk-dk" aria-hidden="true">${index ? `No. ${String(index).padStart(2, '0')} · ` : ''}${String(count).padStart(2, '0')} ${count === 1 ? 'style' : 'styles'}</span><span class="rk-dn">${esc(name)}</span><span class="sr-only">, ${count} ${count === 1 ? 'piece' : 'pieces'}</span></div></div>`;
 }
 
 /** A hang tag on a string, for whatever isn't on the rack. */
@@ -227,9 +229,10 @@ export function ctaMarkup(): string {
   return `<div class="rk-swing"><svg class="rk-wire" viewBox="0 0 20 46" aria-hidden="true">
     <circle cx="10" cy="3" r="6.6" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M10 9.6V46" stroke="currentColor" stroke-width="2"/></svg>
     <div class="rk-cta"><div class="rk-cta-body">
-    <h3>Need another style?</h3>
+    <span class="rk-ck">Not on the rack</span>
+    <h3>Need <em>another</em> style?</h3>
     <p>Your designer will source it.</p>
-    <a class="btn-blue" href="/quote" data-nav>Start a collection</a></div></div></div>`;
+    <a class="btn-blue btn-sm" href="/quote" data-nav>Start a collection</a></div></div></div>`;
 }
 
 export const EMPTY_HANGER = HOOK + `<div class="rk-swing"><svg class="rk-hb" ${VB}><use href="#rk-hb-top"/></svg></div>`;

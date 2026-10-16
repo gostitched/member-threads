@@ -4,17 +4,13 @@ import { WORK } from '@/lib/work';
 
 export const metadata: Metadata = {
   title: 'Collections',
-  description: 'Concept collections from Member Threads for university clubs, companies, nonprofits, run clubs and members’ clubs: the pieces, the palette, the finishes and the piece count.',
+  description: 'The members’ wall: concept collections from Member Threads for university clubs, companies, nonprofits, run clubs and members’ clubs, with the pieces, the palette, the finishes and the piece count.',
 };
 
 export default function WorkPage() {
   return (
-    // The wall runs nearly full-bleed: wider than the site's text measure on purpose.
-    // Its ink header band runs the full width, so the page clips sideways overflow.
     <div className="overflow-x-clip">
-      <section className="mx-auto px-4 lg:w-[min(94vw,1840px)] lg:px-0 lg:pt-9">
-        <WorkWall projects={WORK} />
-      </section>
+      <WorkWall projects={WORK} />
     </div>
   );
 }

@@ -49,9 +49,10 @@ function buildSlots(results: CatalogProduct[], narrowed: boolean, categories: Ar
 function hang(results: CatalogProduct[], narrowed: boolean, categories: Array<[string, number]>): Slot[] {
   if (narrowed) return results.map((p) => ({ p }));
   const slots: Slot[] = results.filter((p) => p.isFeatured).map((p) => ({ p }));
+  let no = 0;
   const section = (id: string, name: string, count: number, ps: CatalogProduct[]) => {
     if (!ps.length) return;
-    slots.push({ div: { id, name, count } });
+    slots.push({ div: { id, name, count, no: ++no } });
     for (const p of ps) slots.push({ p });
   };
   for (const [name, count] of categories)
@@ -256,43 +257,66 @@ export default function CatalogExplorer({
     set({ category: null, family: null, q: '' }, 'category');
   }
 
+
+  // The toolbar sticks under the site header, whatever height the header is at this
+  // breakpoint: measure it rather than hard-code it.
+  const [headH, setHeadH] = useState<number | null>(null);
+  useEffect(() => {
+    const header = document.querySelector<HTMLElement>('body header');
+    if (!header) return;
+    const measure = () => setHeadH(Math.round(header.getBoundingClientRect().height));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(header);
+    return () => ro.disconnect();
+  }, []);
+  const headVar = (headH !== null ? { ['--ct-head' as string]: `${headH}px` } : {}) as React.CSSProperties;
+
   const familyLabel = state.family ? COLOR_FAMILIES.find((f) => f.id === state.family)?.label ?? state.family : null;
   const board = `${state.q ? 'Search' : familyLabel ?? state.category ?? 'All'} ${results.length}`;
   const count = (
     <>
-      <b>{results.length}</b> {results.length === 1 ? 'style' : 'styles'}
+      <span className="num">{String(results.length).padStart(2, '0')}</span> {results.length === 1 ? 'style' : 'styles'}
       {state.family && (
-        <button type="button" onClick={() => set({ family: null })} className="ml-3 text-uv hover:underline" aria-label={`Remove filter ${familyLabel}`}>
-          {familyLabel} ×
+        <button
+          type="button"
+          onClick={() => set({ family: null })}
+          className="ml-3 inline-flex min-h-[44px] items-center gap-1.5 text-ink"
+          aria-label={`Remove filter ${familyLabel}`}
+        >
+          <span className="link-u">{familyLabel}</span>
+          <span aria-hidden>×</span>
         </button>
       )}
     </>
   );
 
   return (
-    <div>
+    <div style={headVar}>
       {/* ── Colour ─────────────────────────────────────────────────────────── */}
       {/* Only when there is colour to explore: a heading over an empty band is noise. */}
       {swatches.length > 0 && (
-        <section className="pb-8 text-ink sm:pb-10">
+        <section className="pb-10 sm:pb-14" aria-labelledby="ct-color">
           <div className="shell mb-5 flex items-baseline justify-between gap-6">
-            <h2 className="label text-ink">Shop by color</h2>
-            <p className="label hidden text-muted sm:block">{swatches.length} colorways</p>
+            <h2 id="ct-color" className="t-eyebrow">
+              Shop by color
+            </h2>
+            <p className="t-spec fg-muted">{swatches.length} colorways</p>
           </div>
           <Spectrum swatches={swatches} familyCounts={familyCounts} active={state.family} onPick={pickFamily} />
         </section>
       )}
 
       {/* ── Toolbar ────────────────────────────────────────────────────────── */}
-      <div ref={bandRef} className="scroll-mt-[72px] sm:scroll-mt-[84px] lg:scroll-mt-[108px]" />
-      <div ref={barRef} className="sticky top-[72px] z-30 border-b border-rule bg-paper/90 backdrop-blur-xl sm:top-[84px] lg:top-[108px]">
-        <div className="shell flex flex-wrap items-center gap-x-7 gap-y-1 py-2.5">
+      <div ref={bandRef} style={{ scrollMarginTop: headH ?? 72 }} />
+      <div ref={barRef} className="ct-bar sticky z-30 border-y border-[var(--rule-c)] bg-paper">
+        <div className="shell flex flex-wrap items-center gap-x-8 gap-y-1 py-2 xl:flex-nowrap">
           <div
-            className="-mx-5 flex min-w-0 flex-auto gap-2 overflow-x-auto py-1 px-5 [mask-image:linear-gradient(to_right,#000_calc(100%-44px),transparent)] [scrollbar-width:none] sm:mx-0 sm:px-0 lg:[mask-image:none]"
+            className="-mx-5 flex min-w-0 flex-auto gap-1.5 overflow-x-auto px-5 py-1 [mask-image:linear-gradient(to_right,#000_calc(100%-44px),transparent)] [scrollbar-width:none] sm:-mx-8 sm:px-8 lg:-mx-14 lg:px-14 xl:mx-0 xl:px-0 xl:[mask-image:none]"
             role="group"
             aria-label="Category"
           >
-            {['All', ...categories.map(([name]) => name)].map((name) => {
+            {[['All', products.length] as [string, number], ...categories].map(([name, n]) => {
               const on = name === 'All' ? state.category === null : state.category === name;
               return (
                 <button
@@ -303,19 +327,20 @@ export default function CatalogExplorer({
                     e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: smooth() });
                     pickCategory(name === 'All' ? null : name);
                   }}
-                  className="rk-cat"
+                  className="chip shrink-0 whitespace-nowrap px-3.5"
                 >
                   {name}
+                  <span className="ct-chip-n">{String(n).padStart(2, '0')}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className="flex w-full items-center justify-between gap-6 lg:w-auto lg:justify-end">
-            <label className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-ink/5 px-4 py-1.5 text-ink focus-within:ring-2 focus-within:ring-blue lg:flex-none">
-              <svg width="13" height="13" viewBox="0 0 13 13" aria-hidden className="shrink-0">
-                <circle cx="5.5" cy="5.5" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
-                <path d="M9 9l3.2 3.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <div className="flex w-full items-center justify-between gap-6 xl:w-auto xl:flex-none xl:justify-end">
+            <label className="ct-search min-w-0 flex-1 text-ink sm:max-w-sm xl:w-44 xl:flex-none">
+              <svg width="14" height="14" viewBox="0 0 13 13" aria-hidden className="shrink-0">
+                <circle cx="5.5" cy="5.5" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+                <path d="M9 9l3.2 3.2" stroke="currentColor" strokeWidth="1.3" />
               </svg>
               <span className="sr-only">Search styles</span>
               <input
@@ -326,21 +351,22 @@ export default function CatalogExplorer({
                 autoComplete="off"
                 spellCheck={false}
                 placeholder="Search styles"
-                className="w-full min-w-0 bg-transparent py-1 text-[0.875rem] outline-none placeholder:text-ink/40 lg:w-40 [&::-webkit-search-cancel-button]:appearance-none"
               />
+              <kbd className="ct-kbd hidden sm:inline-grid" aria-hidden>
+                /
+              </kbd>
             </label>
 
-            <div className="flex items-center gap-1.5 text-[0.875rem] font-semibold text-muted" role="group" aria-label="View">
+            <div className="flex items-center gap-2" role="group" aria-label="View">
               {(['rack', 'index'] as const).map((v, i) => (
-                <span key={v} className="flex items-center gap-1.5">
-                  {i > 0 && <span aria-hidden>/</span>}
-                  <button
-                    type="button"
-                    aria-pressed={state.view === v}
-                    onClick={() => set({ view: v }, 'none')}
-                    className={`py-2.5 capitalize ${state.view === v ? 'text-ink' : 'hover:text-ink'}`}
-                  >
-                    {v === 'rack' ? 'Rack' : 'List'}
+                <span key={v} className="flex items-center gap-2">
+                  {i > 0 && (
+                    <span aria-hidden className="text-rule">
+                      /
+                    </span>
+                  )}
+                  <button type="button" aria-pressed={state.view === v} onClick={() => set({ view: v }, 'none')} className="ct-toggle">
+                    <span>{v === 'rack' ? 'Rack' : 'List'}</span>
                   </button>
                 </span>
               ))}
@@ -351,9 +377,17 @@ export default function CatalogExplorer({
                 type="button"
                 aria-pressed={soundOn}
                 onClick={() => setSoundOn(rackRef.current?.toggleSound() ?? false)}
-                className={`whitespace-nowrap py-2.5 text-[0.875rem] font-semibold ${soundOn ? 'text-uv' : 'text-muted hover:text-ink'}`}
+                className="ct-toggle min-w-[44px] justify-center gap-2 whitespace-nowrap"
               >
-                Sound {soundOn ? 'on' : 'off'}
+                <svg width="16" height="14" viewBox="0 0 16 14" aria-hidden fill="none">
+                  <path d="M1 5h3l4-3.5v11L4 9H1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                  {soundOn ? (
+                    <path d="M11 4.5c1 1.4 1 3.6 0 5M13.2 2.5c2 2.6 2 6.4 0 9" stroke="currentColor" strokeWidth="1.3" />
+                  ) : (
+                    <path d="M11 5l4 4M15 5l-4 4" stroke="currentColor" strokeWidth="1.3" />
+                  )}
+                </svg>
+                <span className="sr-only sm:not-sr-only xl:sr-only 2xl:not-sr-only">Sound {soundOn ? 'on' : 'off'}</span>
               </button>
             )}
           </div>
@@ -386,15 +420,17 @@ export default function CatalogExplorer({
 
       {/* ── The same, as a spec sheet ─────────────────────────────────────── */}
       {state.view === 'index' && (
-        <section className="shell py-10 sm:py-14">
-          <p className="rk-count mb-6" aria-live="polite">
+        <section className="shell sec-sm" aria-label="Styles as a list">
+          <p className="rk-count mb-8" aria-live="polite">
             {count}
           </p>
           {results.length === 0 ? (
-            <div className="flex flex-col items-start gap-5 border-y border-rule py-14 sm:py-20">
-              <p className="caps text-d2">No styles match.</p>
-              <p className="max-w-measure text-lead text-muted">Try another search, or tell us what you need and we&rsquo;ll source it.</p>
-              <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col items-start gap-6 border-y border-[var(--rule-c)] py-14 sm:py-20">
+              <h2 className="t-h2">
+                No styles <em>match</em>.
+              </h2>
+              <p className="t-lead max-w-measure">Try another search, or tell us what you need and we&rsquo;ll source it.</p>
+              <div className="mt-2 flex flex-wrap gap-3">
                 <button type="button" onClick={clearAll} className="btn-outline">
                   Clear filters
                 </button>

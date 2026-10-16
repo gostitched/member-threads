@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { COLOR_FAMILIES, inkOn, type ColorFamily, type SpectrumSwatch } from '@/lib/catalog/util';
+import { COLOR_FAMILIES, type ColorFamily, type SpectrumSwatch } from '@/lib/catalog/util';
 
 /**
  * Every colourway in the catalog as one continuous band, sorted by hue.
@@ -30,7 +30,7 @@ export default function Spectrum({
     <div>
       <div className="relative">
         <div
-          className="flex h-[88px] w-full overflow-hidden sm:h-[112px]"
+          className="flex h-[72px] w-full overflow-hidden sm:h-[96px] lg:h-[112px]"
           onPointerLeave={() => setHover(null)}
           aria-hidden
         >
@@ -41,7 +41,7 @@ export default function Spectrum({
                 key={s.hex}
                 onPointerEnter={() => setHover(i)}
                 onClick={() => onPick(active === s.family ? null : s.family)}
-                className="relative h-full min-w-[3px] cursor-pointer transition-[flex-grow,opacity] duration-500 ease-out"
+                className="relative h-full min-w-[3px] cursor-pointer transition-[flex-grow,opacity] duration-[420ms] ease-out motion-reduce:transition-none"
                 style={{
                   background: s.hex,
                   flexGrow: hover === i ? 7 : hover !== null && Math.abs(hover - i) === 1 ? 2.2 : 1,
@@ -53,24 +53,24 @@ export default function Spectrum({
           })}
         </div>
 
-        {/* The readout: what the stripe under the pointer is. */}
+        {/* The readout: what the stripe under the pointer is, on a woven label. */}
         <div
-          className={`pointer-events-none absolute left-4 top-4 flex items-center gap-3 rounded-full px-4 py-2 transition-opacity duration-200 ${
+          className={`woven pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 gap-3 transition-opacity duration-[180ms] sm:left-8 lg:left-14 ${
             hovered ? 'opacity-100' : 'opacity-0'
           }`}
-          style={hovered ? { background: hovered.hex, color: inkOn(hovered.hex) } : undefined}
           aria-hidden
         >
           {hovered && (
             <>
-              <span className="text-[0.9375rem] font-semibold">{hovered.name}</span>
-              <span className="text-[0.8125rem] opacity-70">{hovered.productName}</span>
+              <i className="block h-3 w-3 rounded-full" style={{ background: hovered.hex, boxShadow: 'inset 0 0 0 1px rgba(19,51,39,.2)' }} />
+              <span>{hovered.name}</span>
+              <span className="opacity-60">{hovered.productName}</span>
             </>
           )}
         </div>
       </div>
 
-      <div className="shell mt-7 flex flex-wrap gap-2" role="group" aria-label="Filter by color family">
+      <div className="shell mt-6 flex flex-wrap gap-2" role="group" aria-label="Filter by color family">
         {COLOR_FAMILIES.filter((f) => familyCounts.get(f.id)).map((f) => {
           const on = active === f.id;
           return (
@@ -79,12 +79,14 @@ export default function Spectrum({
               type="button"
               aria-pressed={on}
               onClick={() => onPick(on ? null : f.id)}
-              className={`flex min-h-[44px] items-center gap-2.5 rounded-full pl-1.5 pr-4 text-[0.875rem] font-semibold transition-colors duration-200 motion-reduce:transition-none ${
-                on ? 'bg-ink text-paper' : 'bg-ink/5 text-ink hover:bg-ink/10'
-              }`}
+              className="chip gap-2.5 pl-3"
             >
-              <span className="h-8 w-8 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]" style={{ background: f.swatch }} />
+              <i
+                className="block h-4 w-4 rounded-full"
+                style={{ background: f.swatch, boxShadow: on ? '0 0 0 1.5px rgba(244,239,230,.8)' : 'inset 0 0 0 1px rgba(19,51,39,.16)' }}
+              />
               {f.label}
+              <span className="ct-chip-n">{String(familyCounts.get(f.id) ?? 0).padStart(2, '0')}</span>
             </button>
           );
         })}

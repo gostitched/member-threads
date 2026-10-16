@@ -51,7 +51,7 @@ export default function ProductCard({
 
   return (
     <article
-      // No border, no card: the ash plate is the field, the grid's gap does the spacing.
+      // No border, no card: the cream plate is the field, the grid's gap does the spacing.
       className={`group relative flex h-full flex-col ${featured ? 'lg:col-span-2 lg:row-span-2' : ''}`}
       onPointerEnter={(e) => e.pointerType === 'mouse' && setHovering(true)}
       onPointerLeave={() => {
@@ -60,87 +60,77 @@ export default function ProductCard({
         setCycle(0);
       }}
     >
-      <Link href={`/catalog/${product.slug}`} className="flex flex-1 flex-col focus-visible:outline-none">
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-cream">
+      <Link href={`/catalog/${product.slug}`} className="flex flex-1 flex-col outline-none">
+        <div className="ct-plate is-stitchable aspect-[4/5] group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-[var(--focus)]">
           {/* Photo or drawing, the same inset either way. A second photo crossfades in
               on hover; a lone photo or a drawing lifts slightly instead. */}
           <div
-            className={`absolute inset-[10%] transition-all duration-700 ease-out group-hover:scale-[1.04] ${
+            className={`absolute inset-[12%] transition-[transform,opacity] duration-[900ms] ease-out group-hover:-translate-y-1 group-hover:scale-[1.025] motion-reduce:transition-none ${
               gallery[1] ? 'group-hover:opacity-0' : ''
             }`}
           >
             <ProductMedia product={product} colorIndex={colorIndex} size={featured ? 'full' : 'thumb'} />
           </div>
           {photographed && gallery[1] && (
-            <div className="absolute inset-[10%] opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100">
+            <div className="absolute inset-[12%] opacity-0 transition-opacity duration-[420ms] ease-out group-hover:opacity-100">
               <ProductMedia product={product} imageIndex={1} size={featured ? 'full' : 'thumb'} />
             </div>
           )}
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-5">
-            <span className="label text-ink/55">{product.styleNumber}</span>
-            {product.sticker && <span className="label rounded-full bg-paper px-3 py-1.5 text-ink">{product.sticker}</span>}
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4 sm:p-5">
+            <span className="t-spec fg-muted">{product.styleNumber}</span>
+            {product.sticker && <span className="woven">{product.sticker}</span>}
           </div>
 
           {colors[colorIndex] && (
             <span
-              className="label pointer-events-none absolute bottom-5 left-5 translate-y-2 text-ink/60 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+              className="t-spec fg-muted pointer-events-none absolute bottom-4 left-4 translate-y-1 opacity-0 transition-[opacity,transform] duration-[180ms] group-hover:translate-y-0 group-hover:opacity-100 sm:bottom-5 sm:left-5"
               aria-hidden
             >
               {colors[colorIndex].name}
             </span>
           )}
-
-          <span
-            aria-hidden
-            className="absolute bottom-4 right-4 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-ink text-paper opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-          >
-            →
-          </span>
         </div>
 
-        <div className="flex flex-1 flex-col gap-2 pt-4">
-          <div className="flex items-baseline justify-between gap-4">
-            <h3 className={`font-semibold tracking-tight ${featured ? 'text-d3' : 'text-[1.0625rem]'} underline-offset-4 group-hover:underline`}>
+        <div className="flex flex-1 flex-col pt-4">
+          {product.category && <p className="t-spec fg-muted">{product.category}</p>}
+          <h3 className={`mt-1.5 ${featured ? 't-h2' : 't-h3'}`}>
+            <span className="link-u bg-[length:0%_1px] transition-[background-size] duration-[420ms] ease-[cubic-bezier(0.7,0,0.2,1)] group-hover:bg-[length:100%_1px]">
               {product.name}
-            </h3>
+            </span>
+          </h3>
+          <p className="t-spec mt-2.5">
             {price ? (
-              <p className="shrink-0 text-[0.9375rem] tabular-nums">
-                <span className="text-muted">from </span>
-                {formatMoney(price.cents, price.currency)}
-              </p>
+              <>
+                <span className="fg-muted">From </span>
+                <span className="num">{formatMoney(price.cents, price.currency)}</span>
+              </>
             ) : (
-              <p className="shrink-0 text-[0.8125rem] text-muted">With your collection</p>
+              <span className="fg-muted">Priced with your collection</span>
             )}
-          </div>
-          {product.category && <p className="text-[0.8125rem] text-muted">{product.category}</p>}
-          {featured && product.description && (
-            <p className="max-w-measure text-[0.9375rem] leading-relaxed text-muted">{product.description}</p>
-          )}
+          </p>
+          {featured && product.description && <p className="t-body mt-3 max-w-measure">{product.description}</p>}
         </div>
       </Link>
 
-      {colors.length > 0 && (
-        <div className="flex items-center gap-1.5 pt-3" role="group" aria-label={`${product.name} colorways`}>
+      {colors.length > 1 && (
+        <div className="-ml-[13px] flex flex-wrap items-center pt-1" role="group" aria-label={`${product.name} colorways`}>
           {colors.slice(0, MAX_DOTS).map((c, i) => (
             <button
               key={`${c.name}-${i}`}
               type="button"
               title={c.name}
               aria-label={`Preview ${c.name}`}
-              aria-pressed={colorIndex === i}
+              aria-pressed={colorIndex === i && (hovering || pinned !== null)}
               onPointerEnter={() => setPinned(i)}
               onFocus={() => setPinned(i)}
               onClick={() => setPinned(i)}
-              className={`h-4 w-4 rounded-full border transition-transform duration-200 hover:scale-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue ${
-                colorIndex === i && (hovering || pinned !== null) ? 'scale-125 border-ink' : 'border-ink/15'
-              }`}
-              style={{ background: c.hex ?? '#C9C9C9' }}
-            />
+              className="ct-sw !h-11 !w-11 [&>i]:!h-3.5 [&>i]:!w-3.5"
+            >
+              <i style={{ background: c.hex ?? '#C9C9C9' }} />
+            </button>
           ))}
-          {colors.length > MAX_DOTS && (
-            <span className="ml-1 text-[0.75rem] text-muted">+{colors.length - MAX_DOTS}</span>
-          )}
+          {colors.length > MAX_DOTS && <span className="t-spec fg-muted ml-1">+{colors.length - MAX_DOTS}</span>}
         </div>
       )}
     </article>

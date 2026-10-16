@@ -11,6 +11,9 @@ export const FOUNDER = {
   role: 'Founder',
   /** Drop a photo in /public/about/ and set the path here (null shows a plain plate). */
   photo: '/about/founder.jpg' as string | null,
+  /** Intrinsic size of the photo above (for next/image). */
+  width: 1200,
+  height: 1500,
 };
 
 export const ORIGIN = {
@@ -20,11 +23,26 @@ export const ORIGIN = {
   why: 'Most organizations want better merchandise. They just don’t know how to create it, or where to source it.',
   whyBody:
     'The usual answer is a promo catalog and a logo on a blank tee. It gets handed out once and ends up in a drawer. We think the people who show up for your organization deserve something they reach for on their own: the right fabric, a considered fit, colors that are actually yours, finished with the care of a real apparel brand.',
-  // [CONFIRM] "worked directly with manufacturers" and "fabric, fit, color, label" detail, carried over from the Stitched story.
+  /**
+   * The story as roster rows. `when` is only set where the date is on file.
+   * [CONFIRM] "worked directly with manufacturers" and "fabric, fit, color, label" detail, carried over from the Stitched story.
+   */
   story: [
-    'Ethan Scher started making apparel in 2023 for his own college clubs. The options were the same everywhere: pick a blank from a catalog, press a logo on it, hope people wear it.',
-    'So he went further. He worked directly with manufacturers to build the pieces properly: the fabric, the fit, the color, the label inside the neck. Members wore them. Other clubs asked for the same.',
-    'That work became Stitched. Member Threads is how we bring it to every kind of organization, with a catalog to start from, a designer to shape it, and one clear price.',
+    {
+      when: '2023',
+      title: 'Made for his own clubs.',
+      body: 'Ethan Scher started making apparel in 2023 for his own college clubs. The options were the same everywhere: pick a blank from a catalog, press a logo on it, hope people wear it.',
+    },
+    {
+      when: 'Then',
+      title: 'Built properly, from the fabric up.',
+      body: 'So he went further. He worked directly with manufacturers to build the pieces properly: the fabric, the fit, the color, the label inside the neck. Members wore them. Other clubs asked for the same.',
+    },
+    {
+      when: 'Now',
+      title: 'Stitched, then Member Threads.',
+      body: 'That work became Stitched. Member Threads is how we bring it to every kind of organization, with a catalog to start from, a designer to shape it, and one clear price.',
+    },
   ],
 };
 
@@ -54,4 +72,9 @@ export const STITCHED = {
   title: 'Part of Stitched Group.',
   // [CONFIRM] the division of responsibilities between Member Threads and Stitched Group.
   body: 'Member Threads is where organizations design their collections. Stitched Group, our parent company, runs sourcing, production, quality control and logistics. One team from brief to delivery, with no middleman between your designer and the people making the pieces.',
+  /** The two halves, as a spec table. Same facts as `body`. */
+  split: [
+    { k: 'Member Threads', v: 'Your designer, the catalog, the collection' },
+    { k: 'Stitched Group', v: 'Sourcing, production, quality control, logistics' },
+  ],
 };

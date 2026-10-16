@@ -2,61 +2,67 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Arrow } from '@/components/SiteHeader';
 import { FRAME } from '@/components/frame';
+import '@/components/chrome/chrome.css';
 
 export const metadata: Metadata = {
   title: 'Page not found',
 };
 
-const LINKS = [
-  { href: '/catalog', label: 'Browse the Catalog' },
-  { href: '/work', label: 'See Collections' },
-  { href: '/about', label: 'About Member Threads' },
+const ROSTER = [
+  { href: '/', label: 'Home', note: 'Start at the front' },
+  { href: '/catalog', label: 'The catalog', note: 'Styles to start from' },
+  { href: '/work', label: 'Collections', note: 'The members’ wall' },
+  { href: '/quote', label: 'Start a collection', note: 'Tell us who it’s for' },
 ] as const;
 
-/** Branded 404: the same title treatment as the secondary pages, three ways back, the one pill. */
+/**
+ * 404: the block "404" cut off by the right edge of the screen with a woven
+ * "Not issued" label across it, the serif line, and the pages that are on the
+ * roster, numbered.
+ */
 export default function NotFound() {
   return (
-    <section className="bg-paper text-ink">
-      <div className={`${FRAME} grid gap-14 pb-24 pt-14 sm:pt-20 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-end lg:gap-16 lg:pb-32 lg:pt-28`}>
-        <div>
-          <p className="rise label text-ink/55">Error 404</p>
-          <h1 className="caps mt-6 text-[clamp(2.75rem,7.6vw,7.25rem)] leading-[0.92] tracking-[-0.035em]">
-            <span className="rise block" style={{ animationDelay: '60ms' }}>
-              Not in the
-            </span>
-            <span
-              className="rise block font-serif text-[1.02em] font-normal normal-case leading-[1.05] tracking-normal text-dusty [font-stretch:100%]"
-              style={{ animationDelay: '160ms' }}
-            >
-              collection.
-            </span>
-          </h1>
-          <p className="rise mt-10 max-w-[34rem] text-lead text-ink/75" style={{ animationDelay: '260ms' }}>
-            The page you’re looking for has moved or doesn’t exist. Here are a few places to pick up from.
+    <section className="band-paper relative overflow-hidden pb-24 lg:pb-32">
+      <div className={`${FRAME} relative pt-8 sm:pt-12`}>
+        <div className="relative">
+          <p aria-hidden className="mt-404 t-mast enter -ml-[0.04em] select-none whitespace-nowrap text-ink">
+            404
           </p>
-          <div className="rise mt-10 flex flex-wrap gap-3" style={{ animationDelay: '320ms' }}>
-            <Link href="/" className="btn-blue px-7">
-              Back to home <Arrow className="ml-1 h-3.5 w-[18px]" />
-            </Link>
-            <Link href="/quote" className="btn-outline px-7">
-              Start a Collection
-            </Link>
-          </div>
+          <span
+            className="woven woven-beige woven-lg absolute bottom-[12%] left-[10%] rotate-[-4deg] sm:left-[16%]"
+          >
+            No. 404 · Not issued
+          </span>
         </div>
 
-        <ul className="border-t border-ink/15">
-          {LINKS.map((l) => (
-            <li key={l.href} className="border-b border-ink/15">
-              <Link
-                href={l.href}
-                className="group flex items-center justify-between py-5 text-[1rem] font-medium transition-colors hover:text-dusty"
-              >
-                {l.label}
-                <Arrow className="h-3.5 w-[18px] transition-transform duration-300 ease-out group-hover:translate-x-1" />
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="grid-12 mt-14 gap-y-12 lg:mt-20">
+          <div className="col-span-4 sm:col-span-8 lg:col-span-5">
+            <p className="t-eyebrow fg-muted">Error 404</p>
+            <h1 className="t-h1 mt-5">
+              This page isn’t on the <em>roster</em>.
+            </h1>
+            <p className="t-lead mt-6 max-w-[30ch]">Whatever was here has moved, or was never issued. These pages are.</p>
+          </div>
+
+          <nav aria-label="Pages on the roster" className="col-span-4 sm:col-span-8 lg:col-span-6 lg:col-start-7">
+            <ol>
+              {ROSTER.map((r, i) => (
+                <li key={r.href}>
+                  <span aria-hidden className="stitch-rule" />
+                  <Link href={r.href} className="mt-menu-link group flex min-h-[72px] items-center gap-5 py-4">
+                    <span className="t-spec w-6 shrink-0 fg-muted">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="mt-menu-name flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+                      <span className="t-h2">{r.label}</span>
+                      <span className="t-spec fg-muted">{r.note}</span>
+                    </span>
+                    <Arrow className="h-3.5 w-[18px] transition-transform duration-base ease-out group-hover:translate-x-1" />
+                  </Link>
+                </li>
+              ))}
+            </ol>
+            <span aria-hidden className="stitch-rule" />
+          </nav>
+        </div>
       </div>
     </section>
   );

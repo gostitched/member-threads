@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import RequestForm, { ForSticker, QuoteTitle } from '@/components/RequestForm';
 import { FRAME } from '@/components/frame';
 import { CONTACT } from '@/lib/site';
+import '@/components/chrome/chrome.css';
 
 export const metadata: Metadata = {
   title: 'Start a Collection',
@@ -15,83 +16,87 @@ const NEXT = [
   { title: 'Approve, then we make it', line: 'You sign off on every piece and one clear price before anything is produced.' },
 ] as const;
 
-const GOOD_TO_KNOW = ['From 36 pieces per style', 'Sizes mix within a style', 'Design included', 'No upcharges for customization'] as const;
+const ASSURANCES = ['Design included', 'No upcharges', 'From 36 per style'] as const;
 
+/**
+ * A calm intake page. The display line (personalised once a name has been
+ * typed on the home page) with the lead beside it; then two columns: the
+ * three next steps and the woven reassurances, sticky on the left; the
+ * request plate on the right, which frames the Stitched form.
+ */
 export default async function QuotePage({ searchParams }: { searchParams: Promise<{ piece?: string }> }) {
   // Sent from the studio on the home page: what the visitor built, to paste into the brief.
   const { piece } = await searchParams;
 
   return (
-    <>
-      <section className="bg-paper text-ink">
-        <div className={`${FRAME} pb-14 pt-14 sm:pb-16 sm:pt-20 lg:pb-20 lg:pt-28`}>
-          <p className="rise label text-ink/55">Start a collection</p>
-          <div className="mt-6">
-            <QuoteTitle />
+    <section className="band-paper pb-24 lg:pb-32">
+      <div className={FRAME}>
+        <div className="grid-12 gap-y-8 pb-14 pt-10 sm:pt-14 lg:pb-20 lg:pt-20">
+          <div className="col-span-4 sm:col-span-8 lg:col-span-8">
+            <p className="enter t-eyebrow fg-muted">Start a collection · Intake</p>
+            <div className="mt-5">
+              <QuoteTitle />
+            </div>
           </div>
-          <div className="rise mt-10 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-16" style={{ animationDelay: '260ms' }}>
-            <p className="max-w-[40rem] text-lead text-ink/75">
-              Your logo, your colors, roughly how many people and when you need it. A brand guide or a few screenshots is
-              plenty. A designer reads every request; you’ll hear back from a person, not an automated system.
-            </p>
-          </div>
+          <p
+            className="enter t-lead col-span-4 sm:col-span-6 lg:col-span-4 lg:self-end"
+            style={{ ['--d' as string]: '240ms' }}
+          >
+            Your logo, your colors, roughly how many people and when you need it. A designer reads every request, and you
+            hear back from a person.
+          </p>
         </div>
-      </section>
 
-      <section className="bg-paper text-ink">
-        <div className={`${FRAME} grid gap-12 border-t border-rule pb-24 pt-10 sm:pt-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-16 lg:pb-32`}>
-          <div className="min-w-0">
-            {piece && (
-              <div className="mb-6 flex flex-col gap-2 rounded-[4px] bg-cream p-6 sm:p-7">
-                <p className="label text-ink/55">You picked</p>
-                <p className="caps text-d3">{piece.slice(0, 200)}</p>
-                <p className="text-[0.9375rem] text-ink/70">Mention it in the form and your designer will start from there.</p>
-              </div>
-            )}
-            <RequestForm />
-          </div>
-
-          <aside>
+        <div className="grid-12 gap-y-14 border-t border-rule pt-10 lg:pt-14">
+          <aside className="order-2 col-span-4 sm:col-span-8 lg:order-1 lg:col-span-4" aria-label="What happens next">
             <div className="lg:sticky lg:top-[124px]">
-              <div className="mb-8 empty:hidden">
+              <div className="mb-10 empty:hidden">
                 <ForSticker />
               </div>
 
-              <p className="label text-ink/55">What happens next</p>
-              <ol className="mt-5 border-t border-ink/15">
+              <p className="t-eyebrow fg-muted">What happens next</p>
+              <ol className="mt-6">
                 {NEXT.map((n, i) => (
-                  <li key={n.title} className="grid grid-cols-[2.25rem_minmax(0,1fr)] border-b border-ink/15 py-5">
-                    <span className="label pt-1 text-ink/45">{String(i + 1).padStart(2, '0')}</span>
+                  <li key={n.title} className="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 border-t border-rule py-6">
+                    <span className="t-block text-[1.5rem] text-beige-deep">{String(i + 1).padStart(2, '0')}</span>
                     <div>
-                      <p className="text-[1rem] font-semibold leading-snug">{n.title}</p>
-                      <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-ink/70">{n.line}</p>
+                      <h2 className="t-h3">{n.title}</h2>
+                      <p className="t-body mt-2 text-ink/90">{n.line}</p>
                     </div>
                   </li>
                 ))}
               </ol>
 
-              <p className="label mt-10 text-ink/55">Good to know</p>
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {GOOD_TO_KNOW.map((g) => (
-                  <li key={g} className="rounded-full bg-cream px-3.5 py-1.5 text-[0.8125rem] font-medium">
+              <ul className="mt-4 flex flex-wrap gap-2.5" aria-label="Good to know">
+                {ASSURANCES.map((g) => (
+                  <li key={g} className="woven woven-beige">
                     {g}
                   </li>
                 ))}
               </ul>
-
-              <p className="mt-10 text-[0.9375rem] text-ink/70">
-                Prefer email?{' '}
-                <a
-                  href={`mailto:${CONTACT.email}`}
-                  className="font-medium text-ink underline decoration-ink/30 underline-offset-4 transition-colors hover:text-dusty hover:decoration-dusty"
-                >
-                  {CONTACT.email}
-                </a>
-              </p>
+              <p className="t-small mt-6 max-w-[40ch] text-ink/80">Sizes mix within a style.</p>
             </div>
           </aside>
+
+          <div className="order-1 col-span-4 min-w-0 sm:col-span-8 lg:order-2 lg:col-span-8">
+            {piece && (
+              <div className="mb-8 flex flex-col items-start gap-3 border-b border-rule pb-8">
+                <span className="woven woven-green">You picked</span>
+                <p className="t-h2">{piece.slice(0, 200)}</p>
+                <p className="t-body text-ink/90">Mention it in the form and your designer will start from there.</p>
+              </div>
+            )}
+            <RequestForm />
+            <p className="t-body mt-6 text-ink/90">
+              Prefer email? Write to{' '}
+              <a href={`mailto:${CONTACT.email}`} className="link-u font-medium">
+                {CONTACT.email}
+              </a>{' '}
+              with your organization, the pieces and your date.
+            </p>
+          </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

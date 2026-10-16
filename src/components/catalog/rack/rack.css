@@ -37,25 +37,28 @@
   justify-content: space-between;
 }
 .rk-count {
-  padding-bottom: 6px;
-  font: 500 13px/1 var(--font-sans), sans-serif;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.45em;
+  min-height: 44px;
+  padding-bottom: 2px;
+  font: 500 12px/16px var(--font-sans), sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: theme('colors.muted');
 }
-.rk-count b {
-  font-weight: 600;
-  color: theme('colors.ink');
-}
+.rk-count .num { color: theme('colors.ink'); }
 .rk-plate {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 10px 7px 9px;
-  border-radius: 10px;
-  background: #FFFFFF;
-  box-shadow: 0 0 0 1px theme('colors.rule');
-  color: theme('colors.ink');
-  font: 500 10.5px/1 var(--font-mono), monospace;
+  padding: 8px 12px 8px 11px;
+  border-radius: 1px;
+  background: theme('colors.green');
+  color: theme('colors.cream');
+  font: 600 10.5px/1 var(--font-sans), sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -66,26 +69,29 @@
   top: 100%;
   width: 2px;
   height: 26px;
-  background: theme('colors.ink / 30%');
+  background: theme('colors.ink / 45%');
 }
 .rk-plate::before { left: 12px; }
+/* The woven stitch just inside the plate's edge. */
+.rk-plate > .rk-led::after { content: none; }
+.rk-plate { outline: 1px dashed theme('colors.cream / 38%'); outline-offset: -4px; }
 .rk-plate::after { right: 12px; }
 .rk-plate .rk-k { color: theme('colors.muted'); }
 .rk-led {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: theme('colors.rule');
-  transition: background 0.15s, box-shadow 0.15s;
+  background: theme('colors.cream / 30%');
+  transition: background 0.18s, box-shadow 0.18s;
 }
 .rk-plate.is-live .rk-led {
-  background: var(--rk-lit);
-  box-shadow: 0 0 0 2px theme('colors.uv-lit / 60%');
+  background: theme('colors.beige');
+  box-shadow: 0 0 0 2px theme('colors.beige / 35%');
 }
-.rk-plate.is-wake { animation: rk-wake 0.5s var(--rk-ease); }
+.rk-plate.is-wake { animation: rk-wake 0.6s var(--rk-ease); }
 @keyframes rk-wake {
-  0% { box-shadow: 0 0 0 1px theme('colors.rule'), 0 0 0 0 theme('colors.uv-lit / 70%'); }
-  100% { box-shadow: 0 0 0 1px theme('colors.rule'), 0 0 0 10px theme('colors.uv-lit / 0%'); }
+  0% { box-shadow: 0 0 0 0 theme('colors.beige / 55%'); }
+  100% { box-shadow: 0 0 0 10px theme('colors.beige / 0%'); }
 }
 .rk-flap { display: inline-flex; gap: 1px; }
 .rk-fc {
@@ -93,11 +99,11 @@
   width: 1.2ch;
   padding: 3px 0;
   text-align: center;
-  border-radius: 2px;
-  background: linear-gradient(theme('colors.ash') 0 49%, theme('colors.rule') 49% 53%, theme('colors.ash') 53%);
-  color: theme('colors.ink');
+  border-radius: 1px;
+  background: linear-gradient(#0D241B 0 49%, theme('colors.green') 49% 53%, #0D241B 53%);
+  color: theme('colors.cream');
 }
-.rk-fc.is-spin { color: theme('colors.uv'); }
+.rk-fc.is-spin { color: theme('colors.beige'); }
 
 /* ── the rack ─────────────────────────────────────────────────────────────── */
 .rk-rows { position: relative; width: 100%; }
@@ -220,22 +226,32 @@
   width: var(--iw);
   transition: opacity 0.3s var(--rk-ease);
 }
+.rk-no,
+.rk-pr,
+.rk-vw {
+  font: 500 12px/16px var(--font-sans), sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.rk-no { color: theme('colors.muted'); }
 .rk-nm {
-  font: 600 15px/1.2 var(--font-sans), sans-serif;
+  margin-top: 6px;
+  font: 400 clamp(1.25rem, 1.5vw, 1.5rem)/1.12 var(--font-editorial), serif;
+  letter-spacing: -0.012em;
   color: theme('colors.ink');
   text-wrap: balance;
 }
 .rk-pr {
-  margin-top: 4px;
-  font: 400 13px/1.2 var(--font-sans), sans-serif;
-  color: theme('colors.muted');
+  margin-top: 8px;
+  color: theme('colors.ink');
 }
+.rk-pr span { color: theme('colors.muted'); }
 .rk-vw {
   position: absolute;
   right: 0;
   top: 0;
-  font: 600 12px/1 var(--font-sans), sans-serif;
-  color: theme('colors.electric-deep');
+  color: theme('colors.ink');
   opacity: 0;
   translate: -6px 0;
   transition: opacity 0.3s var(--rk-ease), translate 0.3s var(--rk-ease);
@@ -253,15 +269,21 @@
 @media (hover: hover) {
   .rk-run:not(.rk-anim) .rk-g.is-hot { z-index: 4; }
   .rk-run:not(.rk-anim) .rk-g.is-hot .rk-lift {
-    transform: translateY(12px) scale(1.055);
+    transform: translateY(8px) scale(1.035);
   }
-  .rk-run.has-hot:not(.rk-anim) .rk-g:not(.is-hot) .rk-lift { opacity: 0.78; }
+  .rk-run.has-hot:not(.rk-anim) .rk-g:not(.is-hot) .rk-lift { opacity: 0.72; }
+  .rk-run:not(.rk-anim) .rk-g.is-hot .rk-nm {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+    background-position: 0 100%;
+  }
   .rk-run:not(.rk-anim) .rk-g.is-hot .rk-vw,
   .rk-run:not(.rk-anim) .rk-g.is-hot .rk-tag { opacity: 1; translate: 0 0; }
   a.rk-g { cursor: pointer; }
 }
-.rk-g:focus-visible .rk-lift { transform: translateY(12px) scale(1.055); }
-.rk-g:focus-visible .rk-info { outline: 2px solid var(--rk-lit); outline-offset: 6px; border-radius: 4px; }
+.rk-g:focus-visible .rk-lift { transform: translateY(8px) scale(1.035); }
+.rk-g:focus-visible .rk-info { outline: 2px solid var(--focus); outline-offset: 6px; border-radius: 0; }
 .rk-g:focus-visible .rk-tag { opacity: 1; translate: 0 0; }
 
 /* Colorway cycling: the paint eases between colors. */
@@ -273,7 +295,8 @@
   left: calc(50% + 12px);
   top: 7%;
   z-index: 3;
-  width: 88px;
+  width: max-content;
+  min-width: 88px;
   transform-origin: 4px 0;
   opacity: 0;
   translate: 0 -8px;
@@ -295,11 +318,14 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 17px 9px 10px;
-  border-radius: 8px;
-  background: #FFFFFF;
-  box-shadow: 0 0 0 1px theme('colors.rule');
-  font: 500 11px/1.3 var(--font-sans), sans-serif;
+  padding: 18px 10px 10px;
+  border-radius: 1px;
+  background: theme('colors.cream');
+  outline: 1px dashed theme('colors.ink / 30%');
+  outline-offset: -4px;
+  font: 600 10.5px/1.3 var(--font-sans), sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: theme('colors.ink');
   white-space: nowrap;
 }
@@ -322,11 +348,11 @@
 }
 .rk-g.is-locked .rk-tag { opacity: 1; translate: 0 0; }
 .rk-g.is-locked .rk-card {
-  background: theme('colors.electric');
-  color: theme('colors.ink');
-  box-shadow: 0 0 0 1px theme('colors.ink / 10%');
+  background: theme('colors.green');
+  color: theme('colors.cream');
+  outline-color: theme('colors.cream / 40%');
 }
-.rk-g.is-locked .rk-cwn { color: theme('colors.ink'); }
+.rk-g.is-locked .rk-cwn { color: theme('colors.cream'); }
 .rk-g.is-locked .rk-vw { opacity: 1; translate: 0 0; }
 
 /* Section plates */
@@ -345,22 +371,38 @@
   height: 46px;
   margin-left: -64px;
 }
-/* Section tags are pill chips. */
+/* Section plates: a large woven label in green, hung from two rings. */
 .rk-dplate {
+  position: relative;
   display: grid;
   justify-items: center;
+  gap: 8px;
   max-width: calc(var(--gw) - 24px);
   margin-top: 46px;
-  padding: 10px 16px 11px;
-  border-radius: 22px;
-  background: #FFFFFF;
-  box-shadow: 0 0 0 1px theme('colors.rule');
+  padding: 14px 22px 13px;
+  border-radius: 1px;
+  background: theme('colors.green');
+  color: theme('colors.cream');
+}
+.rk-dplate::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed currentColor;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.rk-dk {
+  font: 600 10px/1 var(--font-sans), sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: theme('colors.beige');
 }
 .rk-dn {
-  font: 900 14px/1.1 var(--font-display), sans-serif;
-  letter-spacing: -0.01em;
+  font: 900 15px/1.05 var(--font-display), sans-serif;
+  font-stretch: 125%;
+  letter-spacing: -0.005em;
   text-transform: uppercase;
-  color: theme('colors.ink');
   text-align: center;
 }
 
@@ -391,12 +433,20 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 34px 16px 20px;
+  padding: 40px 18px 20px;
   text-align: center;
-  border-radius: 24px;
-  background: #FFFFFF;
+  border-radius: 1px;
+  background: theme('colors.cream');
   color: theme('colors.ink');
-  box-shadow: 0 0 0 1px theme('colors.rule');
+  clip-path: polygon(20% 0, 80% 0, 100% 9%, 100% 100%, 0 100%, 0 9%);
+}
+.rk-cta-body::after {
+  content: '';
+  position: absolute;
+  inset: 30px 6px 6px;
+  border: 1px dashed currentColor;
+  opacity: 0.3;
+  pointer-events: none;
 }
 /* The punched hole the string goes through. */
 .rk-cta-body::before {
@@ -411,14 +461,21 @@
   background: theme('colors.paper');
   box-shadow: inset 0 0 0 1px theme('colors.rule');
 }
+.rk-cta .rk-ck {
+  font: 500 12px/16px var(--font-sans), sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: theme('colors.muted');
+}
 .rk-cta h3 {
   margin: 0;
-  font: 900 clamp(1.1rem, 1.5vw, 1.35rem)/1 var(--font-display), sans-serif;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
+  font: 400 clamp(1.375rem, 1.9vw, 1.75rem)/1.1 var(--font-editorial), serif;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
 }
-.rk-cta p { margin: 0; font: 400 14px/1.35 var(--font-sans), sans-serif; color: theme('colors.muted'); }
-.rk-cta a { margin-top: 8px; white-space: nowrap; }
+.rk-cta h3 em { font-style: italic; }
+.rk-cta p { margin: 0; font: 400 14px/1.45 var(--font-sans), sans-serif; color: theme('colors.ink'); }
+.rk-cta a { position: relative; z-index: 1; margin-top: 8px; white-space: nowrap; }
 
 /* Empty rack */
 .rk-empty {
@@ -434,11 +491,11 @@
 }
 .rk-empty h3 {
   margin: 0;
-  font: 900 clamp(1.25rem, 2vw, 1.75rem)/1.1 var(--font-display), sans-serif;
-  letter-spacing: -0.018em;
-  text-transform: uppercase;
+  font: 400 clamp(1.875rem, 3.2vw, 3rem)/1.05 var(--font-editorial), serif;
+  letter-spacing: -0.02em;
 }
-.rk-empty p { margin: 0; font-size: 15px; color: theme('colors.muted'); }
+.rk-empty h3 em { font-style: italic; }
+.rk-empty p { margin: 0; font-size: 16px; color: theme('colors.ink'); }
 .rk-empty a { margin-top: 10px; }
 
 /* Lifted off, on its way to the product page. */
@@ -463,27 +520,14 @@
 /* Multiplied onto the page, so the packshot's white never shows as a box in flight. */
 .rk-fly.rk-ph { filter: none; mix-blend-mode: multiply; }
 
-/* Categories in the toolbar: pill chips; the chosen one is navy. */
-.rk-cat {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: 9999px;
-  background: theme('colors.ink / 5%');
-  color: theme('colors.ink');
-  font: 500 14px/1 var(--font-sans), sans-serif;
-  white-space: nowrap;
-  transition: background-color 0.2s, color 0.2s;
-}
-.rk-cat:hover { background: theme('colors.ink / 10%'); }
-.rk-cat[aria-pressed='true'] { background: theme('colors.ink'); color: theme('colors.paper'); }
 
 /* The rack's metal: hooks, hangers and wires (engine.ts / art.ts paint with these). */
 .rk-hook, .rk-rings, .rk-wire { color: var(--rk-metal); }
 
 @media (max-width: 659px) {
-  .rk-nm { font-size: 12.5px; }
+  .rk-nm { font-size: 17px; margin-top: 4px; }
+  .rk-no, .rk-pr { font-size: 11px; }
+  .rk-dk { display: none; }
     .rk-vw,
   .rk-tag { display: none; }
   .rk-dplate { padding: 9px 12px; }
@@ -492,8 +536,9 @@
   .rk-cta { width: calc(var(--gw) - 22px); }
   .rk-cta-body { gap: 8px; padding: 26px 10px 14px; }
   .rk-cta-body::before { top: 8px; width: 10px; height: 10px; margin-left: -5px; }
-  .rk-cta h3 { font-size: 14px; }
-  .rk-cta p { font-size: 12.5px; }
+  .rk-cta h3 { font-size: 18px; }
+  .rk-cta p { font-size: 13px; }
+  .rk-cta .rk-ck { font-size: 10.5px; }
   .rk-cta a { padding: 8px 12px; min-height: 40px; font-size: 13px; white-space: normal; }
   .rk-plate { gap: 8px; font-size: 9.5px; }
   .rk-plate .rk-k,
@@ -504,6 +549,5 @@
   .rk,
   .rk-g,
   .rk-lift,
-  .rk-cat,
   .rk-gm { transition: none; }
 }

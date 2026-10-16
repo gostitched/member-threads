@@ -9,8 +9,9 @@ import { ACT3, initial, lockup, type Piece } from '@/lib/chapter';
 import type { Deco, Drawn } from '@/lib/work';
 
 /**
- * Act 02, one row: the question and our answer, then three pieces from one
- * collection on cream, dusty-blue and beige plates, each carrying the
+ * Act 02, one row on paper: the question and our answer (cols 1–4), then three
+ * pieces from one collection on square cream and beige plates (cols 6–12),
+ * staggered down the grid like a contact sheet, each carrying the
  * organization's name the way that garment would. Phones swipe the plates.
  */
 
@@ -20,6 +21,9 @@ const PLATE: Record<Piece['plate'], string> = {
   dusty: 'bg-dusty',
   green: 'bg-green',
 };
+
+/** Vertical offsets on desktop: a stagger, so the row reads as laid out by hand. */
+const OFFSET = ['lg:mt-0', 'lg:mt-24', 'lg:mt-12'];
 
 /** The organization's name, set on a piece the way that garment would carry it. */
 function decoFor(p: Piece, name: string): Deco {
@@ -50,54 +54,68 @@ function useSettle() {
   return [ref, shown] as const;
 }
 
+const Arrow = () => (
+  <svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden>
+    <path d="M0 6h16M11 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
+  </svg>
+);
+
 export default function DesignAct() {
   const [row, rowIn] = useSettle();
   const { name: typed, isDefault } = useOrgName();
   const name = isDefault ? YOUR_NAME : typed;
   const c = ACT3.collection;
+  const [a, em, b] = ACT3.ask;
 
   return (
-    <section aria-labelledby="design-title" className="chapter-design relative overflow-x-clip bg-paper text-ink">
-      <div ref={row} data-in={rowIn} className="chapter-table shell relative grid gap-10 border-t border-rule py-16 sm:py-20 lg:grid-cols-12 lg:items-center lg:gap-12 lg:py-24">
-        <div className="chapter-piece lg:col-span-4" style={{ '--from': '0 20px', '--d': '0ms' } as React.CSSProperties}>
-          <p className="label text-muted">Design help, included</p>
-          <h2 id="design-title" className="caps mt-4 text-d2">{ACT3.ask}</h2>
-          <p className="mt-4 font-serif text-[clamp(1.75rem,2.6vw,2.25rem)] leading-[1.1] text-uv">{ACT3.script}</p>
-          <p className="mt-5 max-w-[26rem] text-lead text-ink/70">{ACT3.body}</p>
-          <Link href={ACT3.link.href} className="label group mt-8 inline-flex items-center gap-2 border-b border-ink/30 pb-1 text-ink transition-colors hover:border-ink">
-            {ACT3.link.label}
-            <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
-          </Link>
+    <section aria-labelledby="design-title" className="chapter-design band-paper sec relative overflow-x-clip">
+      <div ref={row} data-in={rowIn} className="chapter-table shell">
+        <div className="grid-12 gap-y-12">
+          <div className="chapter-piece col-span-4 sm:col-span-6 lg:col-span-4 lg:pt-4" style={{ '--d': '0ms' } as React.CSSProperties}>
+            <p className="t-eyebrow fg-muted">{ACT3.eyebrow}</p>
+            <h2 id="design-title" className="t-h2 mt-5">
+              {a}
+              <em>{em}</em>
+              {b}
+            </h2>
+            <p className="t-body mt-7 max-w-[40ch] text-ink/85">{ACT3.body}</p>
+            <Link href={ACT3.link.href} className="link-arrow t-spec mt-8 text-ink">
+              <span className="link-u">{ACT3.link.label}</span>
+              <Arrow />
+            </Link>
+          </div>
+
+          <ul
+            aria-label={`Example collection for ${name}`}
+            className="chapter-rail col-span-4 sm:col-span-8 lg:col-span-7 lg:col-start-6"
+          >
+            {c.pieces.map((p, i) => {
+              const g: Drawn = { kind: p.kind, color: p.color, trim: p.trim, place: p.place, deco: decoFor(p, name) };
+              return (
+                <li
+                  key={p.kind}
+                  className={`chapter-piece ${OFFSET[i]}`}
+                  style={{ '--d': `${120 + i * 80}ms` } as React.CSSProperties}
+                >
+                  <figure className="group">
+                    <div className={`chapter-plate relative aspect-[4/5] overflow-hidden ${PLATE[p.plate]}`}>
+                      <WorkArt
+                        art={{ t: 'garment', g }}
+                        label={`${p.label} for ${name}, ${p.spec.toLowerCase()}`}
+                        className="chapter-piece-art absolute inset-[7%] h-[86%] w-[86%]"
+                      />
+                      <span aria-hidden className="t-spec absolute left-3 top-3 text-ink">{String(i + 1).padStart(2, '0')}</span>
+                    </div>
+                    <figcaption className="mt-4">
+                      <span className="t-h3 block">{p.label}</span>
+                      <span className="t-spec fg-muted mt-1.5 block">{p.spec}</span>
+                    </figcaption>
+                  </figure>
+                </li>
+              );
+            })}
+          </ul>
         </div>
-        <ul
-          aria-label={`Example collection for ${name}`}
-          className="-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:col-span-8"
-        >
-          {c.pieces.map((p, i) => {
-            const g: Drawn = { kind: p.kind, color: p.color, trim: p.trim, place: p.place, deco: decoFor(p, name) };
-            return (
-              <li
-                key={p.kind}
-                className="chapter-piece w-[68%] shrink-0 snap-start sm:w-auto"
-                style={{ '--from': '0 30px', '--d': `${120 + i * 120}ms` } as React.CSSProperties}
-              >
-                <figure className="group">
-                  <div className={`chapter-plate relative aspect-[4/5] overflow-hidden rounded-[20px] ${PLATE[p.plate]}`}>
-                    <WorkArt
-                      art={{ t: 'garment', g }}
-                      label={`${p.label} for ${name}, ${p.spec.toLowerCase()}`}
-                      className="chapter-piece-art absolute inset-[5%] h-[90%] w-[90%] transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                    />
-                  </div>
-                  <figcaption className="mt-3.5">
-                    <span className="block text-[0.9375rem] font-semibold text-ink">{p.label}</span>
-                    <span className="label mt-1.5 block text-[10px] text-muted">{p.spec}</span>
-                  </figcaption>
-                </figure>
-              </li>
-            );
-          })}
-        </ul>
       </div>
     </section>
   );
