@@ -1,58 +1,119 @@
-import { SLIP, named, type Custom } from '@/lib/chapter';
+import { SLIP, COLORWAYS, named, type Custom, type Look } from '@/lib/chapter';
 import { DEFAULT_NAME } from '@/lib/name';
 
-export type SlipLine = { id: Custom; label: string };
+export type SlipLine = { id: Custom; no: string; label: string };
 
 /**
- * The tech pack on the table. Every step the visitor takes prints a line (in
- * the order they took them) and the slip grows downward; the upcharge column
- * stays at +$0. The line for the detail being pointed at lights up.
+ * The tech pack on the table: a real spec sheet, square, on paper, with the
+ * site's one shadow (`.lift`). Header with the house mark, style and revision;
+ * the organization in the block face; the base spec as a hairline grid; the
+ * neck label as it will be woven (it re-weaves when the name changes); then a
+ * numbered line per detail, in the order chosen, every one at +$0. The line
+ * for the detail being pointed at lights up, and pointing at a line lights the
+ * detail. The total never moves.
  */
 export default function Receipt({
   lines,
   focus,
   name = DEFAULT_NAME,
+  look,
+  rev = 0,
+  onReset,
+  setHover,
   className = '',
 }: {
   lines: SlipLine[];
   focus: Custom | null;
   name?: string;
+  look: Look;
+  rev?: number;
+  onReset?: () => void;
+  setHover?: (id: Custom | null) => void;
   className?: string;
 }) {
+  const cw = COLORWAYS[look.color];
   return (
-    <div className={`chapter-slip relative ${className}`}>
-      <header className="chapter-slip-head">
-        <div className="flex items-center justify-between gap-3">
-          <p className="chapter-slip-brand">{SLIP.brand}</p>
-          <p className="chapter-slip-text text-muted">{SLIP.kicker}</p>
+    <article aria-label={`Tech pack for ${name}`} className={`chapter-slip lift relative ${className}`}>
+      <header className="flex items-start justify-between gap-4">
+        <span role="img" aria-label={SLIP.brand} className="chapter-logo-ink block h-9 w-[86px]" />
+        <div className="text-right">
+          <p className="t-spec">{SLIP.kicker}</p>
+          <p className="t-spec fg-muted num mt-0.5">
+            {SLIP.no} · Rev. <span key={rev} className="chapter-tick inline-block">{String(rev).padStart(2, '0')}</span>
+          </p>
         </div>
-        <p className="chapter-slip-org mt-[0.9em]">{named(SLIP.title, name)}</p>
       </header>
-      <dl className="chapter-slip-text chapter-slip-rule mt-[0.9em] grid grid-cols-2 gap-x-3 gap-y-[0.15em] pt-[0.7em] text-muted">
-        <dt className="sr-only">Style</dt><dd>{SLIP.no}</dd>
-        <dt className="sr-only">Fabric</dt><dd className="text-right">{SLIP.qty}</dd>
-        <dt className="sr-only">Fit</dt><dd>{SLIP.fit}</dd>
-        <dt className="sr-only">Minimum</dt><dd className="text-right">{SLIP.min}</dd>
-      </dl>
-      <div className="chapter-slip-text chapter-slip-rule mt-[0.7em] flex justify-between py-[0.5em] font-semibold">
-        <span>{SLIP.item}</span>
-        <span>{SLIP.upcharge}</span>
+
+      <div className="hairline mt-5 pt-4">
+        <p className="t-spec fg-muted">Organization</p>
+        <p className="chapter-slip-org mt-2">{named(SLIP.title, name)}</p>
       </div>
-      <ul className="chapter-slip-rule py-[0.4em]" aria-label="Tech pack">
-        {lines.length === 0 && <li className="chapter-slip-text py-[0.18em] text-ink/35">Tap a detail to add it</li>}
-        {lines.map((r) => (
-          <li key={r.id} data-lit={focus === r.id || undefined} className="chapter-slip-row chapter-slip-text chapter-slip-in">
-            <span className="min-w-0">{r.label}</span>
-            <span className="shrink-0">{SLIP.included}</span>
-          </li>
+
+      <dl className="chapter-slip-specs mt-5">
+        {SLIP.specs.map(([k, v]) => (
+          <div key={k}>
+            <dt className="t-spec fg-muted">{k}</dt>
+            <dd className="t-spec mt-1">
+              {k === 'Colorway' ? (
+                <span key={cw.id} className="chapter-fade-in inline-flex items-center gap-1.5">
+                  <span aria-hidden className="chapter-slip-sw" style={{ background: cw.body }} />
+                  {v.replace('{color}', cw.name)}
+                </span>
+              ) : (
+                v
+              )}
+            </dd>
+          </div>
         ))}
-      </ul>
-      <div className="chapter-slip-total-row chapter-slip-rule flex items-end justify-between gap-3 pt-[0.8em]">
-        <p className="chapter-slip-text font-semibold">{SLIP.totalLabel}</p>
-        <p className="chapter-slip-total">{SLIP.total}</p>
+      </dl>
+
+      <div className="hairline mt-0 flex items-center justify-between gap-3 py-4">
+        <p className="t-spec fg-muted shrink-0">{SLIP.label}</p>
+        <span className="chapter-necklabel woven woven-green">
+          <span key={name} className="chapter-reweave chapter-woven-name">{name}</span>
+        </span>
       </div>
-      <p className="chapter-slip-text mt-[0.7em] normal-case tracking-normal text-muted">{SLIP.note}</p>
-      <p aria-hidden className="chapter-slip-code mt-[1em]">{SLIP.code}</p>
-    </div>
+
+      <div className="hairline">
+        <div className="t-spec fg-muted flex justify-between py-2.5">
+          <span>No. · {SLIP.item}</span>
+          <span>{SLIP.upcharge}</span>
+        </div>
+        <ul aria-label="Details added" className="chapter-slip-lines">
+          {lines.length === 0 && <li className="t-spec fg-muted py-1.5">{SLIP.empty}</li>}
+          {lines.map((r) => (
+            <li
+              key={r.id}
+              data-lit={focus === r.id || undefined}
+              onPointerEnter={(e) => e.pointerType === 'mouse' && setHover?.(r.id)}
+              onPointerLeave={(e) => e.pointerType === 'mouse' && setHover?.(null)}
+              className="chapter-slip-row t-spec"
+            >
+              <span aria-hidden className="fg-muted num w-6 shrink-0">{r.no}</span>
+              <span className="chapter-print min-w-0 flex-1">{r.label}</span>
+              <span className="num shrink-0">{SLIP.included}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="hairline mt-2 flex items-end justify-between gap-3 pt-4">
+        <div>
+          <p className="t-spec">{SLIP.totalLabel}</p>
+          <p className="t-spec fg-muted num mt-1">{String(lines.length).padStart(2, '0')} details</p>
+        </div>
+        <p className="chapter-slip-total num">{SLIP.total}</p>
+      </div>
+      <p className="t-small mt-4 max-w-[34ch]">{SLIP.note}</p>
+
+      <div className="mt-5 flex items-center justify-between gap-3">
+        <span aria-hidden className="chapter-slip-code t-spec fg-muted">{SLIP.code}</span>
+        {onReset && lines.length > 1 && (
+          <button type="button" onClick={onReset} className="link-u chapter-link chapter-reset">
+            Start over
+          </button>
+        )}
+      </div>
+    </article>
   );
 }

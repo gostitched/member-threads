@@ -3,49 +3,24 @@
 import { useEffect, useRef, useState } from 'react';
 import { pieces, type WorkItem } from '@/lib/work';
 
-export { bandStyle, bandTheme, type BandTheme } from './band';
-
 /**
- * Small pieces shared by the wall, the dossier and the collection pages: the
- * collection's own colour as a hero band, the piece-count chip, and a share button
- * (the buyer usually needs a committee, a board or a manager to see it too).
+ * Small pieces shared by the dossier and the collection pages: the piece count as a
+ * woven label, and a share link (the buyer usually needs a committee, a board or a
+ * manager to see it too).
  */
 
-const CHIP = {
-  ink: 'bg-ink text-paper',
-  pop: 'bg-uv-lit text-ink',
-  paper: 'bg-white text-ink',
-};
-
-/**
- * "438 PIECES": a production fact, set as a flat green pill, straight. (`rotate`
- * is accepted for older callers and ignored: the trims sit square now.)
- */
-export function PieceStamp({
-  w,
-  tone = 'ink',
-  className = '',
-}: {
-  w: WorkItem;
-  rotate?: number;
-  /** pop is a chip fill only (never type). */
-  tone?: 'ink' | 'pop' | 'paper';
-  className?: string;
-}) {
+/** "438 pieces", woven. */
+export function PieceStamp({ w, className = '' }: { w: WorkItem; className?: string }) {
   const n = pieces(w);
   if (!n) return null;
-  return (
-    <span className={`inline-flex min-h-[36px] items-center rounded-full px-4 text-[0.875rem] font-semibold leading-none ${CHIP[tone]} ${className}`}>
-      {n} pieces
-    </span>
-  );
+  return <span className={`woven woven-green ${className}`}>{n} pieces</span>;
 }
 
 /**
  * Share a collection: the phone's share sheet where there is one, otherwise the link
  * goes on the clipboard and the button says so.
  */
-export function ShareButton({ w, tone = 'ink', className = '' }: { w: WorkItem; tone?: 'ink' | 'paper'; className?: string }) {
+export function ShareButton({ w, className = '' }: { w: WorkItem; className?: string }) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const timer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -84,21 +59,13 @@ export function ShareButton({ w, tone = 'ink', className = '' }: { w: WorkItem; 
     }
   };
 
-  const tones = {
-    ink: 'bg-white text-ink ring-1 ring-ink/10 hover:bg-ink hover:text-paper',
-    paper: 'bg-white text-ink ring-1 ring-ink/10 hover:bg-ink hover:text-paper',
-  };
-
   return (
     <button
       type="button"
       onClick={share}
-      className={`group inline-flex min-h-[44px] items-center gap-2 rounded-full px-4 text-[0.875rem] font-semibold transition-colors duration-200 motion-reduce:transition-none ${tones[tone]} ${className}`}
+      className={`inline-flex min-h-[44px] items-center text-[14px] font-medium ${className}`}
     >
-      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="shrink-0">
-        <path d="M2 3.5h12v7H7l-3.5 3v-3H2z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      </svg>
-      <span aria-live="polite">
+      <span aria-live="polite" className="link-u">
         {state === 'copied' ? (
           <span key="c">Link copied</span>
         ) : state === 'failed' ? (

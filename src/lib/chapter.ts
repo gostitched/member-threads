@@ -4,13 +4,13 @@
  * Two acts and a close. 01 puts the house hoodie on the development table with
  * the visitor's organization on the chest, and lets them build it detail by
  * detail while the tech pack prints. 02 shows the design team turning a loose
- * brief into a whole collection. The close is one band: name, colors,
+ * brief into a whole collection. The close is a cream band: name, colors,
  * collection. Copy, callouts, the slip and every swappable asset live here so
  * the components only lay things out.
  *
  * Rules from the business, not taste:
  *  - Sell the collection, never the shirt: no per-piece prices on this table.
- *  - Name the craft (420 GSM fleece, chenille, embroidery, puff print, 2×2 rib).
+ *  - Name the craft (400 GSM fleece, chenille, embroidery, puff print, 2×2 rib).
  *  - Customization never costs extra; design help is included.
  *  - Harbor Run Club is a sample organization; nothing here claims a real client.
  */
@@ -58,14 +58,11 @@ export const initial = (name: string) => (name.trim().match(/\p{L}|\p{N}/u)?.[0]
 // ── Act 01 ────────────────────────────────────────────────────────────────────
 
 export const ACT1 = {
-  eyebrow: 'The house hoodie · 420 GSM',
-  title: 'Not a blank.',
-  /** The body, with the emphasised claim split out. */
-  body: {
-    lead: 'Generic merch starts with a blank and a logo. We start with ',
-    mark: 'the garment',
-    rest: ': better fabric, a better cut, and every detail decided by you.',
-  },
+  eyebrow: 'The house hoodie · 400 GSM',
+  /** Sentence case; the bracketed word is set in the serif italic. */
+  title: ['Not a ', 'blank', '.'] as const,
+  /** The lead: what the hoodie is for. */
+  lead: 'Promo merch starts with a blank and a logo. We start with the garment: better fabric, a better cut, and every detail decided by you.',
   /** The small line under it: how to play with the hoodie, and the price of a detail. */
   hint: 'Type your organization’s name, pick a colorway, then add details. Each one is +$0.',
   /** The chip that lands beside a detail as it goes on. */
@@ -73,16 +70,19 @@ export const ACT1 = {
   /** The name field. */
   namePlaceholder: 'Your organization',
   nameLabel: 'Organization name',
-  /** Colorway dots under the garment (synced with the hero's colorway). */
+  /** Colorway dots (synced with the hero's colorway). */
   colorways: 'Colorway',
   /** Beside the dots: the five are examples, not the menu. */
   anyColor: 'Any color',
+  details: 'Details',
   reset: 'Start over',
+  /** The drawing sheet's title block. */
+  sheet: 'Front · House hoodie',
 };
 
 /**
  * The details a visitor can add to the hoodie. The cut is fixed as the house
- * piece: oversized, boxy, 420 GSM fleece. It starts in the site's colorway
+ * piece: oversized, boxy, 400 GSM fleece. It starts in the site's colorway
  * with the organization's wordmark on the chest (tonal rib, self-lined hood, no
  * cords). Every accent comes from the colorway, so no combination can clash.
  */
@@ -116,11 +116,11 @@ export type Callout = {
 export const CALLOUTS: Callout[] = [
   { id: 'construction', word: 'Contrast stitch', add: 'Every seam', line: 'Contrast topstitch, {accent}', at: [478, 812], side: 'left', rides: 'side' },
   { id: 'patch', word: 'Chenille patch', add: 'On the sleeve', line: 'Chenille “{initial}” patch, sleeve', at: [330, 1090], side: 'left', pin: [440, 1190], rides: 'side' },
-  { id: 'color', word: 'Colorway', add: 'Tap to change', line: 'Body / {color} fleece', at: [330, 1250], side: 'left', rides: 'side' },
-  { id: 'rib', word: 'Contrast rib', add: 'Hem and cuffs', line: '2×2 rib, {liner}, hem + cuffs', at: [300, 1690], side: 'left', rides: 'side' },
+  { id: 'color', word: 'Colorway', add: 'Tap to change', line: 'Body / {color} fleece', at: [330, 1250], side: 'left', pin: [760, 1240], rides: 'side' },
+  { id: 'rib', word: 'Contrast rib', add: 'Hem and cuffs', line: '2×2 rib, {liner}, hem + cuffs', at: [300, 1690], side: 'left', pin: [660, 1690], rides: 'side' },
   { id: 'liner', word: 'Hood liner', add: 'Inside the hood', line: '{liner} jersey hood liner', at: [1120, 300], side: 'right', pin: [1100, 280] },
   { id: 'trims', word: 'Cords + aglets', add: 'Flat cord, metal tips', line: 'Flat drawcord, metal aglets', at: [1034, 740], side: 'right', pin: [1034, 700] },
-  { id: 'embroidery', word: 'Wordmark', add: 'Arched, embroidered', line: '“{name}” arched wordmark, embroidered', at: [1250, 930], side: 'right', pin: [1240, 900] },
+  { id: 'embroidery', word: 'Wordmark', add: 'Script, embroidered', line: '“{name}” script, embroidered, chest', at: [1250, 930], side: 'right', pin: [1240, 900] },
   { id: 'print', word: 'Puff print', add: 'On the pocket', line: '“Season 01” puff print, pocket', at: [1010, 1500], side: 'right', pin: [1160, 1410] },
 ];
 
@@ -226,17 +226,22 @@ export const SLIP = {
   brand: 'Member Threads',
   kicker: 'Tech pack',
   title: '{name}',
-  no: 'Style MT-HD01',
-  qty: '420 GSM fleece',
-  fit: 'Oversized · boxy',
-  min: 'Min. 36 pcs',
+  no: 'MT-HD01',
+  specs: [
+    ['Body', '400 GSM fleece'],
+    ['Fit', 'Oversized, boxy'],
+    ['Colorway', '{color}'],
+    ['Minimum', '36 pcs'],
+  ] as const,
+  label: 'Neck label',
   item: 'Detail',
   upcharge: 'Upcharge',
   included: '+$0',
+  empty: 'Tap a detail to add it',
   totalLabel: 'Total upcharge',
   total: '$0',
   note: 'Design help included. One clear price, no customization fees.',
-  code: 'MT-HD01 · SEASON 01',
+  code: 'MT-HD01 · Season 01',
 };
 
 // ── Act 02 ────────────────────────────────────────────────────────────────────
@@ -264,18 +269,19 @@ export type Piece = {
 };
 
 export const ACT3 = {
-  ask: 'Don’t know what you want yet?',
-  script: 'We design the whole collection.',
+  eyebrow: 'Design help, included',
+  /** One headline; the middle string is set in the serif italic. */
+  ask: ['Don’t know what you want yet? We design the ', 'whole', ' collection.'] as const,
   body: 'Send a logo, a color, a reference, or nothing at all. Our designers build it into a cohesive set of pieces and revise until it’s right. Design help is included.',
   /** An example collection on /work (slug provided by the Work page). */
-  link: { label: 'Example: the Eastline Run Club collection', href: '/work/eastline-run-club' },
+  link: { label: 'See the Eastline Run Club collection', href: '/work/eastline-run-club' },
   collection: {
     pieces: [
       { kind: 'quarterzip', label: 'Quarter-zip', spec: 'Brushed fleece · Forest', plate: 'cream', color: C.green, trim: C.green,
-        deco: 'script', place: 'left', ink: C.cream },
-      { kind: 'polo', label: 'Polo', spec: 'Piqué · Cream', plate: 'dusty', color: C.cream, trim: C.green,
+        deco: 'block', place: 'left', ink: C.cream },
+      { kind: 'polo', label: 'Polo', spec: 'Piqué · Cream', plate: 'beige', color: C.cream, trim: C.green,
         deco: 'crest', place: 'left', ink: C.green, ink2: C.cream },
-      { kind: 'cap', label: 'Six-panel cap', spec: 'Washed twill · Navy', plate: 'beige', color: C.dusty, trim: C.dusty,
+      { kind: 'cap', label: 'Six-panel cap', spec: 'Washed twill · Navy', plate: 'cream', color: C.dusty, trim: C.dusty,
         deco: 'block', place: 'chest', ink: C.cream },
     ] satisfies Piece[],
   },
@@ -284,11 +290,12 @@ export const ACT3 = {
 // ── The close ─────────────────────────────────────────────────────────────────
 
 export const FINALE = {
-  /** Three lines; the first word sits in beige. */
-  lines: [['Your', 'name.'], ['Your', 'colors.'], ['Your', 'collection.']] as const,
-  /** Under the lines when a name is typed: the org, in the script, as a signature. */
+  /** Three lines; the last word of the last line is set in the serif italic. */
+  lines: ['Your name.', 'Your colors.', 'Your collection.'] as const,
+  /** The hang tag: who it's made for, then the house facts. */
   madeFor: 'Made for',
+  tag: { style: 'The house hoodie', min: 'From 36 pieces' },
   body: 'Start from the catalog, make every detail yours, and get one clear price. From 36 pieces per style.',
-  primary: { label: 'Start {name’s} collection', href: '/quote' },
+  primary: { label: 'Start a collection', href: '/quote' },
   secondary: { label: 'Browse the catalog', href: '/catalog' },
 };

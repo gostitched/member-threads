@@ -1,14 +1,19 @@
 import type { Metadata } from 'next';
-import { Archivo, Yellowtail } from 'next/font/google';
+import { Archivo, Newsreader, Yellowtail } from 'next/font/google';
 import './globals.css';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import { SITE_URL } from '@/lib/site';
 
 /**
- * Archivo stands in for both brand faces: at heavy weights and a wide
- * setting it plays The Bold Font (display caps, numerals); at text weights
- * it plays Acumin (body, nav, buttons, labels).
+ * Type system (see DESIGN.md, "Type"). Three voices, like a club's printed matter:
+ *
+ * - Newsreader (OFL): the voice. Headlines, leads, pull quotes. The optical-size
+ *   axis keeps it crisp at 120px and readable at 20px. Italic is the emphasis.
+ * - Archivo (OFL): the uniform. At 900 and full width it is the block "THREADS"
+ *   caps of the logo (`.t-mast`, `.caps`, numerals); at text weights it is the
+ *   body, buttons, labels and spec lines.
+ * - Yellowtail (OFL): the script, standing in for Billion Dreams. Rare.
  */
 const archivo = Archivo({
   subsets: ['latin'],
@@ -17,7 +22,14 @@ const archivo = Archivo({
   display: 'swap',
 });
 
-/** Yellowtail stands in for Billion Dreams: the script, used sparingly as an accent. */
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  variable: '--font-newsreader',
+  style: ['normal', 'italic'],
+  axes: ['opsz'],
+  display: 'swap',
+});
+
 const script = Yellowtail({
   subsets: ['latin'],
   variable: '--font-script',
@@ -45,11 +57,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${script.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${newsreader.variable} ${script.variable}`}>
       <body className="min-h-screen antialiased">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-ink focus:px-5 focus:py-2 focus:text-paper"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-ink focus:px-5 focus:py-3 focus:text-paper t-eyebrow"
         >
           Skip to content
         </a>

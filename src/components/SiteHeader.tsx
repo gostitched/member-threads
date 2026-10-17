@@ -2,27 +2,45 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONTACT, NAV, NAV_CTA } from '@/lib/site';
 import { FRAME } from '@/components/frame';
-
+import { sentence } from '@/components/chrome/nav';
+import '@/components/chrome/chrome.css';
 
 function isActive(pathname: string, href: string) {
   if (href.startsWith('/#')) return false;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+
+/** The menu's roster: the four pages, then the custom route. */
+const MENU = [...NAV, { href: '/custom', label: 'Fully custom' }];
+
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 /**
- * Paper header, sticky. A hairline appears once you scroll. Logo left, four
- * tracked caps links centred (md+), the one green pill right. Heights stay
- * 72 / 84 / 92px: the home hero sizes itself against them.
- * Mobile: a full-height paper sheet with an indexed link list, the pill and
- * the contact line.
+ * Paper header, sticky, one fixed height (72 / 84 / 92px; the home hero and
+ * the catalog bar size against it). After 8px of scroll it condenses: paper
+ * turns translucent, a hairline appears and the wordmark steps down.
+ * Nav: sentence case; hover sews an underline in; the current page keeps a
+ * running stitch. Right: the one primary, small.
+ * Mobile: a full-screen green sheet. A numbered roster of the four pages in
+ * the serif, stitch rules between, the primary, contact, and the woven label;
+ * the lettermark sits cut off by the corner. A disclosure with a focus trap;
+ * Escape closes it and returns focus to the toggle.
  */
 export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const headerRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  const close = useCallback((refocus = false) => {
+    setOpen(false);
+    if (refocus) toggleRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -31,128 +49,166 @@ export default function SiteHeader() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Lock the page behind the sheet; close it if the viewport grows past md.
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
+    if (!open) return;
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const onMq = () => mq.matches && setOpen(false);
+    mq.addEventListener('change', onMq);
     return () => {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = prev;
+      mq.removeEventListener('change', onMq);
     };
   }, [open]);
 
+  // Focus trap + Escape while open. The trap spans the bar (logo, toggle) and the sheet.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
+    const root = headerRef.current;
+    const first = root?.querySelector<HTMLElement>('#mobile-menu a');
+    first?.focus({ preventScroll: true });
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        close(true);
+        return;
+      }
+      if (e.key !== 'Tab' || !root) return;
+      const items = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (el) => el.getClientRects().length > 0
+      );
+      if (!items.length) return;
+      const firstEl = items[0];
+      const lastEl = items[items.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (active === firstEl || !root.contains(active))) {
+        e.preventDefault();
+        lastEl.focus();
+      } else if (!e.shiftKey && (active === lastEl || !root.contains(active))) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, close]);
 
   // Close the menu on navigation.
   useEffect(() => setOpen(false), [pathname]);
 
   return (
     <header
-      className={`sticky top-0 z-50 bg-paper text-ink transition-shadow duration-300 ${
-        scrolled || open ? 'shadow-[inset_0_-1px_0_theme(colors.rule)]' : ''
-      }`}
+      ref={headerRef}
+      data-scrolled={scrolled && !open}
+      data-open={open}
+      className="mt-head sticky top-0 z-40 bg-paper text-ink"
     >
-      <div className={`${FRAME} grid h-[72px] grid-cols-[1fr_auto] items-center gap-6 sm:h-[84px] md:grid-cols-[1fr_auto_1fr] lg:h-[92px]`}>
+      <div
+        className={`${FRAME} relative z-10 grid h-[72px] grid-cols-[1fr_auto] items-center gap-6 sm:h-[84px] lg:h-[92px] lg:grid-cols-[1fr_auto_1fr]`}
+      >
         <Link
           href="/"
-          className="-my-1 flex min-h-11 items-center justify-self-start text-ink transition-colors duration-300 hover:text-dusty"
+          className="flex min-h-11 items-center justify-self-start"
           onClick={() => setOpen(false)}
           aria-label="Member Threads, home"
         >
-          <Wordmark />
+          <Wordmark className="mt-logo" />
         </Link>
 
-        <nav className="hidden items-center gap-9 md:flex lg:gap-14" aria-label="Main">
+        <nav className="hidden items-center gap-9 lg:flex xl:gap-11" aria-label="Main">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? 'page' : undefined}
-                className={`group relative whitespace-nowrap py-2 font-sans text-[0.8125rem] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 hover:text-dusty ${
-                  active ? 'text-ink' : 'text-ink/80'
-                }`}
-              >
-                {item.label}
-                <span
-                  aria-hidden
-                  className={`absolute -bottom-0.5 left-0 h-px w-full origin-left bg-current transition-transform duration-300 ease-out ${
-                    active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                  }`}
-                />
+              <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} className="mt-nav">
+                {sentence(item.label)}
               </Link>
             );
           })}
         </nav>
 
-        <div className="flex items-center gap-2 justify-self-end">
+        <div className="flex items-center gap-3 justify-self-end">
           <Link
             href={NAV_CTA.href}
-            className="btn-blue hidden h-11 min-h-0 whitespace-nowrap px-6 text-[0.9375rem] sm:inline-flex lg:h-12 lg:px-7"
+            className={`btn-blue btn-sm hidden ${open ? '' : 'sm:inline-flex'}`}
+            aria-current={pathname === NAV_CTA.href ? 'page' : undefined}
           >
-            {NAV_CTA.label} <Arrow className="ml-1 h-3.5 w-[18px]" />
+            {NAV_CTA.label} <Arrow className="h-3 w-4" />
           </Link>
           <button
+            ref={toggleRef}
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="mobile-menu"
-            aria-label={open ? 'Close menu' : 'Open menu'}
-            className="-mr-2.5 flex h-11 w-11 items-center justify-center md:hidden"
+            className="mt-burger -mr-3 flex h-11 min-w-11 items-center gap-3 px-3 lg:hidden"
           >
-            <span className="relative block h-3 w-7">
-              <span className={`absolute left-0 block h-[1.5px] w-7 bg-current transition-transform duration-300 ease-out ${open ? 'top-1.5 rotate-45' : 'top-0'}`} />
-              <span className={`absolute left-0 block h-[1.5px] w-7 bg-current transition-transform duration-300 ease-out ${open ? 'top-1.5 -rotate-45' : 'top-3'}`} />
+            <span className="t-spec">{open ? 'Close' : 'Menu'}</span>
+            <span aria-hidden className="relative block h-2.5 w-6">
+              <span className={`absolute left-0 block h-[1.5px] w-6 bg-current ${open ? 'top-[4px] rotate-45' : 'top-0'}`} />
+              <span className={`absolute left-0 block h-[1.5px] w-6 bg-current ${open ? 'top-[4px] -rotate-45' : 'top-[9px]'}`} />
             </span>
           </button>
         </div>
       </div>
 
-      {open && (
-        <div
-          id="mobile-menu"
-          className="fixed inset-x-0 bottom-0 top-[72px] z-40 flex flex-col overflow-y-auto bg-paper text-ink sm:top-[84px] md:hidden"
-        >
-          <nav className={`${FRAME} flex flex-1 flex-col pb-8 pt-4`} aria-label="Main">
-            <ul className="border-t border-rule">
-              {NAV.map((item, i) => {
-                const active = isActive(pathname, item.href);
-                return (
-                  <li key={item.href} className="rise border-b border-rule" style={{ animationDelay: `${40 + i * 50}ms` }}>
-                    <Link
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      aria-current={active ? 'page' : undefined}
-                      className="flex items-baseline gap-4 py-5"
-                    >
-                      <span className="label w-6 text-ink/45">{String(i + 1).padStart(2, '0')}</span>
-                      <span className={`caps text-[1.75rem] leading-none ${active ? 'text-dusty' : ''}`}>{item.label}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-            <Link
-              href={NAV_CTA.href}
-              onClick={() => setOpen(false)}
-              className="rise btn-blue mt-8 h-14 w-full text-[1rem]"
-              style={{ animationDelay: '260ms' }}
-            >
-              {NAV_CTA.label} <Arrow className="ml-1 h-3.5 w-[18px]" />
-            </Link>
-            <div className="mt-auto flex flex-col gap-2 pt-12">
-              <a href={`mailto:${CONTACT.email}`} className="text-[0.9375rem] font-medium text-ink underline-offset-4 hover:underline">
-                {CONTACT.email}
-              </a>
-              <p className="label text-ink/50">A Stitched Group company</p>
-            </div>
-          </nav>
-        </div>
-      )}
+      {open && <MobileMenu pathname={pathname} onNavigate={() => setOpen(false)} />}
     </header>
+  );
+}
+
+function MobileMenu({ pathname, onNavigate }: { pathname: string; onNavigate: () => void }) {
+  return (
+    <div
+      id="mobile-menu"
+      className="mt-menu band-green fixed inset-0 z-0 flex flex-col overflow-y-auto overscroll-contain lg:hidden"
+    >
+      {/* The lettermark, cut off by the sheet's bottom-right corner. */}
+      <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <span className="mt-menu-mark absolute -bottom-[14%] -right-[30%] block aspect-[240/189] w-[110%] max-w-[640px]" />
+      </span>
+
+      <nav aria-label="Menu" className={`${FRAME} relative flex flex-1 flex-col pb-6 pt-[84px] sm:pt-[108px]`}>
+        <p className="mt-menu-item t-eyebrow fg-muted" style={{ ['--d' as string]: '40ms' }}>
+          The roster
+        </p>
+        <ol className="mt-3">
+          {MENU.map((item, i) => {
+            const active = isActive(pathname, item.href);
+            return (
+              <li key={item.href} className="mt-menu-item" style={{ ['--d' as string]: `${80 + i * 80}ms` }}>
+                <Link
+                  href={item.href}
+                  onClick={onNavigate}
+                  aria-current={active ? 'page' : undefined}
+                  className="mt-menu-link flex min-h-[56px] items-baseline gap-5 py-2"
+                >
+                  <span className="t-spec w-6 shrink-0 text-beige">{String(i + 1).padStart(2, '0')}</span>
+                  <span className={`mt-menu-name t-h1 ${active ? 'italic text-beige' : ''}`}>{sentence(item.label)}</span>
+                </Link>
+                <span aria-hidden className="stitch-rule opacity-60" />
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="mt-menu-item mt-8" style={{ ['--d' as string]: '480ms' }}>
+          <Link href={NAV_CTA.href} onClick={onNavigate} className="btn-white w-full">
+            {NAV_CTA.label} <Arrow className="h-3.5 w-[18px]" />
+          </Link>
+        </div>
+
+        <div className="mt-menu-item mt-auto flex flex-col items-start gap-2 pt-8" style={{ ['--d' as string]: '560ms' }}>
+          <a href={`mailto:${CONTACT.email}`} className="link-u inline-flex min-h-11 items-center text-[17px]">
+            {CONTACT.email}
+          </a>
+          {/* [CONFIRM] "Est. 2023": the year Ethan started making apparel; confirm it is the brand's founding line. */}
+          <span className="t-spec text-beige">Est. 2023 · A Stitched Group company</span>
+        </div>
+      </nav>
+    </div>
   );
 }
 
@@ -166,7 +222,7 @@ export function Arrow({ className = 'h-4 w-5' }: { className?: string }) {
 }
 
 const WORDMARK_SIZES = {
-  header: 'h-12 sm:h-[56px] lg:h-[62px]',
+  header: 'h-11 sm:h-[52px] lg:h-14',
   footer: 'h-20 sm:h-24 lg:h-28',
 } as const;
 

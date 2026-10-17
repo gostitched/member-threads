@@ -1,96 +1,215 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import type { PublicPriceBreak } from '@/lib/catalog/types';
 import { formatMoney } from '@/lib/catalog/util';
 
 /**
- * The price ladder, and a quantity you can drag across it.
+ * The price ladder, and a quantity you can set against it.
  *
- * The tiers read first, as a row (36 / 72 / 144 / 300+), because that is the answer
- * most buyers want. The slider underneath turns it into a total for their headcount.
- * It is logarithmic: 36 to 72 matters as much, in decision terms, as 300 to 600.
+ * The ladder reads first, as a hairline table (36 / 72 / 144 / 300+), because that is
+ * the answer most buyers want; the tier your quantity lands in is marked. Under it,
+ * the quantity: a stepper for an exact headcount and a slider for feel. The slider is
+ * logarithmic: 36 to 72 matters as much, in decision terms, as 300 to 600.
  */
 const MAX_QTY = 1000;
+const HARD_MAX = 99999;
 
 /** `breaks` is one flat ladder (see `flatBreaks`): decoration is in the price. */
 export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPriceBreak[]; minimum?: number | null }) {
+  const id = useId();
   const ladder = useMemo(() => [...breaks].sort((a, b) => a.minQuantity - b.minQuantity), [breaks]);
   // Nobody can order below the minimum, so tiers that only apply under it are dropped
   // and the track starts at it.
   const tiers = ladder.filter((t, i) => !(minimum && ladder[i + 1] && ladder[i + 1].minQuantity <= minimum));
   const minQ = Math.max(minimum ?? 1, tiers[0]?.minQuantity ?? 1);
   const maxQ = Math.max(MAX_QTY, Math.round((tiers[tiers.length - 1]?.minQuantity ?? minQ) * 1.6));
-  const [pos, setPos] = useState(0);
+  const [qty, setQty] = useState(minQ);
+  const [draft, setDraft] = useState<string | null>(null);
+  const [underMin, setUnderMin] = useState(false);
 
   if (tiers.length === 0) return null;
 
-  const qty = Math.round(Math.exp(Math.log(minQ) + pos * (Math.log(maxQ) - Math.log(minQ))));
-  const active = [...tiers].reverse().find((t) => qty >= t.minQuantity) ?? tiers[0];
+  const L = (n: number) => Math.log(n);
+  const posOf = (q: number) => Math.min(1, Math.max(0, (L(q) - L(minQ)) / (L(maxQ) - L(minQ))));
+  const qtyAt = (pos: number) => Math.round(Math.exp(L(minQ) + pos * (L(maxQ) - L(minQ))));
+  const clamp = (q: number) => Math.min(HARD_MAX, Math.max(minQ, Math.round(q) || minQ));
+
+  const activeIndex = tiers.reduce((at, t, i) => (qty >= Math.max(t.minQuantity, minQ) ? i : at), 0);
+  const active = tiers[activeIndex];
+  const next = tiers[activeIndex + 1];
   const currency = active.currency;
-  const last = tiers[tiers.length - 1];
+  const total = active.unitPriceCents * qty;
+  const pos = posOf(qty);
+
+  const commitDraft = () => {
+    if (draft === null) return;
+    const n = Number(draft.replace(/[^\d]/g, ''));
+    setUnderMin(n < minQ);
+    setQty(clamp(n));
+    setDraft(null);
+  };
+  const set = (q: number) => {
+    setUnderMin(false);
+    setDraft(null);
+    setQty(clamp(q));
+  };
+  // − and + step along the ladder: 36 → 72 → 144 → 300, then by the hundred.
+  const starts = tiers.map((t) => Math.max(t.minQuantity, minQ));
+  const stepUp = () => {
+    const nextStart = starts.find((q) => q > qty);
+    set(nextStart ?? Math.floor(qty / 100) * 100 + 100);
+  };
+  const stepDown = () => {
+    const top = starts[starts.length - 1];
+    if (qty > top + 100) return set(Math.ceil(qty / 100) * 100 - 100);
+    const prev = [...starts].reverse().find((q) => q < qty);
+    set(prev ?? minQ);
+  };
+  const upLabel = (() => {
+    const nextStart = starts.find((q) => q > qty);
+    return nextStart ? `Step up to ${nextStart} pieces` : 'Add 100 pieces';
+  })();
 
   return (
     <div>
-      {/* The ladder. Each tier is a button that jumps the slider to it. */}
-      <div className="grid border-y border-rule" style={{ gridTemplateColumns: `repeat(${tiers.length}, minmax(0, 1fr))` }}>
-        {tiers.map((t, i) => {
-          const on = t === active;
-          const q = Math.max(t.minQuantity, minQ);
-          return (
-            <button
-              key={t.minQuantity}
-              type="button"
-              aria-pressed={on}
-              onClick={() => setPos((Math.log(q) - Math.log(minQ)) / (Math.log(maxQ) - Math.log(minQ)))}
-              className={`relative flex flex-col items-start gap-2 px-3 py-4 text-left transition-colors duration-200 sm:px-4 ${
-                i > 0 ? 'border-l border-rule' : ''
-              } ${on ? 'bg-cream' : 'hover:bg-cream/50'}`}
-            >
-              <span className="label text-muted">
-                {q.toLocaleString('en-US')}
-                {t === last ? '+' : ''}
-              </span>
-              <span className="text-[1.125rem] font-semibold tabular-nums sm:text-[1.375rem]">
-                {formatMoney(t.unitPriceCents, t.currency)}
-              </span>
-              <span aria-hidden className={`absolute inset-x-0 top-0 h-[2px] ${on ? 'bg-ink' : 'bg-transparent'}`} />
-            </button>
-          );
-        })}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 id={`${id}-h`} className="t-eyebrow">
+          Price per piece
+        </h2>
+        <p className="t-spec fg-muted">Design + decoration included</p>
       </div>
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
-        <div>
-          <div className="flex items-baseline justify-between gap-4">
-            <p className="label text-muted">Quantity</p>
-            <p className="text-[0.8125rem] text-muted">Sizes mix freely</p>
-          </div>
-          <p className="mt-2 text-d2 font-black tabular-nums">{qty.toLocaleString('en-US')}</p>
+      {/* The ladder. Each tier's quantity is a button that sets the order to it. */}
+      <table className="mt-4 w-full border-collapse border-t border-ink text-left" aria-labelledby={`${id}-h`}>
+        <thead className="sr-only">
+          <tr>
+            <th scope="col">Pieces</th>
+            <th scope="col">Price per piece</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tiers.map((t, i) => {
+            const on = i === activeIndex;
+            const from = Math.max(t.minQuantity, minQ);
+            const upTo = tiers[i + 1] ? tiers[i + 1].minQuantity - 1 : null;
+            return (
+              <tr key={t.minQuantity} className="ct-tier border-b border-[var(--rule-c)]" data-on={on}>
+                <th scope="row" className="p-0 font-normal">
+                  <button
+                    type="button"
+                    onClick={() => set(from)}
+                    aria-pressed={on}
+                    className="flex w-full items-center gap-3 py-2.5 pl-4 text-left"
+                  >
+                    <span className="t-spec num">
+                      {from.toLocaleString('en-US')}
+                      {upTo ? `–${upTo.toLocaleString('en-US')}` : '+'}
+                    </span>
+                    <span className="t-spec fg-muted">pieces</span>
+                  </button>
+                </th>
+                <td className="py-2.5 pr-4 text-right">
+                  <span className={`num text-[17px] ${on ? 'font-semibold' : ''}`}>{formatMoney(t.unitPriceCents, t.currency)}</span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {/* Quantity: exact, then by feel. */}
+      <div className="mt-7 flex items-center justify-between gap-4">
+        <label htmlFor={`${id}-q`} className="t-eyebrow">
+          Quantity
+        </label>
+        <div className="ct-stepper flex items-center gap-2">
+          <button type="button" onClick={stepDown} disabled={qty <= minQ} aria-label="Step down a price tier">
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+              <path d="M1 6h10" stroke="currentColor" strokeWidth="1.5" />
+            </svg>
+          </button>
           <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.001}
-            value={pos}
-            onChange={(e) => setPos(Number(e.target.value))}
-            className="range mt-3"
-            aria-label="Quantity"
-            aria-valuetext={`${qty} pieces`}
+            id={`${id}-q`}
+            type="number"
+            inputMode="numeric"
+            min={minQ}
+            max={HARD_MAX}
+            value={draft ?? qty}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              const n = Number(e.target.value);
+              setUnderMin(e.target.value !== '' && n < minQ);
+            }}
+            aria-invalid={underMin || undefined}
+            onBlur={commitDraft}
+            onKeyDown={(e) => e.key === 'Enter' && commitDraft()}
+            aria-describedby={`${id}-min ${id}-note`}
           />
+          <button type="button" onClick={stepUp} aria-label={upLabel}>
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+              <path d="M1 6h10M6 1v10" stroke="currentColor" strokeWidth="1.5" />
+            </svg>
+          </button>
         </div>
-        <div className="grid grid-cols-2 gap-6 border-t border-rule pt-5 sm:min-w-[15rem] sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
+      </div>
+
+      <p id={`${id}-min`} className="t-small mt-2 text-right text-alert" aria-live="polite">
+        {underMin ? `Minimum is ${minQ}. Sizes can be mixed to reach it.` : ''}
+      </p>
+
+      <div className="ct-range">
+        <span className="ct-range-track" aria-hidden />
+        <span className="ct-range-fill" style={{ left: 13, width: `calc(${pos} * (100% - 26px))` }} aria-hidden />
+        {tiers.slice(1).map((t) => (
+          <span
+            key={t.minQuantity}
+            className="ct-range-tick"
+            style={{ left: `calc(13px + ${posOf(t.minQuantity)} * (100% - 26px))` }}
+            aria-hidden
+          />
+        ))}
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.001}
+          value={pos}
+          onChange={(e) => set(qtyAt(Number(e.target.value)))}
+          className="range"
+          aria-label="Quantity, by slider"
+          aria-valuetext={`${qty.toLocaleString('en-US')} pieces`}
+        />
+      </div>
+      <div className="t-spec fg-muted -mt-1 flex justify-between" aria-hidden>
+        <span>{minQ}</span>
+        <span>{maxQ.toLocaleString('en-US')}+</span>
+      </div>
+
+      {/* The estimate. */}
+      <div className="mt-6 border-t border-ink pt-5" aria-live="polite">
+        <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="label text-muted">Per piece</p>
-            <p className="mt-2 text-[1.25rem] font-semibold tabular-nums">{formatMoney(active.unitPriceCents, currency)}</p>
-          </div>
-          <div>
-            <p className="label text-muted">Estimate</p>
-            <p className="mt-2 text-[1.25rem] font-semibold tabular-nums">
-              {formatMoney(active.unitPriceCents * qty, currency)}
+            <p className="t-eyebrow">Estimate</p>
+            <p className="t-spec fg-muted mt-2 num">
+              {qty.toLocaleString('en-US')} × {formatMoney(active.unitPriceCents, currency)}
             </p>
           </div>
+          <p className="t-block num text-right text-[clamp(2rem,2.6vw,2.5rem)]">
+            <span key={total} className="ct-tick">
+              {formatMoney(total, currency)}
+            </span>
+          </p>
         </div>
+        <p id={`${id}-note`} className="t-small fg-muted mt-4">
+          {next ? (
+            <>
+              Add {(next.minQuantity - qty).toLocaleString('en-US')} more for{' '}
+              <span className="text-ink">{formatMoney(next.unitPriceCents, next.currency)}</span> a piece.{' '}
+            </>
+          ) : null}
+          Sizes mix freely. An estimate, not a quote.
+        </p>
       </div>
     </div>
   );

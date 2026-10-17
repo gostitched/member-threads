@@ -1,14 +1,12 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
-import { Fragment } from 'react';
 import { notFound } from 'next/navigation';
-import Media from '@/components/work/Media';
-import { bandStyle, bandTheme } from '@/components/work/band';
-import { PieceStamp, ShareButton } from '@/components/work/hype';
+import WorkArt from '@/components/work/art';
+import { ShareButton } from '@/components/work/hype';
+import { Arrow, ArrowBack, Em, MoodPhoto } from '@/components/work/ui';
 import '@/components/work/work.css';
-import { CASES, type CaseStudy } from '@/lib/cases';
-import { WORK, assetById, leadOf, pieces, projectBySlug, specs, type WorkAsset, type WorkItem } from '@/lib/work';
+import { CASES } from '@/lib/cases';
+import { WORK, assetById, categoryOf, drop, pieces, projectBySlug, scheduleOf, specs, type WorkAsset } from '@/lib/work';
 
 export function generateStaticParams() {
   return WORK.map((w) => ({ slug: w.slug }));
@@ -19,313 +17,340 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return w ? { title: `${w.title} · Collections`, description: w.note ?? `${w.title}: ${w.sector}. ${specs(w).join(', ')}.` } : {};
 }
 
+/** True when a colour is dark enough to take a cream stitch. */
+const dark = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  return 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255) < 140;
+};
+
+const WORDS = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+const FLAT_COLS: Record<number, string> = { 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4', 5: 'lg:grid-cols-5' };
+
 /**
- * One collection, in full: what was in it, how it was made, and its case study from
- * @/lib/cases (the ask, the collection, the numbers). The wall's dossier links here.
+ * One collection as a lookbook: mood photography up top, the drawn garments as the
+ * product flats, the piece schedule as a spec table, the palette as woven labels, and
+ * the next collection waiting at the bottom. Every collection here is a concept, and
+ * the page says so in the spec panel, the captions and the roster label.
  */
-export default async function WorkProjectPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CollectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const w = projectBySlug((await params).slug);
   if (!w) notFound();
-  const study = w.caseId ? CASES.find((c) => c.id === w.caseId) : undefined;
-  const lead = leadOf(w);
-  const rest = w.assets.filter((a) => a !== lead);
+  const study = CASES.find((c) => c.id === w.caseId);
   const next = WORK[(WORK.indexOf(w) + 1) % WORK.length];
-  const whole = (k: string) => k === 'garment' || k === 'artifact';
-
-  if (w.chapters) return <Chaptered w={w} next={next} study={study} />;
+  const cat = categoryOf(w);
+  const rows = scheduleOf(w);
+  const chapter = (label: string) => w.chapters?.find((c) => c.label === label);
+  const pics = (label: string) => (chapter(label)?.assets ?? []).map((id) => assetById(w, id)).filter((a): a is WorkAsset => !!a);
+  const plate = assetById(w, w.cover?.[0] ?? '') ?? pics('The collection')[0];
+  const second = w.chapters?.[1];
+  const tall = second ? pics(second.label)[0] : undefined;
+  const close = pics('Up close');
+  const closeCaps = chapter('Up close')?.captions ?? [];
+  const thinking = w.story?.[0]?.body[0] ?? '';
+  const cut = thinking.indexOf('. ');
+  const pull = cut > 0 ? thinking.slice(0, cut + 1) : thinking;
+  const after = cut > 0 ? thinking.slice(cut + 2) : '';
+  const total = rows.reduce((n, r) => n + (r.count ?? 0), 0);
 
   return (
     <div className="wk overflow-x-clip">
-    <Hero w={w} />
-    <article className="mx-auto w-[min(94vw,1480px)] pb-24 pt-10 lg:pt-14">
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.32fr)_minmax(0,1fr)] lg:gap-[4vw]">
-        <div className="relative aspect-[4/3] lg:aspect-[5/4]">
-          {whole(lead.kind) && <div className="wk-plate absolute inset-0" />}
-          <div className={`absolute overflow-hidden ${whole(lead.kind) ? 'inset-[8%]' : 'inset-0 rounded-[18px]'}`}>
-            <Media asset={lead} sizes="(min-width: 1024px) 55vw, 94vw" eager />
-          </div>
+      {/* ── 1. Hero ─────────────────────────────────────────────────────── */}
+      <header>
+        <div className="shell flex min-h-[64px] flex-wrap items-center justify-between gap-x-6 gap-y-1 pt-4 lg:pt-6">
+          <Link href="/work" className="link-arrow group text-[14px] font-medium">
+            <ArrowBack className="h-3 w-4 transition-transform duration-base ease-out group-hover:-translate-x-1" />
+            <span className="link-u">All collections</span>
+          </Link>
+          <p className="t-spec hidden text-muted sm:block">
+            {drop(w.no)} · {cat?.title}
+          </p>
         </div>
 
-        <div>
-          <Chips w={w} />
-          {(study || w.note) && <p className="mt-8 max-w-measure text-lead text-ink/75">{study ? study.title : w.note}</p>}
-        </div>
-      </div>
-
-      {study && <CaseBlock study={study} />}
-
-      {rest.length > 0 && (
-        <ul className="mt-20 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {rest.map((a, i) => (
-            <li key={a.id} className={`relative ${i === 0 ? 'col-span-2 row-span-2 aspect-square' : 'aspect-square'}`}>
-              {whole(a.kind) && <div className="wk-plate absolute inset-0" />}
-              <div className={`absolute overflow-hidden ${whole(a.kind) ? 'inset-[9%]' : 'inset-0 rounded-[18px]'}`}>
-                <Media asset={a} sizes={i === 0 ? '(min-width: 1024px) 47vw, 94vw' : '(min-width: 1024px) 23vw, 47vw'} />
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <Footer next={next} />
-    </article>
-    </div>
-  );
-}
-
-/** What's in it, as pill chips. */
-function Chips({ w, className = '' }: { w: WorkItem; className?: string }) {
-  return (
-    <ul className={`flex flex-wrap gap-2 ${className}`}>
-      {/* The piece count is already stamped in the header. */}
-      {specs(w).filter((m) => !/ pieces$/i.test(m)).map((m) => <li key={m} className="wk-chip">{m}</li>)}
-    </ul>
-  );
-}
-
-/**
- * The hero band: a rounded panel washed with the collection's first colour, with the piece
- * count and a share button.
- */
-function Hero({ w }: { w: WorkItem }) {
-  const t = bandTheme(w);
-  return (
-    <header className="mx-auto mt-3 w-[min(94vw,1480px)] rounded-[24px] bg-electric-lit text-ink lg:mt-5" style={bandStyle(t)}>
-      <div className="px-5 pb-8 pt-3 lg:px-10 lg:pb-12 lg:pt-5">
-        <Link href="/work" className="inline-flex min-h-[44px] items-center gap-2 text-[0.9375rem] font-semibold text-ink/75 hover:text-ink">
-          <span aria-hidden>←</span> All collections
-        </Link>
-        <div className="mt-6 grid gap-6 lg:mt-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div className="min-w-0">
-            <h1 className="caps break-words text-d2">{w.title}</h1>
-            <p className="mt-2 font-sans text-[clamp(1.125rem,1.5vw,1.375rem)] font-medium leading-none text-uv">{w.sector}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <PieceStamp w={w} />
-            <ShareButton w={w} />
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-/** The case study: the ask in one line, and the numbers as tiles. */
-function CaseBlock({ study }: { study: CaseStudy }) {
-  return (
-    <section className="mt-16 grid gap-8 lg:mt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-[4vw]">
-      <p className="max-w-measure text-lead text-ink/75">{study.challenge}</p>
-      <dl className="grid grid-cols-2 gap-3">
-        {study.metrics.slice(0, 2).map((m) => (
-          <div key={m.k} className="flex flex-col-reverse gap-2 rounded-3xl bg-white p-5 ring-1 ring-rule">
-            <dt className="text-[0.875rem] text-muted">{m.k}</dt>
-            <dd className="caps text-d1 text-ink">{m.v}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
-  );
-}
-
-function Footer({ next }: { next: WorkItem }) {
-  return (
-    <div className="mt-20 flex flex-wrap items-end justify-between gap-8 border-t border-rule pt-10">
-      <Link href={`/work/${next.slug}`} className="group">
-        <p className="text-[0.875rem] text-muted">Next collection</p>
-        <p className="caps mt-2 text-d2 transition-colors group-hover:text-uv">{next.title} <span aria-hidden>→</span></p>
-        <p className="mt-2 text-[0.875rem] text-muted">{next.sector}</p>
-      </Link>
-      <Link href="/quote" className="btn-blue">
-        Start a collection <span aria-hidden>→</span>
-      </Link>
-    </div>
-  );
-}
-
-// ── a case study told in pictures ───────────────────────────────────────────
-
-/** A drawn garment or object, shown whole rather than cropped. */
-const cutOut = (a: WorkAsset) => !a.src && (a.kind === 'garment' || a.kind === 'artifact');
-
-/** Width over height, from the file when it's known. */
-const ratioOf = (a: WorkAsset) =>
-  a.width && a.height ? a.width / a.height : a.orientation === 'portrait' ? 0.8 : a.orientation === 'landscape' ? 1.25 : 1;
-
-/**
- * Numbered sections, pictures first. Nothing is written that the project doesn't
- * record: each section is a plain label and its pictures, at their own proportions.
- * A single picture is held to the screen's height and set off-centre, alternating
- * sides; a pair shares one height, each at its own width. A small source file (a
- * crop from a phone photo) is never blown up past twice its pixel width.
- */
-function Chaptered({ w, next, study }: { w: WorkItem; next: WorkItem; study?: CaseStudy }) {
-  const chapters = w.chapters!.map((c) => ({ ...c, pics: c.assets.map((id) => assetById(w, id)).filter((a): a is WorkAsset => !!a) }));
-  return (
-    <div className="wk overflow-x-clip">
-    <Hero w={w} />
-    <article className="mx-auto w-[min(94vw,1480px)] pb-24 pt-2 lg:pt-4">
-      <Chips w={w} className="mt-8" />
-
-      {chapters.map((c, i) => (
-        <Fragment key={c.label}>
-        <section className="mt-14 lg:mt-20" aria-label={c.label}>
-          <h2 className="flex items-center gap-4 text-[0.9375rem] font-semibold text-ink/80">
-            {c.label}
-            <span className="h-px flex-1 bg-rule" aria-hidden />
-          </h2>
-          {c.kind === 'swatches' && w.palette ? (
-            <Swatches palette={w.palette} />
-          ) : c.kind === 'index' ? (
-            <ArtIndex pics={c.pics} captions={c.captions} />
-          ) : c.pics.length === 1 ? (
-            <figure className={`mt-6 flex ${i % 2 ? 'lg:justify-end lg:pr-[6%]' : 'lg:pl-[6%]'}`}>
-              <Pic a={c.pics[0]} eager={i === 0} height={i === 0 ? 'min(72vh, 860px)' : 'min(64vh, 760px)'} />
-            </figure>
-          ) : (
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end">
-              {c.pics.map((a, k) => (
-                <figure key={a.id} className="min-w-0" style={{ flex: `${ratioOf(a)} 1 0%`, maxWidth: a.width ? a.width * 2 : undefined }}>
-                  <div className="relative w-full" style={{ aspectRatio: String(ratioOf(a)) }}>
-                    {/* A drawn piece sits on a raised plate. */}
-                    {cutOut(a) && <div className="wk-plate absolute inset-0" />}
-                    <div className={`absolute overflow-hidden ${cutOut(a) ? 'inset-[9%]' : 'inset-0 rounded-[18px]'}`}>
-                      <Media asset={a} sizes="(min-width: 640px) 47vw, 94vw" />
-                    </div>
-                  </div>
-                  {c.captions?.[k] && <figcaption className="mt-3 text-[0.875rem] text-muted">{c.captions[k]}</figcaption>}
-                </figure>
-              ))}
-            </div>
+        <div className="relative mt-4 lg:mt-6">
+          {w.mood && (
+            <MoodPhoto
+              slug={w.mood.hero}
+              ratio="portrait"
+              treatment={w.mood.heroTone ?? 'grade'}
+              className="wk-focus lg:aspect-[21/9]"
+              priority
+              sizes="100vw"
+            />
           )}
-        </section>
-        {/* The words come after the first picture: the photograph introduces them. */}
-        {i === 0 && study && <CaseBlock study={study} />}
-        {c.label === 'The pieces' && w.pieces && <Schedule w={w} />}
-        <Story story={(w.story ?? []).filter((t) => (t.after ?? chapters[0].label) === c.label)} />
-        </Fragment>
-      ))}
+        </div>
 
-      <Footer next={next} />
-    </article>
-    </div>
-  );
-}
-
-/**
- * The piece schedule: every style in the collection with its count and how it's made,
- * set as a ruled spec sheet. A detail line that reads "120 pieces" is the count.
- */
-function Schedule({ w }: { w: WorkItem }) {
-  const rows = w.pieces!.map((p) => {
-    const count = p.details.find((d) => /^\d+ pieces$/.test(d));
-    return { name: p.name, count: count?.replace(' pieces', ''), details: p.details.filter((d) => d !== count) };
-  });
-  return (
-    <section aria-label="Piece schedule" className="mt-16 grid gap-6 lg:mt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-[4vw]">
-      <div>
-        <h2 className="text-[0.9375rem] font-semibold text-muted">Piece schedule</h2>
-        <p className="mt-3 max-w-[28ch] text-[0.875rem] leading-relaxed text-muted">
-          {pieces(w)} pieces across {rows.length} styles. Sizes mix freely within each style.
-        </p>
-      </div>
-      <ol className="border-t border-ink/15">
-        {rows.map((r, i) => (
-          <li key={r.name} className="grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-baseline gap-x-4 border-b border-rule py-5 sm:grid-cols-[3rem_minmax(0,14rem)_minmax(0,1fr)_auto] sm:gap-x-6">
-            <span className="label text-muted">{String(i + 1).padStart(2, '0')}</span>
-            <p className="caps text-[1.0625rem] leading-tight text-ink">{r.name}</p>
-            <ul className="col-span-3 col-start-2 row-start-2 mt-2 space-y-1 text-[0.9375rem] leading-snug text-ink/70 sm:col-span-1 sm:col-start-3 sm:row-start-1 sm:mt-0">
-              {r.details.map((d) => <li key={d}>{d}</li>)}
-            </ul>
-            {r.count && (
-              <p className="col-start-3 row-start-1 text-right font-display text-[1.0625rem] font-extrabold tabular-nums text-ink sm:col-start-4">
-                {r.count}
+        <div className="shell grid-12 relative gap-y-10">
+          {/* The title plate cuts up into the photo by one line. */}
+          <div className="wk-plate-title col-span-4 -mt-[clamp(3rem,6.6vw,7.5rem)] pr-6 pt-[clamp(0.75rem,1.4vw,1.5rem)] sm:col-span-7 lg:col-span-8 lg:pr-12">
+            <p className="t-spec flex items-center gap-3 text-muted">
+              <span className="hidden sm:inline">{drop(w.no)}</span>
+              <span aria-hidden className="stitch-rule hidden w-8 sm:block" />
+              <span>{w.sector}</span>
+            </p>
+            <h1 className="t-display mt-4 lg:mt-5">
+              <span className="enter block">{w.title}</span>
+            </h1>
+            {w.vibe && (
+              <p className="t-lead enter mt-6 text-ink/80 lg:mt-8" style={{ ['--d' as string]: '120ms' }}>
+                {w.vibe}.
               </p>
             )}
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
-/** The palette: a block of each colour, named underneath. */
-function Swatches({ palette }: { palette: NonNullable<WorkItem['palette']> }) {
-  return (
-    <div className="mt-8 lg:pl-[6%]">
-      <ul className="wk-swatches grid grid-cols-3 sm:flex">
-        {palette.map((c) => (
-          <li key={c.name} className="sm:w-[min(13rem,30%)]">
-            <div className="aspect-[4/5] rounded-2xl shadow-[inset_0_0_0_1px_theme(colors.ink/8%)]" style={{ background: c.hex }} />
-            <p className="mt-3 text-[0.875rem] leading-tight text-ink/75">{c.name}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-/**
- * A design made of many small drawings, taken apart: each drawing on its own tile,
- * numbered, with a plain label. Tiles keep the fabric's ground, so the grid reads as
- * the print laid out flat.
- */
-function ArtIndex({ pics, captions }: { pics: WorkAsset[]; captions?: string[] }) {
-  return (
-    <ol className="mt-6 grid grid-cols-2 overflow-hidden rounded-2xl bg-ink sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      {pics.map((a, k) => (
-        <li key={a.id} className="group relative outline outline-1 -outline-offset-[0.5px] outline-paper/10">
-          <div className="relative aspect-square">
-            <div className="absolute inset-[16%] transition-transform duration-300 ease-out group-hover:scale-[1.06]">
-              <Image src={a.src!} alt={a.alt} fill sizes="(min-width: 1280px) 18vw, (min-width: 1024px) 23vw, (min-width: 640px) 31vw, 47vw" className="object-contain" />
-            </div>
+            <p className="caption">Photograph above: mood reference, not this organization or its collection</p>
+            <ShareButton w={w} className="mt-3" />
           </div>
-          {captions?.[k] && (
-            <p className="absolute inset-x-0 bottom-0 truncate px-3 pb-3 text-[0.75rem] text-paper/60">{captions[k]}</p>
+
+          {/* The spec panel: the page's one label object, sewn across the photo's edge. */}
+          <aside aria-label="Collection spec" className="wk-spec col-span-4 self-start p-7 sm:col-span-6 lg:col-span-4 lg:col-start-9 lg:-mt-36 lg:p-8">
+            <p className="t-eyebrow relative z-[1] flex justify-between">
+              <span>Spec</span>
+              <span className="num">{drop(w.no)}</span>
+            </p>
+            <dl className="relative z-[1] mt-5">
+              {[
+                ['Organization', w.title],
+                ['For', cat?.title ?? ''],
+                ['Pieces', pieces(w) ?? '—'],
+                ['Styles', String(rows.length).padStart(2, '0')],
+                ['Decoration', w.method],
+                ['Status', 'Concept collection'],
+                ['Photography', 'Mood reference'],
+              ].map(([k, v]) => (
+                <div key={k} className="flex items-baseline justify-between gap-4 border-t border-ink/15 py-2.5">
+                  <dt className="t-spec text-muted">{k}</dt>
+                  <dd className="t-spec num text-right">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </aside>
+        </div>
+      </header>
+
+      {/* ── 2. The brief ────────────────────────────────────────────────── */}
+      <section aria-labelledby="wk-brief" className="sec">
+        <div className="shell grid-12 gap-y-8">
+          <p className="t-spec col-span-4 text-muted sm:col-span-8 lg:col-span-2">01 · The brief</p>
+          <h2 id="wk-brief" className="t-h1 col-span-4 sm:col-span-8 lg:col-span-9 lg:col-start-3">
+            {study ? <Em text={study.title} /> : w.title}.
+          </h2>
+          {w.brief?.map((b, i) => (
+            <div
+              key={b.label}
+              className={`col-span-4 sm:col-span-4 ${i === 0 ? 'lg:col-span-5 lg:col-start-3' : 'lg:col-span-4 lg:col-start-9'} mt-4 lg:mt-10`}
+            >
+              <h3 className="t-eyebrow text-muted">{b.label === 'The ask' ? 'The ask, as a concept brief' : b.label}</h3>
+              <p className={`${i === 0 ? 't-lead' : 't-body'} mt-4`}>{b.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 3. The spread ───────────────────────────────────────────────── */}
+      <section aria-label="Lookbook" className="pb-[var(--sec)]">
+        <div className="shell grid-12 gap-y-14">
+          {plate?.art && (
+            <figure className="col-span-4 sm:col-span-8 lg:col-span-8">
+              <div className="wipe-in relative aspect-[4/3] overflow-hidden">
+                <WorkArt art={plate.art} label={plate.alt} className="absolute inset-0 h-full w-full" />
+              </div>
+              <figcaption className="caption">The collection, laid flat · Concept drawing</figcaption>
+            </figure>
           )}
-        </li>
-      ))}
-      {/* The last cell says what holds them together. */}
-      <li className="relative flex aspect-square flex-col justify-end p-4 outline outline-1 -outline-offset-[0.5px] outline-paper/10">
-        <p className="caps text-[clamp(1.4rem,2.2vw,2rem)] leading-[0.9] text-paper">One ink.</p>
-        <p className="mt-2 font-sans text-[clamp(1rem,1.4vw,1.25rem)] font-medium leading-none text-paper/70">White on navy.</p>
-      </li>
-    </ol>
-  );
-}
+          {w.mood && (
+            <figure className="col-span-3 col-start-2 sm:col-span-4 sm:col-start-5 lg:col-span-3 lg:col-start-10 lg:mt-40">
+              <MoodPhoto slug={w.mood.detail} ratio="portrait" wipe sizes="(min-width: 1024px) 24vw, (min-width: 640px) 50vw, 75vw" />
+              <figcaption className="caption">Mood reference · {w.mood.detailNote}</figcaption>
+            </figure>
+          )}
 
-function Pic({ a, height, eager = false }: { a: WorkAsset; height: string; eager?: boolean }) {
-  const r = ratioOf(a);
-  // Width follows the height cap, the page and, for a small file, twice its pixels.
-  const cap = a.width ? `${a.width * 2}px` : '100%';
-  return (
-    <div className="relative overflow-hidden rounded-[18px]" style={{ aspectRatio: String(r), width: `min(100%, calc(${height} * ${r.toFixed(4)}), ${cap})` }}>
-      <Media asset={a} sizes={`min(94vw, ${a.width ? a.width * 2 : 1400}px)`} eager={eager} />
-    </div>
-  );
-}
+          {tall?.art && (
+            <figure className="col-span-4 sm:col-span-5 lg:col-span-4 lg:col-start-2">
+              <div className="wipe-in relative aspect-[3/4] overflow-hidden">
+                <WorkArt art={tall.art} label={tall.alt} className="absolute inset-0 h-full w-full" />
+              </div>
+              <figcaption className="caption">{second?.label} · Concept drawing</figcaption>
+            </figure>
+          )}
+          {pull && (
+            <figure className="col-span-4 self-center sm:col-span-8 lg:col-span-5 lg:col-start-7">
+              <blockquote className="t-quote">{pull}</blockquote>
+              {after && <p className="t-body mt-8 max-w-[52ch]">{after}</p>}
+              <figcaption className="t-spec mt-8 flex items-center gap-3 text-muted">
+                <span aria-hidden className="stitch-rule w-8" />
+                Design note · Member Threads
+              </figcaption>
+            </figure>
+          )}
+        </div>
+      </section>
 
-/** Short prose sections: a label in the margin, the text at a reading measure. */
-function Story({ story }: { story: NonNullable<WorkItem['story']> }) {
-  if (!story.length) return null;
-  return (
-    <div className="mt-16 space-y-12 lg:mt-24 lg:space-y-16">
-      {story.map((s) => (
-        <section key={s.label} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-[4vw]">
-          <h2 className="text-[0.9375rem] font-semibold text-muted">{s.label}</h2>
-          <div className="max-w-measure space-y-5">
-            {/* One paragraph: the rest is for the call. */}
-            <p className="text-lead text-ink/75">{s.body[0]}</p>
-            {s.quote && (
-              <figure className="pt-4">
-                <blockquote className="font-sans text-[clamp(1.375rem,2vw,1.875rem)] font-medium leading-[1.2] text-uv">
-                  “{s.quote.text}”
-                </blockquote>
-                <figcaption className="mt-4 text-[0.875rem] text-muted">{s.quote.cite}</figcaption>
+      {/* ── 4. The pieces ───────────────────────────────────────────────── */}
+      <section aria-labelledby="wk-pieces" className="band-cream sec">
+        <div className="shell">
+          <div className="grid-12 items-end gap-y-6">
+            <p className="t-spec col-span-4 text-muted sm:col-span-8 lg:col-span-2 lg:self-start lg:pt-4">02 · The pieces</p>
+            <h2 id="wk-pieces" className="t-h1 col-span-4 sm:col-span-8 lg:col-span-6 lg:col-start-3">
+              {WORDS[rows.length] ?? rows.length} styles, <em>{pieces(w)}</em> pieces.
+            </h2>
+            <p className="t-body col-span-4 max-w-[40ch] sm:col-span-6 lg:col-span-3 lg:col-start-10">
+              Each style starts in our catalog and is cut, colored and decorated for this collection. Sizes mix freely within each style.
+            </p>
+          </div>
+
+          {/* The product flats. */}
+          <ul className={`mt-16 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-6 lg:gap-x-8 lg:mt-24 ${FLAT_COLS[rows.length] ?? 'lg:grid-cols-5'}`}>
+            {rows.map((r) => (
+              <li key={r.no}>
+                <div className="wk-flatplate relative aspect-[4/5]">
+                  {r.flat?.art && (
+                    <div className="absolute inset-x-[8%] inset-y-[14%]">
+                      <WorkArt art={r.flat.art} label={r.flat.alt} className="h-full w-full" />
+                    </div>
+                  )}
+                  <span className="t-spec absolute left-3 top-3 text-muted">{r.no}</span>
+                </div>
+                <h3 className="t-h3 mt-4">{r.name}</h3>
+                {r.count && <p className="t-spec num mt-1 text-muted">{r.count} pieces</p>}
+              </li>
+            ))}
+          </ul>
+
+          {/* The schedule. */}
+          <div className="mt-20 lg:mt-28">
+            <h3 className="t-eyebrow text-muted">Piece schedule</h3>
+            <table className="mt-5 w-full border-collapse text-left">
+              <caption className="sr-only">Piece schedule for {w.title}: style, fabric and colour, decoration and quantity</caption>
+              <thead className="hidden sm:table-header-group">
+                <tr className="t-spec text-muted">
+                  <th scope="col" className="w-16 pb-3 font-medium">No.</th>
+                  <th scope="col" className="pb-3 font-medium">Style</th>
+                  <th scope="col" className="pb-3 font-medium">Fabric &amp; colour</th>
+                  <th scope="col" className="pb-3 font-medium">Decoration</th>
+                  <th scope="col" className="pb-3 text-right font-medium">Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.no} className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] gap-x-3 border-t border-ink/15 py-5 sm:table-row sm:py-0">
+                    <td className="t-spec text-muted sm:py-6 sm:align-top">{r.no}</td>
+                    <th scope="row" className="t-h3 font-normal sm:w-[22%] sm:py-6 sm:pr-6 sm:align-top">{r.name}</th>
+                    <td className="t-small col-span-2 col-start-2 row-start-2 mt-2 sm:w-[30%] sm:py-6 sm:pr-8 sm:align-top sm:text-[1rem]">{r.fabric}</td>
+                    <td className="t-small col-span-2 col-start-2 row-start-3 mt-1 text-ink/80 sm:py-6 sm:pr-8 sm:align-top sm:text-[1rem]">{r.decoration.join('. ')}</td>
+                    <td className="t-block col-start-3 row-start-1 text-right text-[1.5rem] sm:py-6 sm:align-top sm:text-[1.75rem]">{r.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="grid grid-cols-[1fr_auto] border-y border-ink py-5 sm:table-row sm:py-0">
+                  <th scope="row" colSpan={4} className="t-spec font-medium sm:py-5">Total · {rows.length} styles · Minimum 36 per style</th>
+                  <td className="t-block text-right text-[1.5rem] sm:py-5 sm:text-[1.75rem]">{total}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5. Up close ─────────────────────────────────────────────────── */}
+      {close.length > 0 && (
+        <section aria-labelledby="wk-close" className="sec">
+          <div className="shell grid-12 gap-y-12">
+            <p className="t-spec col-span-4 text-muted sm:col-span-8 lg:col-span-2">03 · Details</p>
+            <h2 id="wk-close" className="t-h1 col-span-4 sm:col-span-8 lg:col-span-6 lg:col-start-3">
+              Up <em>close</em>.
+            </h2>
+            {close[0]?.art && (
+              <figure className="col-span-4 sm:col-span-5 lg:col-span-6 lg:col-start-3 lg:mt-8">
+                <div className="wipe-in relative aspect-[4/3] overflow-hidden">
+                  <WorkArt art={close[0].art} label={close[0].alt} className="absolute inset-0 h-full w-full" />
+                </div>
+                <figcaption className="caption">{closeCaps[0] ? `${closeCaps[0]} · ` : ''}Concept drawing</figcaption>
+              </figure>
+            )}
+            {w.mood?.macro && (
+              <figure className="col-span-3 col-start-2 sm:col-span-3 sm:col-start-6 lg:col-span-3 lg:col-start-10 lg:mt-40">
+                <MoodPhoto slug={w.mood.macro.slug} ratio="portrait" wipe sizes="(min-width: 1024px) 24vw, (min-width: 640px) 38vw, 75vw" />
+                <figcaption className="caption">Mood reference · {w.mood.macro.note}</figcaption>
+              </figure>
+            )}
+            {close[1]?.art && (
+              <figure
+                className={
+                  w.mood?.macro
+                    ? 'col-span-3 sm:col-span-3 sm:col-start-2 lg:col-span-3 lg:col-start-5 lg:-mt-8'
+                    : 'col-span-3 col-start-2 sm:col-span-3 sm:col-start-6 lg:col-span-3 lg:col-start-10 lg:mt-48'
+                }
+              >
+                <div className="wipe-in relative aspect-square overflow-hidden bg-cream">
+                  <div className="absolute inset-[12%]">
+                    <WorkArt art={close[1].art} label={close[1].alt} className="h-full w-full" />
+                  </div>
+                </div>
+                <figcaption className="caption">{closeCaps[1] ? `${closeCaps[1]} · ` : ''}Concept drawing</figcaption>
               </figure>
             )}
           </div>
         </section>
-      ))}
+      )}
+
+      {/* ── 6. Palette ──────────────────────────────────────────────────── */}
+      {w.palette && (
+        <section aria-labelledby="wk-palette" className="band-green sec">
+          <div className="shell">
+            <div className="grid-12 items-end gap-y-6">
+              <p className="t-spec col-span-4 text-beige sm:col-span-8 lg:col-span-2 lg:self-start lg:pt-4">04 · Palette</p>
+              <h2 id="wk-palette" className="t-h1 col-span-4 sm:col-span-8 lg:col-span-6 lg:col-start-3">
+                {WORDS[w.palette.length] ?? w.palette.length} colors, <em>woven</em> in.
+              </h2>
+              {w.paletteNote && <p className="t-body fg-muted col-span-4 max-w-[36ch] sm:col-span-6 lg:col-span-3 lg:col-start-10">{w.paletteNote}</p>}
+            </div>
+            <ul className="mt-16 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:mt-24 lg:grid-cols-4 lg:gap-x-8">
+              {w.palette.map((c, i) => (
+                <li key={c.name}>
+                  <div className="wk-label text-ink" style={{ background: c.hex, color: dark(c.hex) ? '#EEE6D9' : '#133327' }}>
+                    <span className="relative z-[1] flex items-baseline justify-between gap-3 bg-cream px-3 py-2.5 text-ink">
+                      <span className="t-spec" style={{ color: '#133327' }}>{c.name}</span>
+                      <span className="t-spec num" style={{ color: '#55625A' }}>{String(i + 1).padStart(2, '0')}</span>
+                    </span>
+                  </div>
+                  <p className="t-spec mt-4 flex justify-between gap-3">
+                    <span className="num">{c.hex.toUpperCase()}</span>
+                  </p>
+                  {c.use && <p className="t-small fg-muted mt-1">{c.use}</p>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {/* ── 7. Next collection ──────────────────────────────────────────── */}
+      <section aria-labelledby="wk-next" className="sec-sm pb-[var(--sec)]">
+        <div className="shell">
+          <p className="t-spec hairline flex justify-between pt-5 text-muted">
+            <span>Next collection</span>
+            <span>{drop(next.no)}</span>
+          </p>
+          <Link href={`/work/${next.slug}`} className="wk-next-link group mt-10 grid-12 items-end gap-y-8 lg:mt-14">
+            <div className="col-span-4 sm:col-span-8 lg:col-span-5">
+              <p className="t-spec text-muted">{categoryOf(next)?.title}</p>
+              <h2 id="wk-next" className="t-h1 mt-4">
+                {next.title}
+              </h2>
+              <p className="t-spec mt-5 flex items-center gap-3">
+                <span className="link-u">{next.sector}</span>
+                <Arrow className="h-3 w-4 transition-transform duration-base ease-out group-hover:translate-x-1" />
+              </p>
+            </div>
+            {next.mood && (
+              <div className="col-span-4 sm:col-span-8 lg:col-span-7 lg:-mr-14">
+                <MoodPhoto slug={next.mood.hero} ratio="landscape" className="lg:aspect-[21/9]" treatment="release" alt="" sizes="(min-width: 1024px) 60vw, 100vw" />
+              </div>
+            )}
+          </Link>
+        </div>
+      </section>
+
     </div>
   );
 }
+

@@ -3,39 +3,45 @@
 import DesignAct from './DesignAct';
 import Finale from './Finale';
 import Stage from './Stage';
-import { useOrgName } from '@/lib/name';
-import { ACT1, named } from '@/lib/chapter';
+import { ACT1 } from '@/lib/chapter';
 import './chapter.css';
 
 /**
- * The chapter between the hero and how it works.
+ * The chapter between the hero and the intro.
  *
- *   01  Not a blank: the house hoodie on a cream plate, eight details to tap,
- *       the organization's name and colorway under it, the tech pack beside.
- *   02  Don't know what you want yet? One row: the line, and three pieces.
- *   ──  The close: one dusty-blue band, three lines, one button.
+ *   01  Not a blank: a full-width cream band. The house hoodie on its drawing
+ *       sheet, eight details as numbered square chips with dashed leaders, the
+ *       organization's name (the page's one script moment) and colorway beside
+ *       it, and the tech pack printing every step at +$0.
+ *   02  Don't know what you want yet? One row on paper: the line, and three
+ *       drawn pieces from one collection carrying the same name.
+ *   ──  The close: a second cream band, three serif lines and a hang tag that
+ *       drops in on its string with the name on it.
  *
- * The organization's name (typed under the hoodie) runs through all of it.
+ * The organization's name (typed beside the hoodie) runs through all of it.
  * Content lives in `@/lib/chapter`.
  */
 export default function Chapter({ receipt = false }: { receipt?: boolean }) {
-  const { name, isDefault } = useOrgName();
+  const [a, em, b] = ACT1.title;
   return (
     <>
-      <section aria-labelledby="why-title" className="chapter-ground relative overflow-x-clip bg-paper pb-12 pt-14 text-ink sm:pt-20 lg:pb-10">
-        <div className="shell relative text-center">
-          <p className="label text-muted">{ACT1.eyebrow}</p>
-          <h2 id="why-title" className="caps mt-4 text-d1">
-            {ACT1.title}
-          </h2>
-          <p className="mx-auto mt-5 max-w-[38rem] text-balance text-lead text-ink/75">
-            {ACT1.body.lead}
-            <strong className="font-semibold text-ink">{ACT1.body.mark}</strong>
-            {ACT1.body.rest}
-          </p>
-          <p className="mx-auto mt-3 max-w-[34rem] text-balance text-[0.875rem] text-muted">{named(ACT1.hint, name, isDefault)}</p>
+      <section aria-labelledby="why-title" className="chapter-ground band-cream sec relative overflow-x-clip">
+        <div className="shell">
+          <div className="grid-12 items-end gap-y-6">
+            <div className="col-span-4 sm:col-span-8 lg:col-span-7">
+              <p className="t-eyebrow fg-muted">{ACT1.eyebrow}</p>
+              <h2 id="why-title" className="t-h1 mt-5">
+                {a}
+                <em>{em}</em>
+                {b}
+              </h2>
+            </div>
+            <div className="col-span-4 sm:col-span-7 lg:col-span-5 lg:col-start-8 lg:pb-[0.35rem] xl:col-span-4 xl:col-start-9">
+              <p className="t-lead max-w-measure">{ACT1.lead}</p>
+            </div>
+          </div>
         </div>
-        <div className="mt-10 lg:mt-12">
+        <div className="mt-12 lg:mt-20">
           <Stage receipt={receipt} />
         </div>
       </section>

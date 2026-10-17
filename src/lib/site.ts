@@ -44,20 +44,20 @@ export const MEDIA = {
 };
 
 export const NAV = [
-  { href: '/#how', label: 'How It Works' },
+  { href: '/#how', label: 'How it works' },
   { href: '/catalog', label: 'Catalog' },
   { href: '/work', label: 'Collections' },
   { href: '/about', label: 'About' },
 ];
 
 /** The one header CTA. Static: personalisation lives in the chapter. */
-export const NAV_CTA = { href: '/quote', label: 'Start a Collection' };
+export const NAV_CTA = { href: '/quote', label: 'Start a collection' };
 
 /** Who we make collections for. Order is the display order. */
 export const SEGMENTS = [
   {
     id: 'campus',
-    label: 'University Clubs',
+    label: 'University clubs',
     title: 'University clubs & student organizations',
     body: 'Recruitment drops, exec board pieces and the hoodie everyone wears to the library.',
     pieces: ['Hoodies', 'Crewnecks', 'Heavyweight tees', 'Quarter-zips', 'Hats'],
@@ -78,14 +78,14 @@ export const SEGMENTS = [
   },
   {
     id: 'athletic',
-    label: 'Teams & Fitness',
+    label: 'Teams & fitness',
     title: 'Sports teams, run clubs & fitness studios',
     body: 'Off-field lifestyle pieces for the people who show up every week.',
     pieces: ['Athletic tees', 'Shorts', 'Hoodies', 'Polos', 'Hats'],
   },
   {
     id: 'social',
-    label: 'Clubs & Associations',
+    label: 'Clubs & associations',
     title: 'Social clubs, alumni & associations',
     body: 'Quiet, embroidered pieces that signal membership to the people who know.',
     pieces: ['Embroidered crewnecks', 'Polos', 'Heavyweight hoodies', 'Seasonal collections'],

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { register } from '@/lib/reveal';
 
 /**
- * Reveals children once they reach the fold.
+ * Reveals children once they reach the fold: a 12px rise and fade over 900ms
+ * on the arrival curve (DESIGN.md §7), once.
  *
  * Renders visible and only hides content confirmed to be below the fold when the
  * effect runs, so a section the reader already passed during hydration is never
@@ -41,7 +42,7 @@ export default function Reveal({
     <div
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-[opacity,transform] duration-[700ms] ease-out ${
+      className={`transition-[opacity,transform] duration-slow ease-out ${
         hidden ? 'translate-y-3 opacity-0' : 'translate-y-0 opacity-100'
       } ${className}`}
     >

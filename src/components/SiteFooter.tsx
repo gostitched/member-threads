@@ -1,80 +1,96 @@
 import Link from 'next/link';
 import { CONTACT, NAV, NAV_CTA } from '@/lib/site';
-import { Arrow, Wordmark } from '@/components/SiteHeader';
+import { Arrow } from '@/components/SiteHeader';
+import { sentence } from '@/components/chrome/nav';
 import { FRAME } from '@/components/frame';
 
-const EXPLORE = [...NAV.filter((n) => n.href !== '/about'), { href: '/custom', label: 'Fully Custom' }];
+const EXPLORE = [...NAV.filter((n) => n.href !== '/about'), { href: '/custom', label: 'Fully custom' }];
 const COMPANY = [
   { href: '/about', label: 'About' },
+  { href: '/about#stitched', label: 'Stitched Group' },
   { href: NAV_CTA.href, label: NAV_CTA.label },
 ];
 
+const MAST = 'THREADS'.split('');
+
 /**
- * The closing brand moment: a full-bleed dusty-blue band, cream type, the
- * primary logo in cream (as on the brand board). A sign-off line with the one
- * pill, then the logo and a short line beside two link columns and contact,
- * then the legal line with the Stitched Group credit.
+ * The closing moment, on green-deep. The sign-off line and the light button;
+ * a running stitch; the link columns with beige eyebrows; then the block
+ * "THREADS" in cream, edge to edge, cropped by the bottom of the page like a
+ * name across a chest cut by the hem. Its letters rise out of the hem as the
+ * footer comes into view (scroll timeline; static elsewhere).
  */
 export default function SiteFooter() {
   return (
-    <footer className="relative bg-dusty text-cream">
+    <footer className="band-green relative overflow-hidden bg-[#0D241B]" aria-labelledby="footer-title">
       <div className={FRAME}>
-        <div className="flex flex-col gap-8 border-b border-cream/15 pb-14 pt-20 sm:pt-24 lg:flex-row lg:items-end lg:justify-between lg:pb-16 lg:pt-28">
-          <p className="caps text-d1 text-cream">
-            <span className="lg:whitespace-nowrap">Better than merch.</span>
-            <br />
-            <span className="font-serif text-[1.08em] font-normal normal-case tracking-normal text-beige [font-stretch:100%]">
-              made to be kept.
-            </span>
-          </p>
-          <Link
-            href={NAV_CTA.href}
-            className="btn h-14 w-fit shrink-0 bg-cream px-8 text-[1rem] text-ink hover:bg-beige"
-          >
-            {NAV_CTA.label} <Arrow className="ml-1 h-3.5 w-[18px]" />
-          </Link>
+        {/* Sign-off */}
+        <div className="grid-12 gap-y-10 pb-14 pt-20 sm:pt-24 lg:pb-20 lg:pt-32">
+          <h2 id="footer-title" className="t-h1 col-span-4 sm:col-span-8 lg:col-span-8">
+            Ready when your <em>members</em> are.
+          </h2>
+          <div className="col-span-4 flex flex-col items-start gap-8 sm:col-span-6 lg:col-span-4 lg:justify-end">
+            <p className="t-body max-w-[34ch] text-cream/85">
+              Tell us who it’s for and when you need it. A designer reads every request.
+            </p>
+            <Link href={NAV_CTA.href} className="btn-white">
+              {NAV_CTA.label} <Arrow className="h-3.5 w-[18px]" />
+            </Link>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-6 gap-y-12 py-14 sm:grid-cols-3 lg:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] lg:gap-10 lg:py-16">
-          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
-            <Link href="/" className="inline-flex text-cream transition-colors hover:text-beige" aria-label="Member Threads, home">
-              <Wordmark size="footer" />
-            </Link>
-            <p className="mt-7 max-w-[30ch] text-[0.9375rem] leading-relaxed text-cream/70">
+        <span aria-hidden className="stitch-rule draw-in" />
+
+        {/* Columns */}
+        <div className="grid-12 gap-y-12 py-14 lg:py-20">
+          <div className="col-span-4 sm:col-span-8 lg:col-span-5">
+            <p className="t-h3 max-w-[22ch] text-cream">
               Custom apparel collections for clubs, companies, nonprofits, teams and associations.
             </p>
+            <p className="t-spec mt-6 text-beige">From 36 pieces per style · Design included</p>
           </div>
 
-          <Col title="Explore">
+          <Col title="Explore" className="col-span-2 lg:col-span-2 lg:col-start-7">
             {EXPLORE.map((l) => (
               <FooterLink key={l.href} href={l.href}>
-                {l.label}
+                {sentence(l.label)}
               </FooterLink>
             ))}
           </Col>
-          <Col title="Company">
+          <Col title="Company" className="col-span-2 lg:col-span-2">
             {COMPANY.map((l) => (
               <FooterLink key={l.href} href={l.href}>
-                {l.label}
+                {l.label === NAV_CTA.label ? sentence(l.label) : l.label}
               </FooterLink>
             ))}
           </Col>
-          <Col title="Contact" className="col-span-2 sm:col-span-1">
+          <Col title="Contact" className="col-span-4 sm:col-span-4 lg:col-span-2">
             <li>
-              <a
-                href={`mailto:${CONTACT.email}`}
-                className="inline-flex min-h-11 items-center text-[0.9375rem] text-cream/80 underline decoration-cream/30 underline-offset-[5px] transition-colors hover:text-cream hover:decoration-cream sm:min-h-0 sm:py-1"
-              >
-                {CONTACT.email}
+              <a href={`mailto:${CONTACT.email}`} className="mt-foot-link break-all">
+                <span>{CONTACT.email}</span>
               </a>
             </li>
-            <li className="pt-1 text-[0.9375rem] leading-relaxed text-cream/60 sm:pt-2">From 36 pieces per style.</li>
           </Col>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-cream/15 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="label text-cream/55">© {new Date().getFullYear()} Member Threads</p>
-          <p className="label text-cream/55">A Stitched Group company</p>
+        {/* Legal + label */}
+        <div className="flex flex-col-reverse items-start gap-5 border-t border-cream/15 py-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="t-spec fg-muted">© {new Date().getFullYear()} Member Threads. All rights reserved.</p>
+          {/* [CONFIRM] "Est. 2023" as the brand's founding line (DESIGN.md). */}
+          <p className="t-spec text-beige">Est. 2023 · A Stitched Group company</p>
+        </div>
+      </div>
+
+      {/* The mast, set to the frame's width. Decorative: the name is already on the page. */}
+      <div aria-hidden className={`${FRAME} mt-mast-frame mt-8`}>
+        <div className="mt-mast-wrap t-mast select-none text-cream">
+          <div className="mt-mast">
+            {MAST.map((c, i) => (
+              <span key={i} style={{ ['--i' as string]: i }}>
+                {c}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
@@ -84,8 +100,8 @@ export default function SiteFooter() {
 function Col({ title, className = '', children }: { title: string; className?: string; children: React.ReactNode }) {
   return (
     <div className={className}>
-      <p className="label text-beige">{title}</p>
-      <ul className="mt-3 sm:mt-5 sm:space-y-1.5">{children}</ul>
+      <h3 className="t-eyebrow text-beige">{title}</h3>
+      <ul className="mt-4 sm:mt-5">{children}</ul>
     </div>
   );
 }
@@ -93,11 +109,8 @@ function Col({ title, className = '', children }: { title: string; className?: s
 function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <li>
-      <Link
-        href={href}
-        className="inline-flex min-h-11 items-center text-[0.9375rem] text-cream/80 transition-colors hover:text-cream sm:min-h-0 sm:py-1"
-      >
-        {children}
+      <Link href={href} className="mt-foot-link">
+        <span>{children}</span>
       </Link>
     </li>
   );

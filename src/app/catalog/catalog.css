@@ -1,2 +1,338 @@
-/* The catalog sits on paper, like the rest of the site (rack.css holds the rack). */
+/* Catalog + product pages. Builds on the foundation in globals.css (see DESIGN.md);
+   everything here is prefixed ct- so it can't collide with another page's CSS.
+   The rack's own styles live in src/components/catalog/rack/rack.css. */
+
+/* The catalog sits on paper, like the rest of the site. */
 body:has(.rk) { background: theme('colors.paper'); }
+
+/* ── Frame helpers ────────────────────────────────────────────────────────── */
+/* The shell's side padding, per breakpoint (matches .shell). */
+.ct-scope { --shell-pad: 20px; }
+@media (min-width: 640px) { .ct-scope { --shell-pad: 32px; } }
+@media (min-width: 1024px) { .ct-scope { --shell-pad: 56px; } }
+/* Bleed a grid item off the left edge of the viewport, wherever the shell sits. */
+.ct-bleed-l { margin-left: calc(-1 * var(--shell-pad) - max(0px, (100vw - 1536px) / 2)); }
+
+/* ── Facts table (catalog header) ─────────────────────────────────────────── */
+.ct-facts > div + div { border-left: 1px solid var(--rule-c); }
+
+/* ── Toolbar ──────────────────────────────────────────────────────────────── */
+.ct-bar {
+  /* The site header is sticky; the explorer measures it and sets --ct-head. */
+  top: var(--ct-head, 72px);
+}
+.ct-chip-n {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.62;
+}
+.ct-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 32%, transparent);
+  transition: border-color var(--dur-quick) ease, box-shadow var(--dur-quick) ease;
+}
+.ct-search:hover { border-bottom-color: color-mix(in srgb, currentColor 60%, transparent); }
+.ct-search:focus-within { border-bottom-color: currentColor; box-shadow: 0 1px 0 0 currentColor; }
+.ct-search:has(input:focus-visible) { outline: 2px solid theme('colors.dusty'); outline-offset: 2px; }
+.ct-search input {
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.2;
+}
+.ct-search input::placeholder { color: currentColor; opacity: 0.45; }
+.ct-search input::-webkit-search-cancel-button { appearance: none; }
+.ct-kbd {
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  border: 1px solid var(--rule-c);
+  border-radius: 2px;
+  font: 500 12px/1 var(--font-sans), sans-serif;
+  color: var(--fg-muted);
+}
+/* Plain-text toggles: Rack / List, Sound. The pressed one is underlined. */
+.ct-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--fg-muted);
+  transition: color var(--dur-quick) ease;
+}
+.ct-toggle:hover { color: theme('colors.ink'); }
+.ct-toggle[aria-pressed='true'] { color: theme('colors.ink'); }
+.ct-toggle[aria-pressed='true'] > span {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 0 100%;
+  padding-bottom: 0.12em;
+}
+
+/* ── Plates (product tiles, gallery) ──────────────────────────────────────── */
+/* A cream plate. No border, no radius, no shadow. On hover a running stitch
+   appears just inside its edge: the woven-label move, at plate scale. */
+.ct-plate {
+  position: relative;
+  overflow: hidden;
+  background: theme('colors.cream');
+}
+.ct-plate::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px dashed theme('colors.ink');
+  opacity: 0;
+  transform: scale(1.015);
+  transition: opacity var(--dur-quick) ease, transform var(--dur-base) var(--ease-out);
+  pointer-events: none;
+}
+.group:hover .ct-plate.is-stitchable::after,
+.group:focus-visible .ct-plate.is-stitchable::after { opacity: 0.32; transform: none; }
+
+/* ── Product gallery strip (mobile: horizontal snap) ──────────────────────── */
+@media (max-width: 1023px) {
+  .ct-strip {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 84%;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin-inline: calc(-1 * var(--shell-pad));
+    padding-inline: var(--shell-pad);
+    scroll-padding-inline: var(--shell-pad);
+  }
+  .ct-strip::-webkit-scrollbar { display: none; }
+  .ct-strip > * { scroll-snap-align: start; }
+}
+
+/* ── Colour swatches (round: the only round things) ───────────────────────── */
+.ct-sw {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+}
+.ct-sw > i {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1px rgba(19, 51, 39, 0.16);
+  transition: box-shadow var(--dur-quick) ease, transform var(--dur-base) var(--ease-out);
+}
+.ct-sw:hover > i { box-shadow: inset 0 0 0 1px rgba(19, 51, 39, 0.16), 0 0 0 2px theme('colors.paper'), 0 0 0 3px rgba(19, 51, 39, 0.35); }
+.ct-sw[aria-checked='true'] > i,
+.ct-sw[aria-pressed='true'] > i { box-shadow: inset 0 0 0 1px rgba(19, 51, 39, 0.16), 0 0 0 3px theme('colors.paper'), 0 0 0 4px theme('colors.ink'); }
+.ct-sw:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* ── Estimator ────────────────────────────────────────────────────────────── */
+.ct-tier {
+  position: relative;
+  transition: background-color var(--dur-quick) ease, color var(--dur-quick) ease;
+}
+.ct-tier::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  background: theme('colors.ink');
+  transform: scaleY(0);
+  transform-origin: 50% 50%;
+  transition: transform var(--dur-base) var(--ease-stitch);
+}
+.ct-tier[data-on='true']::before { transform: none; }
+.ct-tier[data-on='true'] { background: theme('colors.cream'); }
+.ct-tier button { min-height: 44px; }
+.ct-tier:hover:not([data-on='true']) { background: color-mix(in srgb, theme('colors.cream') 55%, transparent); }
+
+.ct-stepper button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--rule-c);
+  border-radius: var(--radius);
+  transition: border-color var(--dur-quick) ease, background-color var(--dur-quick) ease;
+}
+.ct-stepper button:hover:not(:disabled) { border-color: currentColor; }
+.ct-stepper button:disabled { opacity: 0.35; }
+.ct-stepper input {
+  width: 5.5ch;
+  min-height: 44px;
+  background: transparent;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 32%, transparent);
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+.ct-stepper input::-webkit-outer-spin-button,
+.ct-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ct-stepper input:focus-visible { outline: none; border-bottom-color: currentColor; box-shadow: 0 1px 0 0 currentColor; }
+
+/* The slider's filled run, drawn as a stitch up to the thumb. */
+.ct-range { position: relative; }
+.ct-range-fill {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: theme('colors.ink');
+  pointer-events: none;
+}
+.ct-range-tick {
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 10px;
+  margin-top: -5px;
+  background: theme('colors.ink');
+  opacity: 0.35;
+  pointer-events: none;
+}
+.ct-range .range { position: relative; z-index: 1; }
+.ct-range .range::-webkit-slider-runnable-track { background: transparent; }
+.ct-range .range::-moz-range-track { background: transparent; }
+.ct-range-track {
+  position: absolute;
+  inset: 50% 0 auto 0;
+  height: 2px;
+  margin-top: -1px;
+  background: theme('colors.rule');
+  pointer-events: none;
+}
+.ct-range .range::-webkit-slider-thumb { box-shadow: none; border-color: theme('colors.paper'); }
+.ct-range .range:focus-visible { outline: none; }
+.ct-range:has(.range:focus-visible) { outline: 2px solid theme('colors.dusty'); outline-offset: 2px; }
+.ct-range .range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px theme('colors.paper'), 0 0 0 4px var(--focus); }
+.ct-range .range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px theme('colors.paper'), 0 0 0 4px var(--focus); }
+
+/* A figure changing: it ticks up from below, once per change. */
+.ct-tick { display: inline-block; animation: ct-tick var(--dur-base) var(--ease-out); }
+@keyframes ct-tick { from { opacity: 0.2; transform: translateY(0.25em); } to { opacity: 1; transform: none; } }
+
+/* ── Hang tag (catalog "beyond" panel) ────────────────────────────────────── */
+.ct-hangtag {
+  position: relative;
+  width: min(300px, 78vw);
+  padding: 56px 28px 28px;
+  background: theme('colors.cream');
+  clip-path: polygon(22% 0, 78% 0, 100% 12%, 100% 100%, 0 100%, 0 12%);
+}
+.ct-hangtag::before {
+  /* The punched hole. */
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 9999px;
+  background: theme('colors.paper');
+  box-shadow: inset 0 0 0 1px theme('colors.rule');
+}
+.ct-hangtag::after {
+  content: '';
+  position: absolute;
+  inset: 44px 8px 8px;
+  border: 1px dashed theme('colors.ink');
+  opacity: 0.3;
+  pointer-events: none;
+}
+.ct-hang {
+  transform: rotate(-3deg);
+  transform-origin: 50% 0;
+  /* .lift, as a filter: the tag's die-cut shoulders would clip a box-shadow. */
+  filter: drop-shadow(0 1px 1px rgba(19, 51, 39, 0.08)) drop-shadow(0 16px 18px rgba(19, 51, 39, 0.2));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ct-hang { animation: ct-hang 2.4s var(--ease-out) both; }
+  @keyframes ct-hang {
+    0% { transform: rotate(4deg); }
+    40% { transform: rotate(-4.5deg); }
+    70% { transform: rotate(-2.2deg); }
+    100% { transform: rotate(-3deg); }
+  }
+}
+
+/* ── Timeline ─────────────────────────────────────────────────────────────── */
+.ct-hatch {
+  background: repeating-linear-gradient(-45deg, rgba(19, 51, 39, 0.34) 0 1.5px, transparent 1.5px 7px);
+}
+
+.ct-hatch-lt {
+  background: repeating-linear-gradient(-45deg, rgba(196, 177, 154, 0.75) 0 1.5px, transparent 1.5px 7px);
+}
+
+/* ── Size chart ───────────────────────────────────────────────────────────── */
+.ct-sum { list-style: none; }
+.ct-sum::-webkit-details-marker { display: none; }
+.ct-plus { position: relative; width: 18px; height: 18px; }
+.ct-plus::before,
+.ct-plus::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1.5px;
+  margin-top: -0.75px;
+  background: currentColor;
+  transition: transform var(--dur-base) var(--ease-inout);
+}
+.ct-plus::after { transform: rotate(90deg); }
+details[open] .ct-plus::after { transform: rotate(0deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-plate::after,
+  .ct-tier,
+  .ct-tier::before,
+  .ct-sw > i,
+  .ct-plus::before,
+  .ct-plus::after { transition: none; }
+  .ct-tick { animation: none; }
+}
+
+/* Visible focus on the catalog's own controls. */
+.ct-toggle:focus-visible,
+.ct-plate:focus-visible,
+.ct-scope summary:focus-visible { outline: 2px solid theme('colors.dusty'); outline-offset: 2px; }
+
+/* Product photographs come from different studios: some on white, some on near-black.
+   One shared tone so the set reads as one: blacks lifted and whites pulled down a
+   touch, then a cream multiply that warms white grounds toward the plates. */
+.ct-unify img { filter: saturate(0.8) contrast(0.9) sepia(0.1) brightness(1.03) !important; }
+.ct-unify::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #EEE6D9;
+  mix-blend-mode: multiply;
+  opacity: 0.32;
+  pointer-events: none;
+}

@@ -1,65 +1,153 @@
-import Link from 'next/link';
-import { Arrow } from '@/components/SiteHeader';
-import { SEGMENTS } from '@/lib/site';
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useRef, useState, type PointerEvent } from "react";
+import { Arrow } from "@/components/SiteHeader";
+import { PHOTOS, type PhotoSlug } from "@/lib/photos";
+import { SEGMENTS } from "@/lib/site";
+import "./home.css";
 
 /**
- * Who we make it for: the page's one full-bleed dusty-blue band, cream type.
- * Five audiences as an editorial index: numeral, name, one line on what they
- * order it for, and the pieces they typically order. Server component.
+ * Who we make it for: the page's one green band, The Roster. Five audiences as
+ * numbered rows divided by hairlines: roster number, the name in the serif,
+ * one line on what they order it for, and the pieces they typically order.
+ *
+ * Desktop with a pointer: a duotone photo slides along the row under the
+ * cursor and the name steps 8px right. Phones get the plain list. The photos
+ * are mood images, not clients; they carry no claim and are decorative here.
  */
+
+const PEEK: Record<(typeof SEGMENTS)[number]["id"], PhotoSlug> = {
+  campus: "lifestyle-park-picnic",
+  company: "segment-company-coffee-team",
+  nonprofit: "segment-nonprofit-garden",
+  athletic: "segment-athletic-rowing",
+  social: "segment-social-croquet",
+};
+
 export default function Segments() {
+  const listRef = useRef<HTMLDivElement>(null);
+  const peekRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState<number | null>(null);
+
+  const follow = (e: PointerEvent<HTMLLIElement>, i: number) => {
+    if (e.pointerType !== "mouse") return;
+    const list = listRef.current;
+    const peek = peekRef.current;
+    if (!list || !peek) return;
+    const box = list.getBoundingClientRect();
+    const row = e.currentTarget.getBoundingClientRect();
+    // Follow the cursor across the row; stay centred on the row vertically.
+    peek.style.setProperty("--x", `${e.clientX - box.left}px`);
+    peek.style.setProperty("--y", `${row.top - box.top + row.height / 2}px`);
+    if (active !== i) setActive(i);
+  };
+
   return (
-    <section aria-labelledby="segments-title" className="bg-dusty py-20 text-cream sm:py-28 lg:py-32">
-      <div className="mx-auto w-full max-w-[1536px] px-5 sm:px-8 lg:px-14">
-        <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
-          <div className="lg:col-span-7">
-            <p className="label text-beige">Who we make it for</p>
-            <h2 id="segments-title" className="caps mt-5 text-[clamp(2rem,4vw,3.75rem)] leading-[0.95] tracking-[-0.03em]">
-              Built for every kind of{' '}
-              <span className="font-serif text-[1.08em] font-normal normal-case tracking-[0] text-beige">membership.</span>
+    <section
+      aria-labelledby="segments-title"
+      className="band-green sec overflow-x-clip"
+    >
+      <div className="shell">
+        <div className="grid-12 items-end gap-y-6">
+          <div className="col-span-4 sm:col-span-8 lg:col-span-7">
+            <p className="t-eyebrow text-beige">The roster</p>
+            <h2 id="segments-title" className="t-h1 mt-5">
+              Built for every kind of <em>membership.</em>
             </h2>
           </div>
-          <p className="max-w-[34rem] text-lead text-cream/70 lg:col-span-5 lg:pb-1">
-            If a group of people wears it together, it belongs in a collection. These are the organizations we make
-            for most, and what they tend to order.
+          <p className="t-lead fg-muted col-span-4 max-w-measure sm:col-span-7 lg:col-span-5 lg:pb-1">
+            If a group of people wears it together, it belongs in a collection.
+            These are the organizations we make for most, and what they tend to
+            order.
           </p>
         </div>
 
-        <ol className="mt-14 border-t border-cream/15 sm:mt-16">
-          {SEGMENTS.map((s, i) => (
-            <li
-              key={s.id}
-              className="grid grid-cols-[2.5rem_1fr] gap-x-4 gap-y-4 border-b border-cream/15 py-8 sm:grid-cols-[4rem_1fr] sm:gap-x-6 sm:py-10 lg:grid-cols-[4rem_minmax(0,3.2fr)_minmax(0,4fr)_minmax(0,4fr)] lg:items-baseline lg:gap-x-10"
-            >
-              <span aria-hidden className="label pt-1 text-beige lg:pt-0">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <h3 className="caps text-[1.375rem] leading-[1.02] lg:text-[1.625rem]">{s.label}</h3>
-              <p className="col-start-2 max-w-[38ch] text-[1rem] leading-[1.6] text-cream/70 lg:col-start-auto">
-                <span className="sr-only">{s.title}. </span>
-                {s.body}
-              </p>
-              <ul aria-label="Typical pieces" className="col-start-2 flex flex-wrap gap-2 lg:col-start-auto">
-                {s.pieces.map((p) => (
-                  <li
-                    key={p}
-                    className="rounded-full px-3 py-1.5 text-[0.75rem] font-medium leading-none tracking-[0.01em] text-cream/85 ring-1 ring-inset ring-cream/25"
+        <div
+          ref={listRef}
+          className="relative mt-16 sm:mt-20 lg:mt-24"
+          onPointerLeave={() => setActive(null)}
+        >
+          <ol className="roster-list hairline relative z-[1]">
+            {SEGMENTS.map((s, i) => (
+              <li
+                key={s.id}
+                className="roster-row hairline-b grid-12 gap-y-3 py-8 lg:items-baseline lg:py-10"
+                onPointerMove={(e) => follow(e, i)}
+              onPointerEnter={(e) => follow(e, i)}
+              >
+                <span className="t-spec col-span-4 text-beige sm:col-span-8 lg:col-span-1">
+                  No. {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="col-span-4 sm:col-span-8 lg:col-span-6">
+                  <span className="roster-name t-h1 roster-size">{s.label}</span>
+                  <span className="sr-only">: {s.title}</span>
+                </h3>
+                <div className="col-span-4 mt-2 sm:col-span-6 lg:col-span-5 lg:mt-0">
+                  <p className="t-body max-w-[44ch] text-cream/90">{s.body}</p>
+                  <ul
+                    aria-label="Typical pieces"
+                    className="mt-4 flex flex-wrap gap-2"
                   >
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ol>
+                    {s.pieces.map((p) => (
+                      <li key={p} className="tag text-cream/90">
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ))}
+          </ol>
 
-        <div className="mt-12 flex flex-col items-start gap-6 sm:mt-14 sm:flex-row sm:items-center sm:justify-between">
-          <p className="max-w-[36rem] text-[1rem] leading-[1.6] text-cream/70">
-            Don’t see yours? If you have 36 people who would wear it, we can make it.
+          {/* The cursor photo (desktop pointer only). */}
+          <div
+            ref={peekRef}
+            aria-hidden
+            data-on={active !== null}
+            className="roster-peek hidden aspect-[4/5] lg:block"
+          >
+            {SEGMENTS.map((s, i) => {
+              const p = PHOTOS[PEEK[s.id]];
+              return (
+                <div
+                  key={s.id}
+                  data-on={active === i}
+                  className="photo duo grain"
+                >
+                  <Image
+                    src={p.src}
+                    width={p.width}
+                    height={p.height}
+                    alt=""
+                    sizes="264px"
+                    loading="lazy"
+                    style={{ objectPosition: p.objectPosition }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* The house number. */}
+        <div className="grid-12 mt-16 items-end gap-y-8 sm:mt-20">
+          <p
+            aria-hidden
+            className="t-block col-span-4 text-[clamp(5rem,10vw,9rem)] leading-[0.8] text-beige sm:col-span-3 lg:col-span-3"
+          >
+            36
           </p>
-          <Link href="/quote" className="btn h-14 bg-cream px-8 text-[1.0625rem] text-ink hover:bg-paper">
-            Start a Collection <Arrow className="ml-2 h-[16px] w-[22px]" />
-          </Link>
+          <p className="t-h2 col-span-4 max-w-[24ch] sm:col-span-5 lg:col-span-5">
+            Don’t see yours? If you have 36 people who’d wear it,{" "}
+            <em>we can make it.</em>
+          </p>
+          <div className="col-span-4 sm:col-span-8 lg:col-span-4 lg:justify-self-end">
+            <Link href="/quote" className="btn-white w-full sm:w-auto">
+              Start a collection <Arrow className="h-[14px] w-[19px]" />
+            </Link>
+          </div>
         </div>
       </div>
     </section>

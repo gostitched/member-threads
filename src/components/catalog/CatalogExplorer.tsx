@@ -43,21 +43,25 @@ function haystack(p: CatalogProduct): string {
  */
 function buildSlots(results: CatalogProduct[], narrowed: boolean, categories: Array<[string, number]>): Slot[] {
   // The tag for ordering something the rack doesn't carry. The rack hangs it on its first run.
+  // The way out for anything not on the rack is the panel under it (one hang tag a page).
   if (!results.length) return [];
-  return [...hang(results, narrowed, categories), { cta: true }];
+  return hang(results, narrowed, categories);
 }
 function hang(results: CatalogProduct[], narrowed: boolean, categories: Array<[string, number]>): Slot[] {
   if (narrowed) return results.map((p) => ({ p }));
-  const slots: Slot[] = results.filter((p) => p.isFeatured).map((p) => ({ p }));
-  const section = (id: string, name: string, count: number, ps: CatalogProduct[]) => {
+  const featured = results.filter((p) => p.isFeatured);
+  const slots: Slot[] = featured.map((p, i) => (i === 0 ? { p, sec: { name: 'Featured', count: featured.length, no: 0 } } : { p }));
+  let no = 0;
+  // Each section opens with a spec-line marker over its first piece, not a sign of its own.
+  const section = (name: string, count: number, ps: CatalogProduct[]) => {
     if (!ps.length) return;
-    slots.push({ div: { id, name, count } });
-    for (const p of ps) slots.push({ p });
+    no += 1;
+    ps.forEach((p, i) => slots.push(i === 0 ? { p, sec: { name, count, no } } : { p }));
   };
   for (const [name, count] of categories)
-    section(name, name, count, results.filter((p) => p.category === name && !p.isFeatured));
+    section(name, count, results.filter((p) => p.category === name && !p.isFeatured));
   const loose = results.filter((p) => !p.category);
-  section('other', 'Other', loose.length, loose.filter((p) => !p.isFeatured));
+  section('Other', loose.length, loose.filter((p) => !p.isFeatured));
   return slots;
 }
 
@@ -123,6 +127,10 @@ export default function CatalogExplorer({
   const [mounted, setMounted] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const mobileSearchRef = useRef<HTMLInputElement>(null);
+  const [searchOpen, setSearchOpen] = useState(Boolean(initial.q));
+  const [tucked, setTucked] = useState(false);
+  const clearRef = useRef<() => void>(() => {});
   const bandRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const rowsRef = useRef<HTMLDivElement>(null);
@@ -197,6 +205,12 @@ export default function CatalogExplorer({
   }, [indexed, state.category, state.family, state.q]);
 
   const narrowed = Boolean(state.category || state.family || state.q);
+  // Search reaches past the category: how many styles match the words alone.
+  const wider = useMemo(() => {
+    const terms = state.q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length || !(state.category || state.family)) return 0;
+    return indexed.filter(({ text }) => terms.every((t) => text.includes(t))).length;
+  }, [indexed, state.q, state.category, state.family]);
   const slots = useMemo(() => buildSlots(results, narrowed, categories), [results, narrowed, categories]);
   // What streams past between one rack and the next: stock from elsewhere in the catalog.
   const pool = useMemo(
@@ -210,6 +224,7 @@ export default function CatalogExplorer({
       {
         onHover: (href) => routerRef.current.prefetch(href),
         onOpen: (href) => routerRef.current.push(href),
+        onClear: () => clearRef.current(),
       }
     );
     rackRef.current = rack;
@@ -253,71 +268,242 @@ export default function CatalogExplorer({
 
   function clearAll() {
     setSearchDraft('');
+    setSearchOpen(false);
     set({ category: null, family: null, q: '' }, 'category');
   }
+  clearRef.current = clearAll;
+
+  // The mobile search field takes focus as it opens.
+  useEffect(() => {
+    if (searchOpen) mobileSearchRef.current?.focus({ preventScroll: true });
+  }, [searchOpen]);
+
+  // Mobile: the bar tucks away while scrolling down the rack, and returns on the way up.
+  useEffect(() => {
+    let last = window.scrollY;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const y = window.scrollY;
+        const mobile = window.innerWidth < 640;
+        const band = bandRef.current;
+        const head = document.querySelector<HTMLElement>('body header')?.getBoundingClientRect().height ?? 72;
+        // The bar is stuck once the marker just above it has scrolled under the header.
+        const stuck = band ? band.getBoundingClientRect().top <= head + 1 : false;
+        if (!mobile || Math.abs(y - last) < 6) return;
+        setTucked(y > last && stuck && !searchOpen);
+        last = y;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [searchOpen]);
+
+
+  // The toolbar sticks under the site header, whatever height the header is at this
+  // breakpoint: measure it rather than hard-code it.
+  const [headH, setHeadH] = useState<number | null>(null);
+  useEffect(() => {
+    const header = document.querySelector<HTMLElement>('body header');
+    if (!header) return;
+    const measure = () => setHeadH(Math.round(header.getBoundingClientRect().height));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(header);
+    return () => ro.disconnect();
+  }, []);
+  const headVar = (headH !== null ? { ['--ct-head' as string]: `${headH}px` } : {}) as React.CSSProperties;
 
   const familyLabel = state.family ? COLOR_FAMILIES.find((f) => f.id === state.family)?.label ?? state.family : null;
   const board = `${state.q ? 'Search' : familyLabel ?? state.category ?? 'All'} ${results.length}`;
   const count = (
     <>
-      <b>{results.length}</b> {results.length === 1 ? 'style' : 'styles'}
+      <span className="num">{String(results.length).padStart(2, '0')}</span> {results.length === 1 ? 'style' : 'styles'}
       {state.family && (
-        <button type="button" onClick={() => set({ family: null })} className="ml-3 text-uv hover:underline" aria-label={`Remove filter ${familyLabel}`}>
-          {familyLabel} ×
+        <button
+          type="button"
+          onClick={() => set({ family: null })}
+          className="ml-3 inline-flex min-h-[44px] items-center gap-1.5 text-ink"
+          aria-label={`Remove filter ${familyLabel}`}
+        >
+          <span className="link-u">{familyLabel}</span>
+          <span aria-hidden>×</span>
+        </button>
+      )}
+      {wider > results.length && (
+        <button
+          type="button"
+          onClick={() => set({ category: null, family: null }, 'category')}
+          className="link-arrow ml-3 text-ink"
+        >
+          <span className="link-u">
+            {wider} {wider === 1 ? 'match' : 'matches'} in all styles
+          </span>
+          <span aria-hidden>→</span>
         </button>
       )}
     </>
   );
 
+  const searchIcon = (
+    <svg width="15" height="15" viewBox="0 0 13 13" aria-hidden className="shrink-0">
+      <circle cx="5.5" cy="5.5" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M9 9l3.2 3.2" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+  const chips = [['All', products.length] as [string, number], ...categories].map(([name, n]) => {
+    const on = name === 'All' ? state.category === null : state.category === name;
+    return (
+      <button
+        key={name}
+        type="button"
+        aria-pressed={on}
+        onClick={(e) => {
+          e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: smooth() });
+          pickCategory(name === 'All' ? null : name);
+        }}
+        className="chip shrink-0 whitespace-nowrap px-3.5"
+      >
+        {name}
+        <span className="ct-chip-n">{String(n).padStart(2, '0')}</span>
+      </button>
+    );
+  });
+  const viewToggle = (
+    <div className="flex items-center gap-1" role="group" aria-label="View">
+      {(['rack', 'index'] as const).map((v, i) => (
+        <span key={v} className="flex items-center gap-1">
+          {i > 0 && (
+            <span aria-hidden className="text-rule">
+              /
+            </span>
+          )}
+          <button type="button" aria-pressed={state.view === v} onClick={() => set({ view: v }, 'none')} className="ct-toggle">
+            <span>{v === 'rack' ? 'Rack' : 'List'}</span>
+          </button>
+        </span>
+      ))}
+    </div>
+  );
+  const soundToggle =
+    state.view === 'rack' ? (
+      <button
+        type="button"
+        aria-pressed={soundOn}
+        onClick={() => setSoundOn(rackRef.current?.toggleSound() ?? false)}
+        className="ct-toggle gap-2 whitespace-nowrap"
+      >
+        <svg width="16" height="14" viewBox="0 0 16 14" aria-hidden fill="none">
+          <path d="M1 5h3l4-3.5v11L4 9H1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+          {soundOn ? (
+            <path d="M11 4.5c1 1.4 1 3.6 0 5M13.2 2.5c2 2.6 2 6.4 0 9" stroke="currentColor" strokeWidth="1.3" />
+          ) : (
+            <path d="M11 5l4 4M15 5l-4 4" stroke="currentColor" strokeWidth="1.3" />
+          )}
+        </svg>
+        <span className="sr-only sm:not-sr-only xl:sr-only 2xl:not-sr-only">Sound {soundOn ? 'on' : 'off'}</span>
+      </button>
+    ) : null;
+
   return (
-    <div>
+    <div style={headVar}>
       {/* ── Colour ─────────────────────────────────────────────────────────── */}
       {/* Only when there is colour to explore: a heading over an empty band is noise. */}
       {swatches.length > 0 && (
-        <section className="pb-8 text-ink sm:pb-10">
+        <section className="pb-10 sm:pb-14" aria-labelledby="ct-color">
           <div className="shell mb-5 flex items-baseline justify-between gap-6">
-            <h2 className="label text-ink">Shop by color</h2>
-            <p className="label hidden text-muted sm:block">{swatches.length} colorways</p>
+            <h2 id="ct-color" className="t-eyebrow">
+              Shop by color
+            </h2>
+            <p className="t-spec fg-muted">{swatches.length} colorways</p>
           </div>
           <Spectrum swatches={swatches} familyCounts={familyCounts} active={state.family} onPick={pickFamily} />
         </section>
       )}
 
       {/* ── Toolbar ────────────────────────────────────────────────────────── */}
-      <div ref={bandRef} className="scroll-mt-[72px] sm:scroll-mt-[84px] lg:scroll-mt-[108px]" />
-      <div ref={barRef} className="sticky top-[72px] z-30 border-b border-rule bg-paper/90 backdrop-blur-xl sm:top-[84px] lg:top-[108px]">
-        <div className="shell flex flex-wrap items-center gap-x-7 gap-y-1 py-2.5">
+      {/* Mobile: the view controls sit above the bar, so the bar itself is one row. */}
+      <div className="shell flex items-center justify-end gap-4 pb-1 sm:hidden">
+        {viewToggle}
+        {soundToggle}
+      </div>
+      <div ref={bandRef} style={{ scrollMarginTop: headH ?? 72 }} />
+      <div
+        ref={barRef}
+        className="ct-bar sticky z-30 border-y border-[var(--rule-c)] bg-paper transition-transform duration-[420ms] ease-out motion-reduce:transition-none"
+        style={tucked ? { transform: `translateY(calc(-100% - ${headH ?? 72}px))` } : undefined}
+      >
+        {/* Mobile: chips and a search icon that opens into a field. */}
+        <div className="shell flex h-[52px] items-center gap-2 sm:hidden">
+          {searchOpen ? (
+            <>
+              <label className="ct-search min-w-0 flex-1 text-ink">
+                {searchIcon}
+                <span className="sr-only">Search styles</span>
+                <input
+                  ref={mobileSearchRef}
+                  type="search"
+                  value={searchDraft}
+                  onChange={(e) => setSearchDraft(e.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="Search all styles"
+                />
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchDraft('');
+                  setSearchOpen(false);
+                }}
+                className="ct-toggle min-w-[44px] justify-center"
+                aria-label="Close search"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
+                  <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.4" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                aria-expanded={false}
+                aria-label="Search styles"
+                className="ct-toggle -ml-2 min-w-[44px] shrink-0 justify-center text-ink"
+              >
+                {searchIcon}
+              </button>
+              <div
+                className="-mr-5 flex min-w-0 flex-1 gap-1.5 overflow-x-auto py-1 pr-5 [mask-image:linear-gradient(to_right,#000_calc(100%-36px),transparent)] [scrollbar-width:none]"
+                role="group"
+                aria-label="Category"
+              >
+                {chips}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="shell hidden flex-wrap items-center gap-x-8 gap-y-1 py-2 sm:flex xl:flex-nowrap">
           <div
-            className="-mx-5 flex min-w-0 flex-auto gap-2 overflow-x-auto py-1 px-5 [mask-image:linear-gradient(to_right,#000_calc(100%-44px),transparent)] [scrollbar-width:none] sm:mx-0 sm:px-0 lg:[mask-image:none]"
+            className="-mx-8 flex min-w-0 flex-auto gap-1.5 overflow-x-auto px-8 py-1 [mask-image:linear-gradient(to_right,#000_calc(100%-44px),transparent)] [scrollbar-width:none] lg:-mx-14 lg:px-14 xl:mx-0 xl:px-0 xl:[mask-image:none]"
             role="group"
             aria-label="Category"
           >
-            {['All', ...categories.map(([name]) => name)].map((name) => {
-              const on = name === 'All' ? state.category === null : state.category === name;
-              return (
-                <button
-                  key={name}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={(e) => {
-                    e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: smooth() });
-                    pickCategory(name === 'All' ? null : name);
-                  }}
-                  className="rk-cat"
-                >
-                  {name}
-                </button>
-              );
-            })}
+            {chips}
           </div>
 
-          <div className="flex w-full items-center justify-between gap-6 lg:w-auto lg:justify-end">
-            <label className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-ink/5 px-4 py-1.5 text-ink focus-within:ring-2 focus-within:ring-blue lg:flex-none">
-              <svg width="13" height="13" viewBox="0 0 13 13" aria-hidden className="shrink-0">
-                <circle cx="5.5" cy="5.5" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
-                <path d="M9 9l3.2 3.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-              </svg>
-              <span className="sr-only">Search styles</span>
+          <div className="flex w-full items-center justify-between gap-6 xl:w-auto xl:flex-none xl:justify-end">
+            <label className="ct-search min-w-0 flex-1 text-ink sm:max-w-sm xl:w-44 xl:flex-none">
+              {searchIcon}
+              <span className="sr-only">Search all styles</span>
               <input
                 ref={searchRef}
                 type="search"
@@ -326,36 +512,13 @@ export default function CatalogExplorer({
                 autoComplete="off"
                 spellCheck={false}
                 placeholder="Search styles"
-                className="w-full min-w-0 bg-transparent py-1 text-[0.875rem] outline-none placeholder:text-ink/40 lg:w-40 [&::-webkit-search-cancel-button]:appearance-none"
               />
+              <kbd className="ct-kbd hidden sm:inline-grid" aria-hidden>
+                /
+              </kbd>
             </label>
-
-            <div className="flex items-center gap-1.5 text-[0.875rem] font-semibold text-muted" role="group" aria-label="View">
-              {(['rack', 'index'] as const).map((v, i) => (
-                <span key={v} className="flex items-center gap-1.5">
-                  {i > 0 && <span aria-hidden>/</span>}
-                  <button
-                    type="button"
-                    aria-pressed={state.view === v}
-                    onClick={() => set({ view: v }, 'none')}
-                    className={`py-2.5 capitalize ${state.view === v ? 'text-ink' : 'hover:text-ink'}`}
-                  >
-                    {v === 'rack' ? 'Rack' : 'List'}
-                  </button>
-                </span>
-              ))}
-            </div>
-
-            {state.view === 'rack' && (
-              <button
-                type="button"
-                aria-pressed={soundOn}
-                onClick={() => setSoundOn(rackRef.current?.toggleSound() ?? false)}
-                className={`whitespace-nowrap py-2.5 text-[0.875rem] font-semibold ${soundOn ? 'text-uv' : 'text-muted hover:text-ink'}`}
-              >
-                Sound {soundOn ? 'on' : 'off'}
-              </button>
-            )}
+            {viewToggle}
+            {soundToggle}
           </div>
         </div>
       </div>
@@ -386,15 +549,17 @@ export default function CatalogExplorer({
 
       {/* ── The same, as a spec sheet ─────────────────────────────────────── */}
       {state.view === 'index' && (
-        <section className="shell py-10 sm:py-14">
-          <p className="rk-count mb-6" aria-live="polite">
+        <section className="shell sec-sm" aria-label="Styles as a list">
+          <p className="rk-count mb-8" aria-live="polite">
             {count}
           </p>
           {results.length === 0 ? (
-            <div className="flex flex-col items-start gap-5 border-y border-rule py-14 sm:py-20">
-              <p className="caps text-d2">No styles match.</p>
-              <p className="max-w-measure text-lead text-muted">Try another search, or tell us what you need and we&rsquo;ll source it.</p>
-              <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col items-start gap-6 border-y border-[var(--rule-c)] py-14 sm:py-20">
+              <h2 className="t-h2">
+                No styles <em>match</em>.
+              </h2>
+              <p className="t-lead max-w-measure">Try another search, or tell us what you need and we&rsquo;ll source it.</p>
+              <div className="mt-2 flex flex-wrap gap-3">
                 <button type="button" onClick={clearAll} className="btn-outline">
                   Clear filters
                 </button>

@@ -1,8 +1,14 @@
+import Image from 'next/image';
+import Reveal from '@/components/Reveal';
+import { PHOTOS } from '@/lib/photos';
+import '@/components/home/home.css';
+
 /**
- * What Member Threads is, for a buyer landing cold: a heading, one paragraph,
- * three numbered principles and a closing line. Sits after the chapter (the
- * hoodie builder) and shares the header/hero frame so its left edge lines up
- * with the logo. Server component.
+ * What Member Threads is, for a buyer landing cold. The idea made explicit as
+ * a contrast: "Printed on" (a drawn stock blank, a logo pressed flat)
+ * against "Sewn in" (chenille at macro, in full grade), staggered down the
+ * grid. Then three principles in columns divided by hairlines. Server
+ * component.
  */
 
 // [CONFIRM] 01: every style is cut and sewn to spec (not decorated stock blanks).
@@ -24,37 +30,89 @@ const PRINCIPLES = [
   },
 ] as const;
 
+const sewn = PHOTOS['detail-chenille-numerals'];
+
 export default function Intro() {
   return (
-    <section aria-labelledby="intro-title" className="bg-paper py-20 text-ink sm:py-28 lg:py-32">
-      <div className="mx-auto w-full max-w-[1536px] px-5 sm:px-8 lg:px-14">
-        <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
-          <div className="lg:col-span-7">
-            <p className="label text-ink/60">What we do</p>
-            <h2 id="intro-title" className="caps mt-5 text-[clamp(2rem,4vw,3.75rem)] leading-[0.95] tracking-[-0.03em]">
-              Not merch. A collection.
+    <section aria-labelledby="intro-title" className="sec bg-paper text-ink">
+      <div className="shell">
+        {/* A stepped header (not the eyebrow-left / lead-right of the roster
+            that follows): headline cols 1–8, the lead dropped to cols 7–12. */}
+        <div className="grid-12 gap-y-8">
+          <div className="col-span-4 sm:col-span-8 lg:col-span-8">
+            <p className="t-eyebrow fg-muted">What we do</p>
+            <h2 id="intro-title" className="t-h1 mt-5">
+              Made to be <em>kept.</em>
             </h2>
           </div>
-          <p className="max-w-[34rem] text-lead text-ink/75 lg:col-span-5 lg:pb-1">
-            We make custom collections the way a label makes a season: considered pieces, one point of view,
-            finished properly. You bring the organization. We handle design, production and delivery.
+          <p className="t-lead col-span-4 max-w-measure sm:col-span-6 sm:col-start-3 lg:col-span-6 lg:col-start-7">
+            We make custom collections the way a label makes a season: considered pieces, one point of view, finished
+            properly. You bring the organization. We handle design, production and delivery.
           </p>
         </div>
 
-        <ul className="mt-14 grid gap-px overflow-hidden rounded-[20px] bg-rule sm:mt-16 md:grid-cols-3">
-          {PRINCIPLES.map((c) => (
-            <li key={c.n} className="flex flex-col bg-cream p-7 sm:p-9 lg:p-10">
-              <span className="label text-ink/50">{c.n}</span>
-              <h3 className="caps mt-10 text-[1.375rem] leading-[1.02] sm:mt-14 lg:text-[1.5rem]">{c.title}</h3>
-              <p className="mt-4 max-w-[34ch] text-[1rem] leading-[1.6] text-ink/75">{c.body}</p>
+        {/* Printed on / Sewn in. */}
+        <div className="grid-12 mt-16 gap-y-14 sm:mt-20 lg:mt-24">
+          <figure className="col-span-3 sm:col-span-4 lg:col-span-5">
+            <div className="relative">
+              {/* A drawing, not a photo: the generic blank, flat, a logo pressed on. */}
+              <div className="photo grain aspect-[4/5] bg-cream">
+                <svg viewBox="0 0 400 500" className="absolute inset-0 h-full w-full" role="img" aria-label="Drawing of a plain stock T-shirt with a rectangular logo printed flat on the chest">
+                  <path
+                    d="M128 92 L170 76 Q200 100 230 76 L272 92 L348 150 L318 204 L290 190 L290 436 L110 436 L110 190 L82 204 L52 150 Z"
+                    fill="#E2D8C7"
+                    stroke="#133327"
+                    strokeOpacity="0.35"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+                  <path d="M170 76 Q200 112 230 76" fill="none" stroke="#133327" strokeOpacity="0.35" strokeWidth="1.5" />
+                  <g opacity="0.55">
+                    <rect x="162" y="168" width="76" height="38" fill="none" stroke="#133327" strokeWidth="3" />
+                    <text x="200" y="194" textAnchor="middle" fontFamily="var(--font-display)" fontWeight="900" fontSize="20" fill="#133327" letterSpacing="1">
+                      LOGO
+                    </text>
+                  </g>
+                </svg>
+              </div>
+              <span className="woven woven-beige woven-lg absolute -top-4 left-4">Printed on</span>
+            </div>
+            <figcaption className="caption">A stock blank, a logo pressed flat on the front</figcaption>
+          </figure>
+
+          <figure className="col-span-4 sm:col-span-8 lg:col-start-7 lg:col-end-13 lg:mt-40">
+            <div className="relative">
+              <div className="drift-in photo grade grain aspect-[3/2]">
+                <Image
+                  src={sewn.src}
+                  width={sewn.width}
+                  height={sewn.height}
+                  alt={sewn.alt}
+                  sizes="(min-width: 1536px) 46vw, (min-width: 1024px) 48vw, 100vw"
+                  style={{ objectPosition: sewn.objectPosition }}
+                />
+              </div>
+              <span className="woven-green woven woven-lg absolute -top-4 left-4">Sewn in</span>
+            </div>
+            <figcaption className="caption">Chenille numerals, stitched into twill</figcaption>
+          </figure>
+        </div>
+
+        {/* Three principles. */}
+        <ul className="intro-pillars home-gap hairline grid gap-y-12 pt-10 md:grid-cols-3 md:gap-y-0">
+          {PRINCIPLES.map((c, i) => (
+            <li key={c.n} className="md:px-8 md:first:pl-0 md:last:pr-0 lg:px-10">
+              <Reveal delay={i * 80}>
+                <span aria-hidden className="t-block text-beige-deep">
+                  {c.n}
+                </span>
+                <h3 className="t-h3 mt-6 md:mt-12">{c.title}</h3>
+                <p className="t-body mt-4 max-w-[38ch] text-ink/90">{c.body}</p>
+              </Reveal>
             </li>
           ))}
         </ul>
 
-        <p className="mx-auto mt-14 max-w-[44rem] text-balance text-center text-[clamp(1.25rem,2vw,1.625rem)] font-medium leading-[1.35] tracking-[-0.01em] text-ink sm:mt-20">
-          Pieces your members keep reaching for,{' '}
-          <span className="text-uv">season after season.</span>
-        </p>
       </div>
     </section>
   );

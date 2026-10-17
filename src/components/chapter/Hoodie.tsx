@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { hoodie, VIEW, type HoodieGeometry } from './geometry';
 import { DEFAULT_NAME, YOUR_NAME, possessive } from '@/lib/name';
-import { COLORWAYS, UNDYED, initial, lockup, type Colorway, type Custom, type Look } from '@/lib/chapter';
+import { COLORWAYS, UNDYED, initial, type Colorway, type Custom, type Look } from '@/lib/chapter';
 
 /**
  * The hoodie, drawn from its pieces and finished like cloth.
@@ -31,15 +31,26 @@ const METAL = ['#FFFFFF', '#C9CCD6', '#5C6584'];
 const CUT = { w: 48, l: -70, band: 128 };
 
 /**
- * The chest wordmark: a collegiate lockup, embroidered. The top line rides an
- * arch across the chest; the rest of the name sits straight under it, smaller
- * and tracked out. Sizes come from the character count, so a long name shrinks
- * to stay inside the chest instead of running into the sleeves.
+ * The chest wordmark: the organization's name in the script, embroidered, set
+ * on a slight climb across the chest with a tail stitched under it (the
+ * home page's one script moment). A long name breaks onto a second line and
+ * everything is measured after layout, so it never runs into the sleeves.
  */
-const MARK = { cx: 966, x0: 636, x1: 1296, y: 1000, lift: 100, line2: 1088, w1: 640, w2: 540, max1: 124, max2: 56 };
-const ARCH = `M${MARK.x0} ${MARK.y}Q${MARK.cx} ${MARK.y - MARK.lift} ${MARK.x1} ${MARK.y}`;
-const size1 = (t: string) => Math.round(Math.min(MARK.max1, MARK.w1 / (Math.max(1, t.length) * 0.82)));
-const size2 = (t: string) => Math.round(Math.min(MARK.max2, MARK.w2 / (Math.max(1, t.length) * 0.8)));
+const MARK = { cx: 966, y: 1010, w: 620, h: 300, max: 200, rot: -6, x0: 636, x1: 1296 };
+
+/** Split a name for the chest: one line up to 14 characters, else the most even two. */
+function chestLines(name: string): string[] {
+  const n = name.trim();
+  const words = n.split(/\s+/);
+  if (n.length <= 14 || words.length < 2) return [n];
+  let best: [string, string] = [words[0], words.slice(1).join(' ')];
+  for (let i = 1; i < words.length; i++) {
+    const a = words.slice(0, i).join(' ');
+    const b = words.slice(i).join(' ');
+    if (Math.max(a.length, b.length) < Math.max(best[0].length, best[1].length)) best = [a, b];
+  }
+  return best;
+}
 
 /** The sleeve patch: a chenille initial on a round felt patch, set in from the sleeve's outer edge. */
 const PATCH = { r: 80, letter: 104 };
@@ -70,7 +81,7 @@ export function describe(look: Look, name = DEFAULT_NAME) {
     look.construction && 'contrast topstitching',
   ].filter(Boolean);
   return (
-    `${name === YOUR_NAME ? 'Your' : possessive(name).replace("'", '’')} oversized, boxy hoodie in ${look.colorSet ? `the ${c.name.toLowerCase()} colorway` : 'undyed'}, 420 GSM fleece` +
+    `${name === YOUR_NAME ? 'Your' : possessive(name).replace("'", '’')} oversized, boxy hoodie in ${look.colorSet ? `the ${c.name.toLowerCase()} colorway` : 'undyed'}, 400 GSM fleece` +
     (bits.length ? `, with ${bits.join(', ')}` : '') +
     '.'
   );
@@ -149,13 +160,13 @@ export default function Hoodie({
         </g>
       </g>
       <path d={g.lines} {...fine} />
-      <path d={g.stitches} {...stitch} />
+      <path d={g.stitches} {...stitch} className={look.construction ? 'chapter-run' : undefined} />
 
       {/* ── Rib ──────────────────────────────────────────────────────── */}
       <path d={g.hem} style={{ ...ease, fill: rib }} />
       <path d={g.hem} fill={url(look.rib ? 'rib2' : 'rib1')} />
       <path d={g.hem} {...edge} />
-      {look.construction && <path d={g.hemStitch} {...stitch} />}
+      {look.construction && <path d={g.hemStitch} {...stitch} className="chapter-run" />}
       {cuffs.map((p, i) => (
         <g key={i}>
           <path d={p} style={{ ...ease, fill: rib }} />
@@ -181,7 +192,7 @@ export default function Hoodie({
 
       {/* ── Front hood edges and the neck, over everything they cross ──── */}
       <path d={g.neckLines} {...fine} />
-      <path d={g.neckStitch} {...stitch} />
+      <path d={g.neckStitch} {...stitch} className={look.construction ? 'chapter-run' : undefined} />
 
       {/* ── Decoration ──────────────────────────────────────────────── */}
       {look.print && (
@@ -205,7 +216,7 @@ export default function Hoodie({
         </text>
         </g>
       )}
-      {look.embroidery && <Wordmark name={name} uid={uid} key={name} />}
+      {look.embroidery && <Wordmark name={name} uid={uid} />}
       {look.patch && (
         // Sewn onto the sleeve: clipped to the sleeve, so it wraps out of sight at the edge.
         <>
@@ -215,7 +226,7 @@ export default function Hoodie({
               {/* Felt patch, a stitched edge, then the letter: felt outline under fuzzy chenille loops. */}
               <circle r={PATCH.r} fill={c.patch.felt} />
               <circle r={PATCH.r} fill={url('felt')} />
-              <circle r={PATCH.r - 11} fill="none" stroke={c.patch.outline} strokeWidth="3" strokeDasharray="8 6" />
+              <circle r={PATCH.r - 11} fill="none" stroke={c.patch.outline} strokeWidth="3" strokeDasharray="8 6" className="chapter-run" />
               <ChenilleS uid={uid} letter={initial(name)} fill={c.patch.letter} outline={c.patch.outline} />
             </g>
           </g>
@@ -391,39 +402,57 @@ function ChenilleS({ uid, letter, fill, outline }: { uid: string; letter: string
 }
 
 /**
- * The organization's name across the chest, as a collegiate lockup: the top
- * line on an arch, the rest straight underneath. Satin-stitch fill with a fine
- * edge and a slight lift, so it reads as embroidery rather than print.
+ * The organization's name across the chest in the script, satin-stitched in the
+ * colorway's accent with a fine edge and a slight lift, so it reads as
+ * embroidery rather than print. On first appearance the outline is sewn
+ * (a stroke draw) and the satin fills in behind it; typing updates it live.
  */
 function Wordmark({ name, uid }: { name: string; uid: string }) {
-  const [top, rest] = lockup(name);
-  const f1 = size1(top);
-  const f2 = size2(rest);
+  const lines = chestLines(name);
+  const longest = Math.max(...lines.map((l) => l.length), 1);
+  const size = Math.round(Math.min(MARK.max, MARK.w / (longest * 0.42), lines.length > 1 ? 150 : MARK.max));
+  const lead = size * 0.86;
+  const ref = useRef<SVGGElement>(null);
+  const [fit, setFit] = useState({ k: 1, w: MARK.w * 0.8 });
+
+  // Measure after layout: shrink to the chest if the script runs wide, and size the tail to the name.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const b = el.getBBox();
+    if (!b.width) return;
+    const k = Math.min(1, MARK.w / b.width, MARK.h / Math.max(b.height, 1));
+    setFit((f) => (Math.abs(f.k - k) < 0.005 && Math.abs(f.w - b.width) < 1 ? f : { k, w: b.width }));
+  }, [name, size]);
+
+  const top = MARK.y - ((lines.length - 1) * lead) / 2;
   const face = {
-    fontFamily: 'var(--font-display)',
-    fontWeight: 900,
-    fontStretch: '118%',
+    fontFamily: 'var(--font-script)',
+    fontWeight: 400,
+    fontSize: size,
+    textAnchor: 'middle',
     fill: `url(#${uid}-satin)`,
     stroke: `url(#${uid}-satinEdge)`,
-    strokeWidth: 2,
+    strokeWidth: 2.4,
     strokeLinejoin: 'round',
     paintOrder: 'stroke',
   } as const;
-  // A single arch sits a little lower so the lockup stays centred on the chest.
-  const drop = rest ? 0 : 40;
+  const tailW = fit.w * 0.86;
+  const tailY = top + (lines.length - 1) * lead + size * 0.3;
+  const tail = `M${MARK.cx - tailW / 2} ${tailY + 6}C${MARK.cx - tailW / 4} ${tailY + 26} ${MARK.cx + tailW / 4} ${tailY + 16} ${MARK.cx + tailW / 2} ${tailY - 22}`;
+
   return (
-    <g className="chapter-add" filter={`url(#${uid}-raised-sm)`}>
-      <g transform={`translate(0 ${drop})`}>
-        <path id={`${uid}-arch`} d={ARCH} fill="none" />
-        <text {...face} fontSize={f1} letterSpacing={f1 * 0.04} textAnchor="middle">
-          <textPath href={`#${uid}-arch`} startOffset="50%">{top}</textPath>
-        </text>
+    <g filter={`url(#${uid}-raised-sm)`} className="chapter-sew-in">
+      <g transform={`rotate(${MARK.rot} ${MARK.cx} ${MARK.y}) translate(${MARK.cx} ${MARK.y}) scale(${fit.k}) translate(${-MARK.cx} ${-MARK.y})`}>
+        <g ref={ref}>
+          {lines.map((l, i) => (
+            <text key={i} {...face} x={MARK.cx + (lines.length > 1 ? (i ? 36 : -36) : 0)} y={top + i * lead}>
+              {l}
+            </text>
+          ))}
+        </g>
+        <path d={tail} fill="none" stroke={`url(#${uid}-satin)`} strokeWidth={Math.max(7, size * 0.07)} strokeLinecap="round" className="chapter-tail" pathLength={1} />
       </g>
-      {rest && (
-        <text {...face} x={MARK.cx} y={MARK.line2 + (MARK.max2 - f2) * 0.2} fontSize={f2} letterSpacing={f2 * 0.16} textAnchor="middle" fontStretch="125%" fontWeight={800}>
-          {rest}
-        </text>
-      )}
     </g>
   );
 }
@@ -453,7 +482,7 @@ function Overlay({ focus, g, id }: { focus: Custom | null; g: HoodieGeometry; id
         </g>
       );
     case 'embroidery':
-      return <rect className="chapter-draw" x={MARK.x0 - 30} y={MARK.y - MARK.lift - 110} width={MARK.x1 - MARK.x0 + 60} height="300" rx="18" {...trace} />;
+      return <rect className="chapter-draw" x={MARK.x0 - 30} y={MARK.y - 190} width={MARK.x1 - MARK.x0 + 60} height="330" {...trace} />;
     case 'print':
       return (
         <g className="chapter-draw">

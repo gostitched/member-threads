@@ -28,31 +28,31 @@ const COLUMNS: Column[] = [
     key: 'style',
     label: 'No.',
     has: (p) => Boolean(p.styleNumber),
-    cell: (p) => <span className="text-[0.875rem] text-muted">{p.styleNumber ?? DASH}</span>,
+    cell: (p) => <span className="t-spec fg-muted">{p.styleNumber ?? DASH}</span>,
   },
   {
     key: 'fabric',
     label: 'Fabric',
     has: (p) => Boolean(p.fabric),
-    cell: (p) => <span className="text-[0.875rem] text-ink/75">{p.fabric ?? DASH}</span>,
+    cell: (p) => <span className="t-small text-ink/85">{p.fabric ?? DASH}</span>,
   },
   {
     key: 'weight',
     label: 'Weight',
     has: (p) => Boolean(p.gsm),
-    cell: (p) => <span className="text-[0.875rem] tabular-nums">{p.gsm ? `${p.gsm} gsm` : DASH}</span>,
+    cell: (p) => <span className="t-spec">{p.gsm ? `${p.gsm} gsm` : DASH}</span>,
   },
   {
     key: 'moq',
     label: 'Minimum',
     has: (p) => Boolean(p.minimumOrderQuantity),
-    cell: (p) => <span className="text-[0.875rem] tabular-nums">{p.minimumOrderQuantity ?? DASH}</span>,
+    cell: (p) => <span className="t-spec">{p.minimumOrderQuantity ?? DASH}</span>,
   },
   {
     key: 'lead',
     label: 'Lead time',
     has: (p) => Boolean(p.leadTimeDays),
-    cell: (p) => <span className="text-[0.875rem] tabular-nums">{leadTimeLabel(p) ?? DASH}</span>,
+    cell: (p) => <span className="t-spec">{leadTimeLabel(p) ?? DASH}</span>,
   },
   {
     key: 'colours',
@@ -60,12 +60,14 @@ const COLUMNS: Column[] = [
     has: (p) => p.colorways.length > 0,
     cell: (p) =>
       p.colorways.length ? (
-        <span className="flex gap-1">
+        <span className="flex items-center gap-1.5">
+          <span className="sr-only">{p.colorways.map((c) => c.name).join(', ')}</span>
           {p.colorways.slice(0, 8).map((c, i) => (
             <span
               key={i}
+              aria-hidden
               title={c.name}
-              className="h-3.5 w-3.5 rounded-full border border-black/10"
+              className="h-3.5 w-3.5 rounded-full shadow-[inset_0_0_0_1px_rgba(19,51,39,0.16)]"
               style={{ background: c.hex ?? '#C9C9C9' }}
             />
           ))}
@@ -81,7 +83,11 @@ const COLUMNS: Column[] = [
     has: (p) => Boolean(entryPrice(p)),
     cell: (p) => {
       const price = entryPrice(p);
-      return price ? formatMoney(price.cents, price.currency) : <span className="text-muted">With collection</span>;
+      return price ? (
+        <span className="t-spec num text-[13px]">{formatMoney(price.cents, price.currency)}</span>
+      ) : (
+        <span className="t-spec fg-muted">With collection</span>
+      );
     },
   },
 ];
@@ -119,13 +125,13 @@ export default function IndexView({ products }: { products: CatalogProduct[] }) 
         <table className="w-full min-w-[560px] border-collapse text-left">
           <thead>
             <tr className="border-b border-ink">
-              {styleCol && <th scope="col" className="label py-3 pr-4 font-semibold text-muted">{styleCol.label}</th>}
-              <th scope="col" className="label py-3 pr-4 font-semibold text-muted">Style</th>
+              {styleCol && <th scope="col" className="t-eyebrow fg-muted w-[5.5rem] py-3 pr-4 font-semibold">{styleCol.label}</th>}
+              <th scope="col" className="t-eyebrow fg-muted py-3 pr-4 font-semibold">Style</th>
               {restCols.map((c) => (
                 <th
                   key={c.key}
                   scope="col"
-                  className={`label py-3 pr-4 font-semibold text-muted last:pr-0 ${c.align === 'right' ? 'text-right' : ''}`}
+                  className={`t-eyebrow fg-muted py-3 pr-4 font-semibold last:pr-0 ${c.align === 'right' ? 'text-right' : ''}`}
                 >
                   {c.label}
                 </th>
@@ -138,23 +144,23 @@ export default function IndexView({ products }: { products: CatalogProduct[] }) 
                 key={p.slug}
                 onPointerEnter={(e) => e.pointerType === 'mouse' && setPreview(p)}
                 onClick={() => router.push(`/catalog/${p.slug}`)}
-                className="group cursor-pointer border-b border-rule transition-colors duration-150 hover:bg-cream/60"
+                className="group cursor-pointer border-b border-[var(--rule-c)] transition-colors duration-[180ms] hover:bg-cream"
               >
-                {styleCol && <td className="py-4 pr-4">{styleCol.cell(p)}</td>}
-                <td className="py-4 pr-4">
+                {styleCol && <td className="py-5 pr-4 align-baseline">{styleCol.cell(p)}</td>}
+                <td className="py-5 pr-4 align-baseline">
                   <Link
                     href={`/catalog/${p.slug}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="text-[1.0625rem] font-semibold tracking-tight underline-offset-4 group-hover:underline"
+                    className="t-h3 inline-block transition-transform duration-[180ms] ease-out group-hover:translate-x-2 motion-reduce:transform-none"
                   >
                     {p.name}
                   </Link>
-                  {p.category && <span className="ml-3 text-[0.8125rem] text-muted">{p.category}</span>}
+                  {p.category && <span className="t-spec fg-muted ml-3 hidden whitespace-nowrap sm:inline">{p.category}</span>}
                 </td>
                 {restCols.map((c) => (
                   <td
                     key={c.key}
-                    className={`py-4 pr-4 last:pr-0 ${c.align === 'right' ? 'text-right text-[0.9375rem] tabular-nums' : ''} ${
+                    className={`py-5 pr-4 align-baseline last:pr-0 ${c.align === 'right' ? 'text-right' : ''} ${
                       c.key === 'fabric' ? 'max-w-[220px]' : ''
                     }`}
                   >
@@ -171,14 +177,17 @@ export default function IndexView({ products }: { products: CatalogProduct[] }) 
       <div
         ref={floater}
         aria-hidden
-        className={`pointer-events-none fixed left-0 top-0 z-30 hidden h-56 w-56 overflow-hidden rounded-2xl bg-cream transition-opacity duration-200 lg:block ${
+        className={`ct-plate pointer-events-none fixed left-0 top-0 z-30 hidden aspect-[4/5] w-56 transition-opacity duration-[180ms] lg:block ${
           preview ? 'opacity-100' : 'opacity-0'
         }`}
       >
         {preview && (
-          <div className="absolute inset-[10%]">
-            <ProductMedia product={preview} />
-          </div>
+          <>
+            <div className="absolute inset-[12%]">
+              <ProductMedia product={preview} />
+            </div>
+            <span className="t-spec fg-muted absolute left-3 top-3">{preview.styleNumber}</span>
+          </>
         )}
       </div>
     </div>

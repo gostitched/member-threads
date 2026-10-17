@@ -1,0 +1,304 @@
+/* ==========================================================================
+   Home page (hero, intro, the roster, how it works, questions).
+   Builds on the foundation in globals.css; see DESIGN.md §8 "Home".
+   The chapter (the hoodie) has its own stylesheet in components/chapter.
+   ========================================================================== */
+
+/* Header block → content, and the gap between blocks inside a section:
+   the small section step (DESIGN.md §4). */
+.home-gap { margin-top: var(--sec-sm); }
+
+/* ---- Hero ---------------------------------------------------------------- */
+
+.hero-grid { padding-bottom: var(--sec-sm); }
+.hero {
+  /* The shell's side padding, so the photo can bleed to the viewport edge even
+     when the frame is capped at 1536px. */
+  --pad: 20px;
+}
+@media (min-width: 640px) { .hero { --pad: 32px; } }
+@media (min-width: 1024px) { .hero { --pad: 56px; } }
+
+/* Mobile and tablet: the photo runs edge to edge. */
+.hero-bleed {
+  margin-inline: calc(-1 * var(--pad));
+}
+@media (min-width: 1024px) {
+
+  /* Desktop: bleeds off the right edge only (never both). */
+  .hero-bleed {
+    margin-left: 0;
+    margin-right: calc(-1 * (var(--pad) + max(0px, (100vw - 1536px) / 2)));
+  }
+}
+
+/* The headline sits over the photo's first column on desktop: the one line
+   that crosses the edge. Lifted above the frame, clear of the label. */
+.hero-title { position: relative; z-index: 2; }
+
+/* The photo is uncovered once on load, bottom-up, and settles from 1.06. */
+.hero-photo { animation: hero-wipe 900ms var(--ease-stitch) 120ms both; }
+.hero-photo > img { animation: hero-settle 1400ms var(--ease-out) 120ms both; }
+@keyframes hero-wipe { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes hero-settle { from { transform: scale(1.06); } to { transform: none; } }
+
+/* The woven label, sewn across the photo's corner. */
+.hero-label {
+  position: absolute;
+  z-index: 3;
+  left: var(--pad);
+  top: 0;
+  transform: translateY(-50%);
+}
+@media (min-width: 1024px) {
+  .hero-label { left: -1.5rem; top: auto; bottom: 3.5rem; transform: none; }
+}
+
+/* Proof row: on a phone, a three-column spec table under the photo; from lg,
+   one line joined by short running stitches. */
+.hero-proof { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.hero-proof > li { padding: 14px 12px 0 0; }
+.hero-proof > li + li { padding-left: 12px; border-left: 1px solid var(--rule-c); }
+.hero-proof .stitch-rule { display: none; }
+@media (min-width: 1024px) {
+  .hero-proof { display: flex; flex-wrap: wrap; align-items: center; column-gap: 16px; row-gap: 8px; border-top: 0; }
+  .hero-proof > li, .hero-proof > li + li { padding: 0; border-left: 0; display: flex; align-items: center; gap: 16px; }
+  .hero-proof .stitch-rule { display: block; width: 28px; }
+  .hero-proof > li:first-child .stitch-rule { display: none; }
+}
+
+/* ---- Intro ---------------------------------------------------------------- */
+
+/* "Printed on": the logo pressed flat onto the blank. */
+.intro-print {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+/* Three pillars: stacked under hairlines on a phone, then columns divided
+   by vertical hairlines. */
+.intro-pillars > li + li { padding-top: 2.5rem; border-top: 1px solid var(--rule-c); }
+@media (min-width: 768px) {
+  .intro-pillars > li + li { padding-top: 0; border-top: 0; border-left: 1px solid var(--rule-c); }
+}
+
+/* ---- The roster (audiences) ------------------------------------------------ */
+
+.roster-row { position: relative; }
+.roster-name {
+  display: inline-block;
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-quick) ease;
+}
+@media (hover: hover) and (min-width: 1024px) {
+  .roster-list:hover .roster-row:not(:hover) .roster-name { opacity: 0.42; }
+  .roster-row:hover .roster-name { transform: translateX(8px); }
+}
+
+/* The photo that follows the cursor along the row. */
+.roster-peek {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  width: clamp(200px, 17vw, 264px);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(calc(var(--x, 0px) - 50%), calc(var(--y, 0px) - 50%), 0) scale(0.94);
+  transition:
+    transform 560ms var(--ease-out),
+    opacity var(--dur-quick) ease;
+}
+.roster-peek[data-on='true'] {
+  opacity: 1;
+  transform: translate3d(calc(var(--x, 0px) - 50%), calc(var(--y, 0px) - 50%), 0) scale(1);
+}
+.roster-peek .photo { position: absolute; inset: 0; opacity: 0; transition: opacity var(--dur-quick) ease; }
+.roster-peek .photo[data-on='true'] { opacity: 1; }
+
+
+/* ---- How it works --------------------------------------------------------- */
+
+.how-steps { --num-w: 3.5rem; }
+@media (min-width: 640px) { .how-steps { --num-w: 5rem; } }
+.how-step { position: relative; }
+/* The thread that joins one numeral to the next, across the 96px gap. */
+.how-thread {
+  position: absolute;
+  top: 2.5rem;
+  bottom: -6rem;
+  left: calc(var(--num-w) / 2 - 1px);
+  transform-origin: 50% 0;
+}
+.how-step:last-child .how-thread { display: none; }
+.how-num {
+  position: relative;
+  z-index: 1;
+  width: var(--num-w);
+  padding-block: 0.35rem;
+  text-align: center;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .how-thread {
+      animation: how-sew linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 55%;
+    }
+  }
+}
+@keyframes how-sew { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* ---- Questions: the seam --------------------------------------------------
+   Each question sits over a running stitch with a loose thread at its right
+   end. Pulling it (the whole row is the button) unpicks the stitches right to
+   left and the answer opens on the paper beneath. Driven by [data-open]. */
+
+.seam-q { position: relative; display: block; width: 100%; text-align: left; cursor: pointer; }
+.seam-q:focus-visible { outline: none; }
+.seam-q:focus-visible .seam-q-text {
+  outline: 2px solid var(--focus);
+  outline-offset: 6px;
+}
+.seam-q-row {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0 12px;
+  padding: 28px 0 16px;
+}
+@media (min-width: 640px) {
+  .seam-q-row { grid-template-columns: 3.5rem minmax(0, 1fr); padding: 36px 6.5rem 18px 0; }
+}
+.seam-q-text {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+@media (hover: hover) {
+  .seam-q:hover .seam-q-text { transform: translateX(6px); }
+}
+
+.seam { position: relative; display: flex; height: 16px; padding-right: 4.75rem; }
+@media (min-width: 640px) { .seam { padding-right: 6rem; } }
+.seam-stitches { --n: 26; display: flex; flex: 1; }
+@media (min-width: 640px) { .seam-stitches { --n: 44; } }
+@media (min-width: 1024px) { .seam-stitches { --n: 60; } }
+.seam-st { position: relative; flex: 1 1 0; }
+/* Needle holes: they stay when the thread comes out. */
+.seam-st::before,
+.seam-st::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 9999px;
+  background: rgba(19, 51, 39, 0.2);
+}
+.seam-st::before { left: calc(17% - 1px); }
+.seam-st::after { right: calc(17% - 1px); }
+.seam-st > i {
+  position: absolute;
+  left: 17%;
+  right: 17%;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: #C4B19A;
+  transition:
+    opacity 140ms ease,
+    transform 200ms var(--ease-out),
+    background-color var(--dur-quick) ease;
+  transition-delay: calc(90ms + var(--i) * 4ms);
+}
+@media (hover: hover) {
+  .seam-q:hover .seam-st > i { background: #8C7A63; transition-delay: 0ms; }
+}
+/* Opening pulls from the loose end: stitches leave right to left. */
+.seam-entry[data-open='true'] .seam-st > i {
+  opacity: 0;
+  transform: translateY(-4px) scaleX(0.3);
+  transition-duration: 110ms, 110ms, 200ms;
+  transition-delay: calc((var(--n) - 1 - var(--i)) * 5ms);
+}
+
+/* The loose thread, in place of a + icon. */
+.seam-tail {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 4.75rem;
+  height: 30px;
+  margin-top: -15px;
+  color: #8C7A63;
+  transition: opacity var(--dur-quick) ease, transform 250ms var(--ease-out);
+}
+@media (min-width: 640px) { .seam-tail { width: 6rem; } }
+.seam-tail svg { position: absolute; left: 0; top: 0; transition: transform 300ms var(--ease-out); }
+.seam-tail-thread { transition: d 300ms var(--ease-out); }
+@media (hover: hover) {
+  .seam-q:hover .seam-tail svg { transform: translate(4px, -1px); }
+  .seam-q:hover .seam-tail-thread { d: path('M1 15 C 16 15, 26 15, 36 15 S 50 17, 56 16 S 62 13, 63 13'); }
+}
+.seam-entry[data-open='true'] .seam-tail { opacity: 0; transform: translateX(14px); }
+
+/* The paper underneath. */
+.seam-under {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 280ms var(--ease-inout);
+}
+.seam-entry[data-open='true'] .seam-under {
+  grid-template-rows: 1fr;
+  transition-duration: var(--dur-base);
+  transition-delay: 140ms;
+  transition-timing-function: var(--ease-out);
+}
+.seam-answer {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 120ms ease, transform 200ms ease;
+}
+.seam-entry[data-open='true'] .seam-answer {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 260ms ease 260ms,
+    transform 500ms var(--ease-out) 220ms;
+}
+
+/* The pulled thread sews the seam back up. */
+.seam-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: #8C7A63;
+}
+.seam-close .t-eyebrow { color: var(--fg-muted); transition: color var(--dur-quick) ease; }
+.seam-close svg { transition: transform 300ms var(--ease-out); }
+.seam-close:hover .t-eyebrow,
+.seam-close:focus-visible .t-eyebrow { color: #133327; }
+.seam-close:hover svg { transform: translateX(-4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo, .hero-photo > img { animation: none !important; clip-path: none; transform: none; }
+  .roster-peek, .roster-peek[data-on='true'] { transition: opacity var(--dur-quick) ease; }
+  .seam-st > i,
+  .seam-entry[data-open='true'] .seam-st > i,
+  .seam-tail,
+  .seam-q-text { transition: none !important; transform: none !important; }
+  .seam-under,
+  .seam-entry[data-open='true'] .seam-under { transition: grid-template-rows 200ms ease !important; }
+  .seam-answer,
+  .seam-entry[data-open='true'] .seam-answer { transform: none; transition: opacity 200ms ease !important; }
+}
+
+/* Roster names sit a step under the section heads (~56px at 1440). */
+.roster-size { font-size: clamp(2.125rem, 3.9vw, 3.75rem); line-height: 1.02; }

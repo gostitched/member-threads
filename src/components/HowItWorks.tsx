@@ -1,83 +1,124 @@
-import Link from 'next/link';
-import Reveal from '@/components/Reveal';
-import { Arrow } from '@/components/SiteHeader';
+import Image from "next/image";
+import Link from "next/link";
+import Reveal from "@/components/Reveal";
+import { Arrow } from "@/components/SiteHeader";
+import { PHOTOS, type PhotoSlug } from "@/lib/photos";
+import "@/components/home/home.css";
 
 /**
- * How it works: an editorial list. The heading and CTA hold the left column
- * (sticky on desktop); four numbered steps run down the right, each a numeral,
- * a heavy title and one plain sentence. Anchor for the header's "How It Works"
- * link (/#how).
+ * How it works. The heading, lead and CTA hold a sticky left column (cols
+ * 1–5; a quiet link, not a second primary); four steps run down the right (cols 6–12), 96px apart, their numerals
+ * joined by one running stitch that sews itself downward as the list scrolls
+ * in. Each step: block numeral, title, one plain paragraph and a small detail
+ * photograph. Anchor for the header's "How it works" link (/#how).
  */
 // [CONFIRM] 04: approved pieces are saved per organization for reorders (matches FAQ 05).
-const STEPS = [
+const STEPS: {
+  n: string;
+  title: string;
+  body: string;
+  photo: PhotoSlug;
+  caption: string;
+}[] = [
   {
-    n: '01',
-    title: ['Tell us about', 'your group.'],
-    body: 'Your logo, your colors, roughly how many people and when you need it. A brand guide or a few screenshots is plenty.',
+    n: "01",
+    title: "Tell us about your group.",
+    body: "Your logo, your colors, roughly how many people and when you need it. A brand guide or a few screenshots is plenty.",
+    photo: "detail-swatch-book",
+    caption: "Cloth, color and weight",
   },
   {
-    n: '02',
-    title: ['Design it', 'with us.'],
-    body: 'Pick styles from the catalog and your designer builds them into one collection: colors, fabric, artwork, embroidery and fit.',
+    n: "02",
+    title: "Design it with us.",
+    body: "Pick styles from the catalog and your designer builds them into one collection: colors, fabric, artwork, embroidery and fit.",
+    photo: "craft-pattern-pieces",
+    caption: "Pattern pieces, laid out",
   },
   {
-    n: '03',
-    title: ['Approve one', 'price.'],
-    body: 'Review the proofs and a single quote for the whole collection. Customization is included, so the price you approve is the price you pay.',
+    n: "03",
+    title: "Approve one price.",
+    body: "Review the proofs and a single quote for the whole collection. Customization is included, so the price you approve is the price you pay.",
+    photo: "detail-varsity-stripe-cuff",
+    caption: "Stripe, rib and trim, in the price",
   },
   {
-    n: '04',
-    title: ['We make it.', 'You wear it.'],
-    body: 'We produce and deliver the collection. Every approved piece is saved to your organization, so next season starts where this one left off.',
+    n: "04",
+    title: "We make it. You wear it.",
+    body: "We produce and deliver the collection. Every approved piece is saved to your organization, so next season starts where this one left off.",
+    photo: "detail-folded-stack-color",
+    caption: "Folded, counted, delivered",
   },
-] as const;
+];
 
 export default function HowItWorks() {
   return (
     <section
       id="how"
       aria-labelledby="how-title"
-      className="scroll-mt-20 bg-paper py-20 text-ink sm:scroll-mt-24 sm:py-28 lg:scroll-mt-28 lg:py-32"
+      className="sec scroll-mt-[var(--header-h)] bg-paper text-ink"
     >
-      <div className="mx-auto grid w-full max-w-[1536px] grid-cols-[minmax(0,1fr)] gap-12 px-5 sm:px-8 lg:grid-cols-12 lg:gap-10 lg:px-14">
-        <Reveal className="lg:col-span-5">
-          <div className="lg:sticky lg:top-36">
-            <p className="label text-ink/60">How it works</p>
-            <h2 id="how-title" className="caps mt-5 text-[clamp(2rem,4vw,3.75rem)] leading-[0.95] tracking-[-0.03em]">
-              Four steps.
-              <br />
-              One collection.
+      <div className="shell grid-12">
+        <div className="col-span-4 sm:col-span-8 lg:col-span-5">
+          <div className="lg:sticky lg:top-[calc(var(--header-h)+4rem)]">
+            <p className="t-eyebrow fg-muted">How it works</p>
+            <h2 id="how-title" className="t-h1 mt-5">
+              Four steps. <br className="hidden sm:block" />
+              <em>One</em> collection.
             </h2>
-            <p className="mt-6 max-w-[26rem] text-lead text-ink/75">
-              From a logo and a rough idea to a finished collection, with one designer and one price the whole way.
+            <p className="t-lead mt-6 max-w-[30ch] sm:mt-8">
+              From a logo and a rough idea to a finished collection, with one
+              designer and one price the whole way.
             </p>
-            <Link href="/quote" className="btn-blue mt-9 h-14 px-8 text-[1.0625rem]">
-              Start a Collection <Arrow className="ml-2 h-[16px] w-[22px]" />
+            <Link href="/quote" className="link-arrow mt-8 text-[15px] font-medium">
+              <span className="link-u">Start a collection</span>
+              <Arrow className="h-[12px] w-[16px]" />
             </Link>
           </div>
-        </Reveal>
+        </div>
 
-        <ol className="border-t border-ink/15 lg:col-span-7">
-          {STEPS.map((s, i) => (
-            <li key={s.n} className="border-b border-ink/15">
-              <Reveal
-                delay={i * 80}
-                className="grid grid-cols-[3rem_1fr] gap-x-4 gap-y-3 py-8 sm:grid-cols-[5rem_1fr_1.15fr] sm:items-baseline sm:gap-x-8 sm:py-10 lg:py-12"
-              >
-                <span aria-hidden className="caps text-[1.75rem] leading-none tracking-[-0.03em] text-uv sm:text-[2.25rem]">
-                  {s.n}
-                </span>
-                <h3 className="caps text-[1.375rem] leading-[1.02] lg:text-[1.625rem]">
-                  <span className="sr-only">Step {s.n}: </span>
-                  {s.title[0]}
-                  <br />
-                  {s.title[1]}
-                </h3>
-                <p className="col-start-2 text-[1rem] leading-[1.6] text-ink/75 sm:col-start-auto">{s.body}</p>
-              </Reveal>
-            </li>
-          ))}
-        </ol>
+        <div className="how-steps col-span-4 mt-16 sm:col-span-8 lg:col-start-6 lg:col-end-13 lg:mt-2">
+          <ol className="flex flex-col gap-y-24">
+            {STEPS.map((s) => {
+              const p = PHOTOS[s.photo];
+              return (
+                <li
+                  key={s.n}
+                  className="how-step grid grid-cols-[var(--num-w)_minmax(0,1fr)] gap-x-5 sm:gap-x-8"
+                >
+                  {/* The thread to the next numeral (none after the last). */}
+                  <span aria-hidden className="how-thread stitch-rule-v" />
+                  <span aria-hidden className="how-num t-block self-start bg-paper">
+                    {s.n}
+                  </span>
+                  <Reveal className="grid gap-x-8 gap-y-8 md:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
+                    <div className="pt-1">
+                      <h3 className="t-h3">
+                        <span className="sr-only">Step {s.n}: </span>
+                        {s.title}
+                      </h3>
+                      <p className="t-body mt-4 max-w-[40ch] text-ink/90">
+                        {s.body}
+                      </p>
+                    </div>
+                    <figure className="max-w-[22rem] md:max-w-none">
+                      <div className="wipe-in photo grade grain aspect-[3/2]">
+                        <Image
+                          src={p.src}
+                          width={p.width}
+                          height={p.height}
+                          alt={p.alt}
+                          sizes="(min-width: 1024px) 22vw, (min-width: 768px) 36vw, 80vw"
+                          style={{ objectPosition: p.objectPosition }}
+                        />
+                      </div>
+                      <figcaption className="caption">{s.caption}</figcaption>
+                    </figure>
+                  </Reveal>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
       </div>
     </section>
   );

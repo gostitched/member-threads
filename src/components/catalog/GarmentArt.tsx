@@ -178,16 +178,36 @@ export default function GarmentArt({
   color,
   className = '',
   label,
+  variant = 'paint',
+  outlined = false,
 }: {
   kind: GarmentKind;
   color: string;
   className?: string;
+  /** 'paint' fills the colourway; 'line' is the working drawing: ink line on the plate. */
+  variant?: 'paint' | 'line';
+  /** A firm ink edge, so white and cream garments don't vanish on a cream plate. */
+  outlined?: boolean;
   /** Accessible name. Omit when the drawing is decorative next to a visible name. */
   label?: string;
 }) {
   const uid = useId().replace(/:/g, '');
   const parts = SHAPES[kind];
   const bodies = parts.filter((p): p is Extract<Part, { t: 'body' }> => p.t === 'body');
+  if (variant === 'line') {
+    return (
+      <svg viewBox="0 0 400 400" className={className} role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : true}>
+        <g fill="none" stroke="#133327" strokeLinejoin="round" strokeLinecap="round">
+          {parts.map((p, i) => {
+            if (p.t === 'dot') return <circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill="#133327" stroke="none" opacity="0.6" />;
+            if (p.t === 'stitch') return <path key={i} d={p.d} strokeWidth="1.2" strokeDasharray="5 5" opacity="0.55" />;
+            if (p.t === 'line') return <path key={i} d={p.d} strokeWidth="1.2" opacity="0.55" />;
+            return <path key={i} d={p.d} strokeWidth="1.5" />;
+          })}
+        </g>
+      </svg>
+    );
+  }
   return (
     <svg
       viewBox="0 0 400 400"
@@ -212,7 +232,7 @@ export default function GarmentArt({
       {/* Ground shadow, so the garment sits on something. */}
       <ellipse cx="200" cy="362" rx="120" ry="9" fill="#000" opacity="0.07" />
 
-      <GarmentParts parts={parts} color={color} />
+      <GarmentParts parts={parts} color={color} outline={outlined ? 'rgba(19,51,39,0.85)' : undefined} />
 
       {/* Light from the top left, across the cloth only. */}
       <rect width="400" height="400" fill={`url(#light-${uid})`} clipPath={`url(#cloth-${uid})`} pointerEvents="none" />
@@ -228,9 +248,12 @@ export function GarmentParts({
   parts,
   color,
   accent = '#232323',
+  outline: edge,
 }: {
   parts: Part[];
   color: string;
+  /** Override the cloth's edge colour. */
+  outline?: string;
   /** Paint for 'accent' panels. */
   accent?: string;
 }) {
@@ -239,7 +262,7 @@ export function GarmentParts({
   const stitch = onDark ? 'rgba(255,255,255,0.55)' : 'rgba(23,23,23,0.35)';
   const hairline = onDark ? 'rgba(255,255,255,0.28)' : 'rgba(23,23,23,0.22)';
   const shade = onDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
-  const outline = onDark ? 'rgba(0,0,0,0.45)' : 'rgba(23,23,23,0.28)';
+  const outline = edge ?? (onDark ? 'rgba(0,0,0,0.45)' : 'rgba(23,23,23,0.28)');
   const paint = { fill: color, transition: 'fill 450ms cubic-bezier(0.16,1,0.3,1)' };
 
   return (

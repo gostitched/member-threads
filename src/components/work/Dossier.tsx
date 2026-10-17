@@ -2,27 +2,24 @@
 
 import Link from 'next/link';
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import Media from './Media';
-import { PieceStamp, ShareButton, bandStyle, bandTheme } from './hype';
+import WorkArt from './art';
+import { ShareButton } from './hype';
 import { EASE_IN, EASE_OUT, REST, fromFrame, prefersReducedMotion } from './flip';
-import { leadOf, specs, stripOf, type WorkAsset, type WorkItem } from '@/lib/work';
+import { Arrow, ArrowBack, MoodPhoto } from './ui';
+import { CASES } from '@/lib/cases';
+import { categoryOf, drop, pieces, scheduleOf, type WorkItem } from '@/lib/work';
 
-/** Rendered widths of the lead and the strip, shared with the wall's preloader. */
-export const LEAD_SIZES = '(min-width: 1024px) 50vw, 94vw';
-export const STRIP_SIZES = '(min-width: 1024px) 10vw, 24vw';
-
-const whole = (a: WorkAsset) => a.kind === 'garment' || (a.kind === 'artifact' && !a.src);
-/** Width over height: the photograph's own, else what its orientation implies. */
-const ratioOf = (a: WorkAsset) =>
-  a.width && a.height ? a.width / a.height : a.orientation === 'portrait' ? 0.8 : a.orientation === 'landscape' ? 1.25 : 1;
+const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /**
- * The assembled collection: the bridge between the wall and the collection page.
+ * The dossier: one collection pulled off the wall and opened over it.
  *
- * Its pictures are the same assets that were scattered across the wall, and on open
- * each one travels from where it sat on the wall into its place here (`from` holds the
- * wall rects), so the project visibly builds itself out of the collage. Closing runs
- * the same trip backwards, onto the wall rects `wallRect` reports at that moment.
+ * The wall tile's photograph travels into the dossier's frame on open (`from` is its
+ * rect) and back onto the tile on close (`wallRect` reports where the tile sits then),
+ * re-cropping as it goes, never stretching. Everything else rises in once.
+ *
+ * A modal dialog: focus moves in, Tab stays inside, Escape and the back button close it,
+ * and focus returns to the tile that opened it (the wall handles that).
  */
 export default function Dossier({
   project,
@@ -35,21 +32,19 @@ export default function Dossier({
   wallRect,
 }: {
   project: WorkItem;
-  from: Map<string, DOMRect> | null;
+  from: DOMRect | null;
   closing: boolean;
   onClose: () => void;
   onClosed: () => void;
   next: WorkItem | null;
   onNext: (() => void) | null;
-  wallRect: (assetId: string) => DOMRect | null;
+  wallRect: (pid: string) => DOMRect | null;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const back = useRef<HTMLButtonElement>(null);
-  const lead = leadOf(project);
-  const strip = stripOf(project).slice(0, 4);
-  const leadWhole = whole(lead);
-  const r = ratioOf(lead);
-  const band = bandTheme(project);
+  const study = CASES.find((c) => c.id === project.caseId);
+  const rows = scheduleOf(project);
+  const cat = categoryOf(project);
 
   // Lock the page behind, without the layout jumping by a scrollbar's width.
   useEffect(() => {
@@ -67,38 +62,35 @@ export default function Dossier({
   useLayoutEffect(() => {
     const el = root.current;
     if (!el) return;
-    // Focus moves into the dialog; the ring shows only when the visitor is on a keyboard.
+    el.scrollTop = 0;
+    // Focus moves into the dialog; the ring shows only for keyboard visitors.
     const keyboard = document.activeElement?.matches(':focus-visible');
     (keyboard ? back.current : el)?.focus({ preventScroll: true });
     if (prefersReducedMotion()) return;
-    const fade = el.querySelectorAll<HTMLElement>('[data-fade]');
     const bg = el.querySelector<HTMLElement>('[data-bg]');
-    if (!from) {
-      // Moving between projects inside the dossier: a quick settle, no flight.
-      fade.forEach((f) => f.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: EASE_OUT, fill: 'backwards' }));
-      el.querySelectorAll<HTMLElement>('[data-d]').forEach((d, i) =>
-        d.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 380, delay: i * 30, easing: EASE_OUT, fill: 'backwards' }),
+    const photo = el.querySelector<HTMLElement>('[data-d]');
+    const fades = el.querySelectorAll<HTMLElement>('[data-fade]');
+    if (from && photo) {
+      bg?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: EASE_OUT, fill: 'backwards' });
+      photo.animate([fromFrame(from, photo.getBoundingClientRect()), REST], { duration: 760, easing: 'cubic-bezier(0.7, 0, 0.2, 1)', fill: 'backwards' });
+      fades.forEach((f, i) =>
+        f.animate([{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], {
+          duration: 620, delay: 320 + i * 60, easing: EASE_OUT, fill: 'backwards',
+        }),
       );
-      return;
+    } else {
+      // Arriving by link, or moving to the next collection: a quick settle.
+      [photo, ...Array.from(fades)].forEach((f, i) =>
+        f?.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], {
+          duration: 520, delay: i * 50, easing: EASE_OUT, fill: 'backwards',
+        }),
+      );
     }
-    bg?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: 90, easing: EASE_OUT, fill: 'backwards' });
-    fade.forEach((f, i) =>
-      f.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 260 + i * 35, easing: EASE_OUT, fill: 'backwards' }),
-    );
-    el.querySelectorAll<HTMLElement>('[data-d]').forEach((d, i) => {
-      const src = from.get(d.dataset.d!);
-      const dst = d.getBoundingClientRect();
-      if (!src) {
-        d.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 250, fill: 'backwards' });
-        return;
-      }
-      d.animate([fromFrame(src, dst), REST], { duration: 620, delay: i * 28, easing: EASE_OUT, fill: 'backwards' });
-    });
-    // Only on the first open of this project; `from` is consumed.
+    // `from` is only for the first open of this project.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project.id]);
 
-  // Disassemble.
+  // Disassemble: the photo goes back to its tile.
   useEffect(() => {
     if (!closing) return;
     const el = root.current;
@@ -106,34 +98,54 @@ export default function Dossier({
       onClosed();
       return;
     }
-    const vh = window.innerHeight;
     const anims: Animation[] = [];
     el.querySelectorAll<HTMLElement>('[data-fade]').forEach((f) =>
-      anims.push(f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: EASE_IN, fill: 'forwards' })),
+      anims.push(f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: EASE_IN, fill: 'forwards' })),
     );
     const bg = el.querySelector<HTMLElement>('[data-bg]');
-    if (bg) anims.push(bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 360, delay: 90, easing: EASE_OUT, fill: 'forwards' }));
-    el.querySelectorAll<HTMLElement>('[data-d]').forEach((d, i) => {
-      const dst = wallRect(d.dataset.d!);
-      const cur = d.getBoundingClientRect();
-      if (dst && dst.bottom > -200 && dst.top < vh + 200) {
-        anims.push(d.animate([REST, fromFrame(dst, cur)], { duration: 480, delay: i * 18, easing: EASE_OUT, fill: 'forwards' }));
-      } else {
-        anims.push(d.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }));
-      }
-    });
+    if (bg) anims.push(bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, delay: 160, easing: EASE_OUT, fill: 'forwards' }));
+    const photo = el.querySelector<HTMLElement>('[data-d]');
+    const dst = wallRect(project.id);
+    const vh = window.innerHeight;
+    if (photo) {
+      const cur = photo.getBoundingClientRect();
+      anims.push(
+        dst && dst.bottom > -100 && dst.top < vh + 100
+          ? photo.animate([REST, fromFrame(dst, cur)], { duration: 560, easing: 'cubic-bezier(0.7, 0, 0.2, 1)', fill: 'forwards' })
+          : photo.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' }),
+      );
+    }
     let done = false;
     Promise.all(anims.map((a) => a.finished)).then(() => {
       if (!done) onClosed();
       done = true;
     });
-    return () => { done = true; };
+    return () => {
+      done = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [closing]);
 
+  // Escape closes; Tab stays inside the dialog.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !root.current) return;
+      const list = Array.from(root.current.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((n) => n.offsetParent !== null);
+      if (!list.length) return;
+      const firstEl = list[0];
+      const lastEl = list[list.length - 1];
+      if (e.shiftKey && (document.activeElement === firstEl || document.activeElement === root.current)) {
+        e.preventDefault();
+        lastEl.focus();
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -148,106 +160,110 @@ export default function Dossier({
       aria-labelledby="wk-dossier-title"
       className={`fixed inset-0 z-[70] overflow-y-auto overscroll-contain outline-none ${closing ? 'pointer-events-none' : ''}`}
     >
-      <div data-bg className="fixed inset-0 bg-paper" />
+      <div data-bg className="wk-dossier fixed inset-0" />
 
-      {/* The hero band: a rounded panel washed with the collection's own first colour. */}
-      <div data-fade className="relative mx-auto mt-3 w-[min(94vw,1480px)] rounded-[24px] bg-electric-lit text-ink lg:mt-5" style={bandStyle(band)}>
-        <div className="px-5 pb-7 pt-3 lg:px-10 lg:pb-10 lg:pt-5">
-          <div className="flex items-center justify-between">
-            <button ref={back} type="button" onClick={onClose} className="group flex min-h-[44px] items-center gap-2 text-[0.9375rem] font-semibold text-ink/75 hover:text-ink">
-              <span aria-hidden className="transition-transform duration-200 group-hover:-translate-x-1">←</span> All collections
+      {/* ── Top bar ── */}
+      <div data-fade className="wk-dossier sticky top-0 z-10">
+        <div className="shell flex min-h-[64px] items-center justify-between gap-4 hairline-b sm:min-h-[72px]">
+          <button ref={back} type="button" onClick={onClose} className="link-arrow group text-[14px] font-medium">
+            <ArrowBack className="h-3 w-4 transition-transform duration-base ease-out group-hover:-translate-x-1" />
+            <span className="link-u">All collections</span>
+          </button>
+          <span className="t-spec hidden text-muted sm:inline">{drop(project.no)} · Concept collection</span>
+          {onNext && next ? (
+            <button type="button" onClick={onNext} className="link-arrow text-[14px] font-medium">
+              <span className="link-u">
+                Next<span className="hidden sm:inline">: {next.title}</span>
+              </span>
+              <Arrow />
             </button>
-            {onNext && next && (
-              <button type="button" onClick={onNext} className="min-h-[44px] text-right text-[0.9375rem] font-semibold text-ink/75 transition-colors hover:text-ink">
-                Next <span aria-hidden>→</span>
-              </button>
-            )}
-          </div>
-          <div className="mt-5 flex flex-col gap-5 lg:mt-8 lg:flex-row lg:items-end lg:justify-between">
-            <div className="min-w-0">
-              <h2 id="wk-dossier-title" className="caps break-words text-d2">
-                {project.title}
-              </h2>
-              <p className="mt-2 font-sans text-[clamp(1.125rem,1.5vw,1.375rem)] font-medium leading-none text-uv">
-                {project.sector}
-              </p>
-            </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-3">
-              <PieceStamp w={project} />
-              <ShareButton w={project} />
-            </div>
-          </div>
+          ) : (
+            <span />
+          )}
         </div>
       </div>
 
-      <div className="relative mx-auto w-[min(94vw,1480px)] pb-16">
-        {/* The lead takes its own proportions, so a portrait is never cropped to fit a
-            landscape box; its height is held to the screen. */}
-        <div className="mt-8 grid gap-8 lg:mt-10 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-[4.5vw]">
-          <div
-            className="relative w-full lg:h-[var(--lead-h)] lg:w-auto"
-            style={{ aspectRatio: String(r), ['--lead-h' as string]: `min(64vh, ${(50 / r).toFixed(2)}vw)` }}
-          >
-            {leadWhole && <div data-fade className="wk-plate absolute inset-0" />}
-            <div data-d={lead.id} className={`absolute overflow-hidden ${leadWhole ? 'inset-[8%]' : 'inset-0 rounded-[18px]'}`}>
-              <Media asset={lead} sizes={LEAD_SIZES} eager />
-            </div>
-          </div>
-
-          <div className="flex min-w-0 flex-col">
-            {/* What's in it, as chips. */}
-            <ul data-fade className="flex max-w-[40rem] flex-wrap gap-2">
-              {(project.pieces ? project.pieces.map((p) => p.name) : specs(project).filter((m) => !/ pieces$/i.test(m))).map((n) => (
-                <li key={n} className="wk-chip">{n}</li>
-              ))}
-            </ul>
-
-            {/* The palette, as dots. */}
-            {project.palette && (
-              <ul data-fade className="mt-6 flex flex-wrap gap-2.5" aria-label="Palette">
-                {project.palette.map((c) => (
-                  <li key={c.name} title={c.name} className="h-8 w-8 rounded-full shadow-[0_0_0_2px_theme(colors.paper),0_0_0_3px_theme(colors.rule)]" style={{ background: c.hex }}>
-                    <span className="sr-only">{c.name}</span>
-                  </li>
-                ))}
-              </ul>
+      {/* ── The collection ── */}
+      <div className="relative shell grid-12 gap-y-10 pb-16 pt-8 lg:pb-24 lg:pt-14">
+        <figure className="col-span-4 sm:col-span-8 lg:col-span-7">
+          <div data-d className="relative">
+            {project.mood && (
+              <MoodPhoto slug={project.mood.wall} ratio="landscape" treatment={project.mood.heroTone ?? 'grade'} className="wk-focus" priority sizes="(min-width: 1536px) 860px, (min-width: 1024px) 56vw, 92vw" />
             )}
+            <span className="wk-no woven woven-green">{drop(project.no)}</span>
+          </div>
+          <figcaption data-fade className="caption">Mood reference, not this organization or its collection</figcaption>
+        </figure>
 
-            {project.brief?.[0] && (
-              <div data-fade className="mt-8 max-w-[34rem]">
-                <p className="label text-muted">{project.brief[0].label}</p>
-                <p className="mt-3 text-lead text-ink/75">{project.brief[0].text}</p>
+        <div className="col-span-4 flex flex-col sm:col-span-8 lg:col-span-4 lg:col-start-9">
+          <p data-fade className="t-spec text-muted">{cat?.title}</p>
+          <h2 data-fade id="wk-dossier-title" className="t-h1 mt-4">{project.title}</h2>
+          <p data-fade className="t-spec mt-4">{project.sector}</p>
+          {study && <p data-fade className="t-lead mt-8">{study.challenge}</p>}
+
+          <dl data-fade className="mt-10 hairline-b">
+            <Row k="Pieces" v={pieces(project) ?? '—'} />
+            <Row k="Styles" v={String(rows.length).padStart(2, '0')} />
+            <Row k="Decoration" v={project.method} />
+            {project.palette && (
+              <div className="hairline flex items-center justify-between gap-4 py-3">
+                <dt className="t-spec text-muted">Palette</dt>
+                <dd>
+                  <ul className="flex gap-1.5">
+                    {project.palette.map((c) => (
+                      <li key={c.name} title={c.name} className="h-5 w-5 rounded-full shadow-[inset_0_0_0_1px_rgba(19,51,39,0.14)]" style={{ background: c.hex }}>
+                        <span className="sr-only">{c.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
               </div>
             )}
+          </dl>
 
-            <div data-fade className="mt-8">
-              <Link href={`/work/${project.slug}`} className="btn-blue px-6 py-3 text-[0.9375rem]">
-                See the full collection <span aria-hidden>→</span>
-              </Link>
-            </div>
-
-            {/* The rest of the project, small, each at its own shape: previews, not tiles. */}
-            {strip.length > 0 && (
-              <ul className="mt-10 flex items-end gap-[1.4vw] lg:mt-auto lg:pt-8">
-                {strip.map((a) => {
-                  const cut = whole(a);
-                  return (
-                    <li
-                      key={a.id}
-                      className={`relative h-[clamp(84px,24vw,130px)] min-w-0 shrink lg:h-[clamp(96px,9.5vw,168px)] ${cut ? 'wk-plate' : ''}`}
-                      style={{ aspectRatio: String(cut && !a.src ? 1 : ratioOf(a)) }}
-                    >
-                      <div data-d={a.id} className={`absolute overflow-hidden ${cut ? 'inset-[8%]' : 'inset-0 rounded-[12px]'}`}>
-                        <Media asset={a} sizes={STRIP_SIZES} />
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+          <div data-fade className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <Link href={`/work/${project.slug}`} className="link-arrow group text-[15px] font-medium">
+              <span className="link-u">See the full collection</span>
+              <Arrow />
+            </Link>
+            <ShareButton w={project} />
           </div>
         </div>
+
+        {/* ── The pieces, as flats ── */}
+        <section data-fade aria-labelledby="wk-dossier-pieces" className="col-span-4 mt-6 sm:col-span-8 lg:col-span-12 lg:mt-12">
+          <div className="hairline flex items-baseline justify-between pt-5">
+            <h3 id="wk-dossier-pieces" className="t-spec">The pieces</h3>
+            <p className="t-spec text-muted">{String(rows.length).padStart(2, '0')} styles · Drawn flats</p>
+          </div>
+          <ul className="wk-strip -mx-5 mt-6 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:px-0 lg:gap-8 lg:grid-cols-5">
+            {rows.map((r) => (
+              <li key={r.no} className="w-[62vw] shrink-0 snap-start sm:w-auto">
+                <div className="relative aspect-square bg-cream">
+                  {r.flat?.art && (
+                    <div className="absolute inset-[10%]">
+                      <WorkArt art={r.flat.art} label={r.flat.alt} className="h-full w-full" />
+                    </div>
+                  )}
+                </div>
+                <p className="t-spec mt-3 flex justify-between gap-3">
+                  <span><span className="text-muted">{r.no}</span> {r.name}</span>
+                  {r.count && <span className="num">{r.count}</span>}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
+    </div>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="hairline flex items-baseline justify-between gap-4 py-3">
+      <dt className="t-spec text-muted">{k}</dt>
+      <dd className="t-spec num text-right">{v}</dd>
     </div>
   );
 }

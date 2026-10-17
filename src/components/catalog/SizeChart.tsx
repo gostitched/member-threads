@@ -28,7 +28,7 @@ function Fraction({ whole, num, den }: { whole: number; num: number; den: number
         {whole > 0 && <span>{whole}</span>}
         <span className={`inline-flex items-baseline font-sans font-semibold ${whole > 0 ? 'ml-[0.12em]' : ''}`}>
           <span className="relative -top-[0.4em] text-[0.72em] leading-none">{num}</span>
-          <span className="mx-[0.04em] text-[0.8em] leading-none text-muted">⁄</span>
+          <span className="mx-[0.04em] text-[0.8em] leading-none opacity-60">⁄</span>
           <span className="text-[0.72em] leading-none">{den}</span>
         </span>
       </span>
@@ -85,36 +85,37 @@ export default function SizeChart({
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <p className="text-[0.875rem] text-muted">Measured flat.</p>
-        <div className="flex overflow-hidden rounded-full bg-ink/5" role="group" aria-label="Units">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <p className="t-spec fg-muted">Measured flat · {shown === 'in' ? 'Inches' : 'Centimetres'}</p>
+        <div className="flex gap-1.5" role="group" aria-label="Units">
           {(['in', 'cm'] as const).map((u) => (
-            <button
-              key={u}
-              type="button"
-              aria-pressed={shown === u}
-              onClick={() => setShown(u)}
-              className={`h-9 w-11 text-[0.8125rem] font-semibold ${shown === u ? 'bg-ink text-paper' : 'text-muted hover:text-ink'}`}
-            >
+            <button key={u} type="button" aria-pressed={shown === u} onClick={() => setShown(u)} className="chip min-w-[52px] px-3">
               {u}
             </button>
           ))}
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left" onPointerLeave={() => setHot(null)}>
+      <p className="t-spec fg-muted mb-3 sm:hidden" aria-hidden>
+        Swipe for every size →
+      </p>
+      <div className="relative">
+      <div className="-mr-5 overflow-x-auto pr-5 sm:mr-0 sm:pr-0" tabIndex={0} role="region" aria-label="Size chart, scrolls sideways">
+        <table className="w-full min-w-[520px] border-collapse text-left" onPointerLeave={() => setHot(null)}>
+          <caption className="sr-only">
+            Garment measurements by size, in {shown === 'in' ? 'inches' : 'centimetres'}, measured flat
+          </caption>
           <thead>
-            <tr className="border-b border-ink/30">
-              <th scope="col" className="w-40 text-[0.8125rem] py-3 pr-4 font-normal text-muted">
-                {shown === 'in' ? 'Inches' : 'Centimetres'}
+            <tr className="border-b border-ink">
+              <th scope="col" className="t-eyebrow fg-muted sticky left-0 z-[1] w-28 bg-paper py-3 pr-4 font-semibold sm:w-40">
+                Size
               </th>
               {sizes.map((s) => (
                 <th
                   key={s}
                   scope="col"
                   onPointerEnter={() => setHot(s)}
-                  className={`min-w-[3.25rem] px-1 py-3 text-center text-[0.875rem] font-semibold tabular-nums transition-colors ${
-                    hot === s ? 'bg-electric text-ink' : ''
+                  className={`t-spec min-w-[3.25rem] px-1 py-3 text-center text-[13px] font-semibold transition-colors duration-[180ms] ${
+                    hot === s ? 'bg-ink text-paper' : ''
                   }`}
                 >
                   {s}
@@ -124,8 +125,8 @@ export default function SizeChart({
           </thead>
           <tbody>
             {measurements.map((m) => (
-              <tr key={m} className="border-b border-rule">
-                <th scope="row" className="whitespace-nowrap py-3.5 pr-4 text-[0.9375rem] font-medium">
+              <tr key={m} className="border-b border-[var(--rule-c)]">
+                <th scope="row" className="t-small sticky left-0 z-[1] whitespace-nowrap bg-paper py-3.5 pr-4 font-medium shadow-[1px_0_0_var(--rule-c)] sm:shadow-none">
                   {m}
                 </th>
                 {sizes.map((s) => {
@@ -134,8 +135,8 @@ export default function SizeChart({
                     <td
                       key={s}
                       onPointerEnter={() => setHot(s)}
-                      className={`whitespace-nowrap px-1 py-3.5 text-center text-[0.9375rem] tabular-nums transition-colors ${
-                        hot === s ? 'bg-electric/25 text-ink' : 'text-ink/75'
+                      className={`num whitespace-nowrap px-1 py-3.5 text-center text-[15px] transition-colors duration-[180ms] ${
+                        hot === s ? 'bg-cream text-ink' : 'text-ink/85'
                       }`}
                     >
                       {typeof v === 'number' ? format(v) : '—'}
@@ -146,6 +147,9 @@ export default function SizeChart({
             ))}
           </tbody>
         </table>
+      </div>
+      {/* Edge fade: there is more table to the right. */}
+      <span aria-hidden className="pointer-events-none absolute -right-5 top-0 h-full w-12 bg-gradient-to-l from-paper to-transparent sm:hidden" />
       </div>
     </div>
   );
