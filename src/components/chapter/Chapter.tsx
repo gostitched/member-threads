@@ -9,39 +9,36 @@ import './chapter.css';
 /**
  * The chapter between the hero and the intro.
  *
- *   01  Not a blank: a full-width cream band. The house hoodie on its drawing
- *       sheet, eight details as numbered square chips with dashed leaders, the
- *       organization's name (the page's one script moment) and colorway beside
- *       it, and the tech pack printing every step at +$0.
- *   02  Don't know what you want yet? One row on paper: the line, and three
- *       drawn pieces from one collection carrying the same name.
- *   ──  The close: a second cream band, three serif lines and a hang tag that
- *       drops in on its string with the name on it.
+ *   01  Yours, down to the stitch: on paper over a faint cutting-mat grid. The signature hoodie on
+ *       its cream drawing sheet, eight details as square chips with
+ *       dashed leaders, the organization's name (the page's one script moment)
+ *       and colorway under it, and the tech pack printing every step at +$0.
+ *   02  Don't know what you want yet? One row: the line, and three drawn pieces
+ *       from one collection carrying the same name.
+ *   ──  The finale: one green panel, three lines, one button.
  *
- * The organization's name (typed beside the hoodie) runs through all of it.
+ * The organization's name (typed under the hoodie) runs through all of it.
  * Content lives in `@/lib/chapter`.
  */
 export default function Chapter({ receipt = false }: { receipt?: boolean }) {
   const [a, em, b] = ACT1.title;
   return (
     <>
-      <section aria-labelledby="why-title" className="chapter-ground band-cream sec relative overflow-x-clip">
-        <div className="shell">
-          <div className="grid-12 items-end gap-y-6">
-            <div className="col-span-4 sm:col-span-8 lg:col-span-7">
-              <p className="t-eyebrow fg-muted">{ACT1.eyebrow}</p>
-              <h2 id="why-title" className="t-h1 mt-5">
-                {a}
-                <em>{em}</em>
-                {b}
-              </h2>
-            </div>
-            <div className="col-span-4 sm:col-span-7 lg:col-span-5 lg:col-start-8 lg:pb-[0.35rem] xl:col-span-4 xl:col-start-9">
-              <p className="t-lead max-w-measure">{ACT1.lead}</p>
-            </div>
-          </div>
+      <section aria-labelledby="why-title" className="chapter-ground board-grid relative overflow-x-clip bg-paper pb-16 pt-10 text-ink sm:pt-12 lg:pb-20">
+        <div className="shell relative text-center">
+          <h2 id="why-title" className="t-h1">
+            {a}
+            <em>{em}</em>
+            {b}
+          </h2>
+          <p className="t-lead mx-auto mt-5 max-w-[40rem] text-balance text-ink/80">
+            {ACT1.lead.lead}
+            <strong className="font-semibold text-ink">{ACT1.lead.mark}</strong>
+            {ACT1.lead.rest}
+          </p>
+          <p className="t-small fg-muted mx-auto mt-3">{ACT1.hint}</p>
         </div>
-        <div className="mt-12 lg:mt-20">
+        <div className="mt-10 lg:mt-12">
           <Stage receipt={receipt} />
         </div>
       </section>

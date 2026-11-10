@@ -11,7 +11,7 @@
  * are standard blank measurements, also [CONFIRM].
  *
  * There are no photographs yet, on purpose: `images` stays empty and GarmentArt
- * draws each piece in its colorways. Set `MT_CATALOG_SOURCE=live` to read the
+ * draws each piece in its colorways. Served when `CATALOG_SOURCE=local`; by default the site reads the
  * dashboard instead (see api.ts).
  */
 

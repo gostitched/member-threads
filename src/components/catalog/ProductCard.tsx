@@ -78,7 +78,7 @@ export default function ProductCard({
           )}
 
           <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4 sm:p-5">
-            <span className="t-spec fg-muted">{product.styleNumber}</span>
+            <span />
             {product.sticker && <span className="woven">{product.sticker}</span>}
           </div>
 
@@ -93,8 +93,7 @@ export default function ProductCard({
         </div>
 
         <div className="flex flex-1 flex-col pt-4">
-          {product.category && <p className="t-spec fg-muted">{product.category}</p>}
-          <h3 className={`mt-1.5 ${featured ? 't-h2' : 't-h3'}`}>
+          <h3 className={featured ? 't-h2' : 't-h3'}>
             <span className="link-u bg-[length:0%_1px] transition-[background-size] duration-[420ms] ease-[cubic-bezier(0.7,0,0.2,1)] group-hover:bg-[length:100%_1px]">
               {product.name}
             </span>

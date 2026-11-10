@@ -14,8 +14,8 @@ function isActive(pathname: string, href: string) {
 }
 
 
-/** The menu's roster: the four pages, then the custom route. */
-const MENU = [...NAV, { href: '/custom', label: 'Fully custom' }];
+/** The menu's roster: the three pages. */
+const MENU = NAV;
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -23,11 +23,11 @@ const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1
  * Paper header, sticky, one fixed height (72 / 84 / 92px; the home hero and
  * the catalog bar size against it). After 8px of scroll it condenses: paper
  * turns translucent, a hairline appears and the wordmark steps down.
+ * Wordmark left, three links centred (md+), the one primary right, small.
  * Nav: sentence case; hover sews an underline in; the current page keeps a
- * running stitch. Right: the one primary, small.
- * Mobile: a full-screen green sheet. A numbered roster of the four pages in
- * the serif, stitch rules between, the primary, contact, and the woven label;
- * the lettermark sits cut off by the corner. A disclosure with a focus trap;
+ * running stitch.
+ * Mobile: a full-screen paper sheet: the three pages in the serif with hairlines
+ * between, the primary, and the email. A disclosure with a focus trap;
  * Escape closes it and returns focus to the toggle.
  */
 export default function SiteHeader() {
@@ -54,7 +54,7 @@ export default function SiteHeader() {
     if (!open) return;
     const prev = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
-    const mq = window.matchMedia('(min-width: 1024px)');
+    const mq = window.matchMedia('(min-width: 768px)');
     const onMq = () => mq.matches && setOpen(false);
     mq.addEventListener('change', onMq);
     return () => {
@@ -107,7 +107,7 @@ export default function SiteHeader() {
       className="mt-head sticky top-0 z-40 bg-paper text-ink"
     >
       <div
-        className={`${FRAME} relative z-10 grid h-[72px] grid-cols-[1fr_auto] items-center gap-6 sm:h-[84px] lg:h-[92px] lg:grid-cols-[1fr_auto_1fr]`}
+        className={`${FRAME} relative z-10 grid h-[72px] grid-cols-[1fr_auto] items-center gap-6 sm:h-[84px] md:grid-cols-[1fr_auto_1fr] lg:h-[92px]`}
       >
         <Link
           href="/"
@@ -118,7 +118,7 @@ export default function SiteHeader() {
           <Wordmark className="mt-logo" />
         </Link>
 
-        <nav className="hidden items-center gap-9 lg:flex xl:gap-11" aria-label="Main">
+        <nav className="hidden items-center gap-8 md:flex lg:gap-11 xl:gap-12" aria-label="Main">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
             return (
@@ -143,9 +143,9 @@ export default function SiteHeader() {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="mobile-menu"
-            className="mt-burger -mr-3 flex h-11 min-w-11 items-center gap-3 px-3 lg:hidden"
+            className="mt-burger -mr-3 flex h-11 min-w-11 items-center gap-3 px-3 md:hidden"
           >
-            <span className="t-spec">{open ? 'Close' : 'Menu'}</span>
+            <span className="t-uniform">{open ? 'Close' : 'Menu'}</span>
             <span aria-hidden className="relative block h-2.5 w-6">
               <span className={`absolute left-0 block h-[1.5px] w-6 bg-current ${open ? 'top-[4px] rotate-45' : 'top-0'}`} />
               <span className={`absolute left-0 block h-[1.5px] w-6 bg-current ${open ? 'top-[4px] -rotate-45' : 'top-[9px]'}`} />
@@ -163,18 +163,10 @@ function MobileMenu({ pathname, onNavigate }: { pathname: string; onNavigate: ()
   return (
     <div
       id="mobile-menu"
-      className="mt-menu band-green fixed inset-0 z-0 flex flex-col overflow-y-auto overscroll-contain lg:hidden"
+      className="mt-menu band-paper fixed inset-0 z-0 flex flex-col overflow-y-auto overscroll-contain md:hidden"
     >
-      {/* The lettermark, cut off by the sheet's bottom-right corner. */}
-      <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <span className="mt-menu-mark absolute -bottom-[14%] -right-[30%] block aspect-[240/189] w-[110%] max-w-[640px]" />
-      </span>
-
       <nav aria-label="Menu" className={`${FRAME} relative flex flex-1 flex-col pb-6 pt-[84px] sm:pt-[108px]`}>
-        <p className="mt-menu-item t-eyebrow fg-muted" style={{ ['--d' as string]: '40ms' }}>
-          The roster
-        </p>
-        <ol className="mt-3">
+        <ul>
           {MENU.map((item, i) => {
             const active = isActive(pathname, item.href);
             return (
@@ -183,29 +175,25 @@ function MobileMenu({ pathname, onNavigate }: { pathname: string; onNavigate: ()
                   href={item.href}
                   onClick={onNavigate}
                   aria-current={active ? 'page' : undefined}
-                  className="mt-menu-link flex min-h-[56px] items-baseline gap-5 py-2"
+                  className="mt-menu-link flex min-h-[56px] items-baseline border-b border-rule py-3"
                 >
-                  <span className="t-spec w-6 shrink-0 text-beige">{String(i + 1).padStart(2, '0')}</span>
-                  <span className={`mt-menu-name t-h1 ${active ? 'italic text-beige' : ''}`}>{sentence(item.label)}</span>
+                  <span className={`mt-menu-name t-h1 ${active ? 'italic' : ''}`}>{sentence(item.label)}</span>
                 </Link>
-                <span aria-hidden className="stitch-rule opacity-60" />
               </li>
             );
           })}
-        </ol>
+        </ul>
 
         <div className="mt-menu-item mt-8" style={{ ['--d' as string]: '480ms' }}>
-          <Link href={NAV_CTA.href} onClick={onNavigate} className="btn-white w-full">
+          <Link href={NAV_CTA.href} onClick={onNavigate} className="btn-blue w-full">
             {NAV_CTA.label} <Arrow className="h-3.5 w-[18px]" />
           </Link>
         </div>
 
-        <div className="mt-menu-item mt-auto flex flex-col items-start gap-2 pt-8" style={{ ['--d' as string]: '560ms' }}>
+        <div className="mt-menu-item mt-auto pt-8" style={{ ['--d' as string]: '560ms' }}>
           <a href={`mailto:${CONTACT.email}`} className="link-u inline-flex min-h-11 items-center text-[17px]">
             {CONTACT.email}
           </a>
-          {/* [CONFIRM] "Est. 2023": the year Ethan started making apparel; confirm it is the brand's founding line. */}
-          <span className="t-spec text-beige">Est. 2023 · A Stitched Group company</span>
         </div>
       </nav>
     </div>

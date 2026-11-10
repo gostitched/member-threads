@@ -50,20 +50,20 @@ export const ORIGIN = {
 export const OFFER = [
   {
     title: 'A dedicated designer',
-    line: 'One person owns your collection from first sketch to final proof. Bring a logo and a few references; no design team needed.',
+    line: 'One person owns your collection from first sketch to final proof.',
   },
   {
     title: 'One clear price',
-    line: 'Embroidery, custom colors, extra print locations and design are built into one per-piece price, quoted before anything is made.',
+    line: 'Embroidery, custom colors and design in one per-piece price, quoted up front.',
   },
   {
     title: 'Reorders on file',
-    line: 'Every approved piece is saved to your organization, so next season’s run starts where the last one left off.',
+    line: 'Every approved piece is saved, so the next run starts where the last ended.',
   },
   {
     // [CONFIRM] nationwide delivery.
     title: 'Delivered nationwide',
-    line: 'Packed by size and shipped to your office, campus or event, anywhere in the U.S.',
+    line: 'Packed by size and shipped anywhere in the U.S.',
   },
 ] as const;
 

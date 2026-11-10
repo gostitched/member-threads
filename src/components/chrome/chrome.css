@@ -22,7 +22,6 @@
   background-color: transparent;
   box-shadow: none;
   backdrop-filter: none;
-  color: theme('colors.cream');
 }
 .mt-logo {
   transform-origin: 0 50%;
@@ -30,18 +29,19 @@
 }
 .mt-head[data-scrolled='true'] .mt-logo { transform: scale(0.86); }
 
-/* Nav link: sentence case, 14px. Hover sews an underline in from the left;
+/* Nav link: the varsity (Big Shoulders caps), 16px. Hover sews an underline in from the left;
    the current page carries a running stitch, permanently. */
 .mt-nav {
   position: relative;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 14px;
+  font-family: var(--font-varsity);
+  font-weight: 800;
+  font-size: 16px;
   line-height: 1;
-  letter-spacing: 0.005em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 .mt-nav::after {
@@ -77,11 +77,12 @@
 .mt-menu-item {
   animation: enter var(--dur-slow) var(--ease-out) var(--d, 0ms) both;
 }
-/* The lettermark, cut by the corner of the sheet. Masked so it takes colour. */
+/* The lettermark, cut by the corner of the sheet. Masked so it takes colour:
+   cream on paper, a watermark rather than a second logo. */
 .mt-menu-mark {
   -webkit-mask: url('/mt-mark.svg') no-repeat center / contain;
   mask: url('/mt-mark.svg') no-repeat center / contain;
-  background-color: #1F4A3A;
+  background-color: theme('colors.cream');
 }
 .mt-menu-link .mt-menu-name {
   transition: transform var(--dur-base) var(--ease-out), color var(--dur-quick) ease;
@@ -90,38 +91,6 @@
 .mt-menu-link:focus-visible .mt-menu-name { transform: translateX(8px); }
 
 /* ---- Footer ------------------------------------------------------------- */
-/* THREADS, cropped by the bottom edge. Each letter rises out of the hem as
-   the footer comes into view. */
-.mt-mast-frame { container-type: inline-size; }
-.mt-mast-wrap,
-.mt-mast-wrap.t-mast {
-  /* "THREADS" runs ~6.2em wide in Archivo 900/125: fill the frame exactly. */
-  font-size: 15.8cqw;
-  overflow: hidden;
-  /* Crop ~18% of the cap height off the bottom. */
-  height: 0.62em;
-}
-.mt-mast {
-  display: flex;
-  justify-content: space-between;
-  line-height: 0.8;
-  white-space: nowrap;
-}
-.mt-mast > span { display: block; }
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .mt-mast > span {
-      animation: mt-mast-rise linear both;
-      animation-timeline: view();
-      animation-range: entry calc(var(--i) * 5%) entry calc(65% + var(--i) * 5%);
-    }
-  }
-}
-@keyframes mt-mast-rise {
-  from { transform: translateY(42%); }
-  to { transform: translateY(0); }
-}
-
 .mt-foot-link {
   display: inline-flex;
   align-items: center;

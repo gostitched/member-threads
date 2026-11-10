@@ -23,7 +23,10 @@ export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.gostitche
 /**
  * Member Threads's embed key (Stitched dashboard → Embed sites). Public by design:
  * it tells the dashboard which site is asking, so leads land under this brand and the
- * form only frames on this site's registered origins.
+ * form only frames on this site's registered origins. The live catalog reads with it too.
+ * [CONFIRM] This value is identical to the sister site's key (inherited when this site
+ * was duplicated): until Member Threads has its own, leads and catalog placements are that
+ * site's. Set NEXT_PUBLIC_EMBED_KEY / STITCHED_CATALOG_KEY or replace it here.
  */
 export const EMBED_KEY = process.env.NEXT_PUBLIC_EMBED_KEY || 'emb_live_NGvIwbuofqui3d54tGp97zcJ';
 export const REQUEST_FORM_URL = `${APP_URL}/embed/v1/form?embed=true&key=${encodeURIComponent(EMBED_KEY)}`;
@@ -43,11 +46,11 @@ export const MEDIA = {
   methodsPoster: '',
 };
 
+/** The three header links (About lives in the footer). Sentence case, per DESIGN.md. */
 export const NAV = [
   { href: '/#how', label: 'How it works' },
   { href: '/catalog', label: 'Catalog' },
-  { href: '/work', label: 'Collections' },
-  { href: '/about', label: 'About' },
+  { href: '/work', label: 'Get inspired' },
 ];
 
 /** The one header CTA. Static: personalisation lives in the chapter. */
@@ -139,36 +142,36 @@ export const FAQ: FaqItem[] = [
     number: '01',
     question: 'What does a collection cost?',
     answer: 'One clear price per piece.',
-    line: 'Cost comes down to the pieces you choose and how many of each. Every product in our catalog shows a starting price, so you can budget before you talk to us.',
+    line: 'It depends on the pieces and how many of each. Every catalog piece shows a starting price.',
   },
   {
     number: '02',
     question: 'Does customizing cost extra?',
     answer: 'No.',
-    line: 'Embroidery, extra print locations, custom colors and design are built into one price, quoted up front. No setup fees, no surprise line items.',
+    line: 'Embroidery, custom colors and design are in one price, quoted up front. No setup fees.',
   },
   {
     number: '03',
     question: 'What’s the minimum?',
     answer: '36 pieces per style.',
-    line: 'Sizes can be mixed within a style. Most organizations order between 36 and 300 of each piece.',
+    line: 'Sizes can be mixed within a style.',
   },
   {
     number: '04',
     question: 'How far out should we start?',
     answer: '6 to 8 weeks.',
-    line: 'Design, sampling and production included. Have a hard date, like a recruitment week or a conference? Tell us first and we plan backward from it.',
+    line: 'That covers design, sampling and production. Have a hard date? Tell us first and we plan back from it.',
   },
   {
     number: '05',
     question: 'Can we reorder?',
     answer: 'Anytime.',
-    line: 'Every approved piece is saved to your organization, so next semester’s run or next year’s onboarding kit starts where the last one left off.',
+    line: 'Every approved piece is saved to your organization, so the next run starts where the last one ended.',
   },
   {
     number: '06',
     question: 'Who actually makes it?',
     answer: 'We do.',
-    line: 'Member Threads is part of Stitched Group, which runs our design, sourcing and production. No blanks with a logo pressed on.',
+    line: 'Member Threads is part of Stitched Group, which runs our sourcing and production.',
   },
 ];

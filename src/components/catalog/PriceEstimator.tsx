@@ -74,10 +74,10 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
   return (
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 id={`${id}-h`} className="t-eyebrow">
+        <h2 id={`${id}-h`} className="font-sans text-[0.9375rem] font-semibold tracking-normal">
           Price per piece
         </h2>
-        <p className="t-spec fg-muted">Design + decoration included</p>
+        <p className="t-spec fg-muted">Design and decoration included</p>
       </div>
 
       {/* The ladder. Each tier's quantity is a button that sets the order to it. */}
@@ -120,7 +120,7 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
 
       {/* Quantity: exact, then by feel. */}
       <div className="mt-7 flex items-center justify-between gap-4">
-        <label htmlFor={`${id}-q`} className="t-eyebrow">
+        <label htmlFor={`${id}-q`} className="text-[0.9375rem] font-semibold">
           Quantity
         </label>
         <div className="ct-stepper flex items-center gap-2">
@@ -190,7 +190,7 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
       <div className="mt-6 border-t border-ink pt-5" aria-live="polite">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="t-eyebrow">Estimate</p>
+            <p className="text-[0.9375rem] font-semibold">Estimate</p>
             <p className="t-spec fg-muted mt-2 num">
               {qty.toLocaleString('en-US')} × {formatMoney(active.unitPriceCents, currency)}
             </p>

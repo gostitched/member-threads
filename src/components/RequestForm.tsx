@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Sticker from '@/components/Sticker';
 import { useOrgName } from '@/lib/name';
 import { APP_URL, CONTACT, REQUEST_FORM_URL } from '@/lib/site';
 
@@ -102,8 +101,7 @@ export default function RequestForm() {
   if (submitted) {
     return (
       <div className="band-green px-6 py-14 sm:px-12 sm:py-20" role="status">
-        <p className="t-eyebrow text-beige">Request received</p>
-        <h2 className="t-h1 mt-6">
+        <h2 className="t-h1">
           Your designer is <em>next</em>.
         </h2>
         <p className="t-script mt-6 text-[clamp(2.25rem,4vw,3.25rem)] text-beige">Welcome to the club.</p>
@@ -116,12 +114,6 @@ export default function RequestForm() {
 
   return (
     <div className="band-cream">
-      {/* The plate's header line: a tech-pack slip. */}
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-[var(--rule-c)] px-5 py-4 sm:px-8">
-        <p className="t-spec">Request No. —</p>
-        <p className="t-spec fg-muted">Member Threads × Stitched</p>
-      </div>
-
       <div className="relative overflow-hidden" style={status === 'loading' ? { maxHeight: LOADING_HEIGHT } : undefined}>
         <iframe
           ref={frameRef}
@@ -200,9 +192,8 @@ export function ForSticker() {
   const { name, isDefault } = useOrgName();
   if (isDefault) return null;
   return (
-    <Sticker key={name} shape="label" draggable>
-      <span>For {name.replace(/'/g, '’')}</span>
-      <span className="opacity-60">Collection 01</span>
-    </Sticker>
+    <span key={name} className="woven">
+      For {name.replace(/'/g, '’')}
+    </span>
   );
 }

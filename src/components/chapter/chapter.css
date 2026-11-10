@@ -80,15 +80,6 @@
   transition: stroke-dashoffset var(--dur-base) var(--ease-stitch);
 }
 .chapter-leader[data-active] .chapter-lead-solid { stroke-dashoffset: 0; }
-.chapter-lead-dot {
-  fill: theme('colors.paper');
-  stroke: currentColor;
-  stroke-width: 1.5;
-  vector-effect: non-scaling-stroke;
-  transition: fill var(--dur-quick) ease, opacity var(--dur-base) ease var(--d, 0ms);
-}
-.chapter-leader[data-on] .chapter-lead-dot,
-.chapter-leader[data-active] .chapter-lead-dot { fill: currentColor; }
 .chapter-board[data-in='false'] .chapter-leader { opacity: 0; }
 .chapter-leader { transition: opacity var(--dur-slow) var(--ease-out) var(--d, 0ms); }
 
@@ -143,18 +134,16 @@
   font-variant-numeric: tabular-nums;
   opacity: 0.62;
 }
-.chapter-chip-word { font-size: 14px; }
+.chapter-chip-word { font-size: 15px; }
 .chapter-chip-sub {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 500;
   opacity: 0.72;
 }
 .chapter-chip:focus-visible { outline-offset: 2px; }
 @media (min-width: 1024px) and (max-width: 1439px) {
   .chapter-board .chapter-chip { min-height: 40px; padding-inline: 0.7rem; }
-  .chapter-board .chapter-chip-word { font-size: 13px; }
+  .chapter-board .chapter-chip-word { font-size: 14px; }
 }
 
 /* "+$0": a woven tag that slaps on beside the chip, holds, then lifts away. */
@@ -190,8 +179,8 @@
   z-index: 5;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 14px;
+  height: 14px;
   translate: -50% -50%;
   background: theme('colors.paper');
   color: theme('colors.ink');
@@ -260,21 +249,77 @@
 .chapter-clear:hover { color: theme('colors.ink'); }
 
 /* ── The tech pack ────────────────────────────────────────────────────── */
+/* ── The tech-pack slip: a till receipt, the same build as The Mitzvah Studio's ── */
 .chapter-slip {
-  padding: 1.5rem 1.5rem 1.25rem;
-  background: theme('colors.paper');
+  padding: 1.8em 1.6em 1.6em;
+  font-size: 12px;
+  background: #fff;
   color: theme('colors.ink');
-  border-radius: 0;
-  --rule-c: theme('colors.rule');
+  box-shadow: 0 30px 50px -24px rgba(40, 32, 20, 0.45), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
-/* Binding strip along the top, like a sheet in a sleeve; punched for the binder. */
-.chapter-slip::before {
+/* Torn off the roll, top and bottom. */
+.chapter-slip::before,
+.chapter-slip::after {
   content: '';
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 4px;
-  background: theme('colors.ink');
+  left: 0;
+  right: 0;
+  height: 7px;
 }
+.chapter-slip::before {
+  top: -7px;
+  background:
+    linear-gradient(-135deg, transparent 5px, #fff 0) 0 0 / 10px 7px repeat-x,
+    linear-gradient(135deg, transparent 5px, #fff 0) 0 0 / 10px 7px repeat-x;
+}
+.chapter-slip::after {
+  bottom: -7px;
+  background:
+    linear-gradient(-45deg, transparent 5px, #fff 0) 0 0 / 10px 7px repeat-x,
+    linear-gradient(45deg, transparent 5px, #fff 0) 0 0 / 10px 7px repeat-x;
+}
+.chapter-slip-brand {
+  font-family: var(--font-receipt);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 1.3em;
+  line-height: 1.1;
+}
+.chapter-slip-text {
+  font-family: var(--font-receipt);
+  font-size: 1em;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.chapter-slip-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5em;
+  margin: 0 -0.5em;
+  padding: 0.18em 0.5em;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+.chapter-slip-rule { border-top: 1px dashed theme('colors.rule'); }
+.chapter-slip-double { border-top: 3px double theme('colors.rule'); }
+.chapter-slip-barcode {
+  height: 2.6em;
+  margin-inline: 8%;
+  background: repeating-linear-gradient(90deg,
+    currentColor 0 2px, transparent 2px 4px, currentColor 4px 5px, transparent 5px 8px,
+    currentColor 8px 11px, transparent 11px 12px, currentColor 12px 13px, transparent 13px 16px);
+  opacity: 0.6;
+}
+.chapter-slip-total {
+  font-family: var(--font-receipt);
+  font-weight: 700;
+  font-size: 3.2em;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
 .chapter-logo-ink {
   background-color: theme('colors.ink');
   -webkit-mask: url('/mt-logo.svg') left center / contain no-repeat;
@@ -307,16 +352,6 @@
   box-shadow: inset 0 0 0 1px theme('colors.ink / 25%');
 }
 .chapter-necklabel { max-width: 62%; font-size: 12px; white-space: normal; text-align: right; padding: 0.75em 1.1em 0.7em; }
-.chapter-slip-lines { padding-bottom: 0.25rem; }
-.chapter-slip-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin: 0 -0.5rem;
-  padding: 0.38rem 0.5rem;
-  border-top: 1px dashed theme('colors.rule');
-  transition: background-color var(--dur-quick) ease;
-}
 .chapter-slip-row:first-child { border-top: 0; }
 .chapter-slip-row[data-lit] { background: theme('colors.cream'); }
 /* A new line prints left to right, the way a spec line is typed out. */
@@ -324,14 +359,6 @@
 @keyframes chapter-print {
   from { clip-path: inset(0 100% 0 0); }
   to { clip-path: inset(0 0 0 0); }
-}
-.chapter-slip-total {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-stretch: 125%;
-  font-size: clamp(2.5rem, 3.4vw, 3rem);
-  line-height: 0.82;
-  letter-spacing: -0.03em;
 }
 .chapter-slip-code { letter-spacing: 0.24em; }
 .chapter-reset { min-height: 44px; display: inline-flex; align-items: center; background-position: 0 calc(100% - 13px); }
@@ -342,7 +369,12 @@
   to { opacity: 1; translate: 0 0; }
 }
 /* The woven label re-weaves when the name changes: uncovered left to right. */
-.chapter-reweave { display: inline-block; animation: chapter-print var(--dur-base) var(--ease-stitch) both; }
+.chapter-reweave { display: inline-block; animation: chapter-reweave var(--dur-base) var(--ease-stitch) both; }
+/* Like chapter-print, but it ends unclipped: an italic name's overhang (and its ’) runs past the box. */
+@keyframes chapter-reweave {
+  from { clip-path: inset(-0.3em 100% -0.3em -0.3em); }
+  to { clip-path: inset(-0.3em -0.5em -0.3em -0.3em); }
+}
 
 /* ── Act 02: three plates, staggered ──────────────────────────────────── */
 .chapter-rail {
@@ -502,7 +534,7 @@
   .chapter-tag-swing, .chapter-chip, .chapter-swatch-dot, .chapter-pin { transition: none !important; }
 }
 
-/* Secondary actions: sentence case, Archivo 500, re-sewing underline. */
+/* Small text actions ("Start over"): sentence case, the sans, re-sewing underline. Arrow links beside a button use .link-arrow. */
 .chapter-link {
   font-family: var(--font-sans);
   font-weight: 500;
@@ -511,3 +543,10 @@
   letter-spacing: 0;
   text-transform: none;
 }
+
+/* ── Framework board: the sheet is the cream plate on the paper grid ───── */
+.chapter-ground .chapter-sheet { background-color: theme('colors.cream'); }
+/* On the board the tech pack is narrower than the panel it was drawn for. */
+
+/* On the desktop board the receipt scales with the board, so it keeps to its corner. */
+.chapter-slip-board .chapter-slip { font-size: clamp(8px, 0.68cqw, 11px); }

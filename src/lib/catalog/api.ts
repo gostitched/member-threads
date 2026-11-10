@@ -2,9 +2,9 @@
  * Reading the catalog. Server-side only.
  *
  * ── WHERE IT COMES FROM ──────────────────────────────────────────────────────
- * Member Threads's pieces live in `local.ts` and are served from there by
- * default. Set `MT_CATALOG_SOURCE=live` to read the dashboard instead; everything
- * below this note describes that path, which is kept intact so switching is one
+ * The pieces come from the Stitched dashboard by default. Set
+ * `CATALOG_SOURCE=local` to serve Member Threads' own list in `local.ts` instead
+ * (drawn in each colorway, no network), which is kept so switching is one
  * environment variable, not a rewrite.
  *
  * Products live in the dashboard, and this site sees only what the dashboard lets it:
@@ -19,8 +19,8 @@
  *
  * ── THE KEY ──────────────────────────────────────────────────────────────────
  * Catalog reads require an embed key; a keyless read is refused. The key is public by
- * design (it sits in page source wherever the catalog is embedded), so falling back to
- * the dashboard's seeded default-site key is fine. `STITCHED_CATALOG_KEY` overrides it,
+ * design (it sits in page source wherever the catalog is embedded), so it falls back to
+ * this site's own embed key, the same one the request form uses. `STITCHED_CATALOG_KEY` overrides it,
  * and must after a key rotation.
  *
  * Server-side requests carry no `Origin`, which the dashboard's allowlist permits;
@@ -32,18 +32,15 @@
  * 60-second timer is the fallback for a ping that never arrives.
  */
 
-import { APP_URL } from '@/lib/site';
+import { APP_URL, EMBED_KEY } from '@/lib/site';
 import { LOCAL_CATALOG } from './local';
 import type { Catalog, CatalogBrand, CatalogProduct, CatalogSource } from './types';
 
-/**
- * The dashboard is opt-in; Member Threads' own list is the default. Its own variable,
- * not `CATALOG_SOURCE`: that one was set for the site this was copied from, and its
- * dashboard placements are that brand's products, not these.
- */
-const LIVE = process.env.MT_CATALOG_SOURCE?.trim().toLowerCase() === 'live';
+/** The dashboard is the default; `CATALOG_SOURCE=local` serves the local list. */
+const LIVE = process.env.CATALOG_SOURCE?.trim().toLowerCase() !== 'local';
 
-const KEY = process.env.STITCHED_CATALOG_KEY?.trim() || 'emb_live_gostitched_default';
+/** This site's embed key (see `EMBED_KEY` in `@/lib/site`); `STITCHED_CATALOG_KEY` overrides it. */
+const KEY = process.env.STITCHED_CATALOG_KEY?.trim() || EMBED_KEY;
 const REVALIDATE_SECONDS = 60;
 /** Every catalog read carries this tag; `/api/revalidate` drops them all at once. */
 export const CATALOG_TAG = 'stitched-catalog';
