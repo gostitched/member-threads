@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { hoodie, VIEW, type HoodieGeometry } from './geometry';
 import { DEFAULT_NAME, YOUR_NAME, possessive } from '@/lib/name';
 import { COLORWAYS, UNDYED, initial, type Colorway, type Custom, type Look } from '@/lib/chapter';
@@ -36,7 +36,7 @@ const CUT = { w: 48, l: -70, band: 128 };
  * home page's one script moment). A long name breaks onto a second line and
  * everything is measured after layout, so it never runs into the sleeves.
  */
-const MARK = { cx: 966, y: 1010, w: 620, h: 300, max: 200, rot: -6, x0: 636, x1: 1296 };
+const MARK = { cx: 966, y: 930, w: 620, h: 300, max: 200, rot: -6, x0: 636, x1: 1296 };
 
 /** Split a name for the chest: one line up to 14 characters, else the most even two. */
 function chestLines(name: string): string[] {
@@ -57,7 +57,7 @@ const PATCH = { r: 80, letter: 104 };
 const PATCH_AT = (g: HoodieGeometry) => `translate(${g.marks.sleeveL[0] + 16} ${g.marks.sleeveL[1] - 40}) rotate(-12)`;
 
 /** The print: small, in raised puff ink, in the pocket's bottom-right corner (house cut). */
-const PRINT = { text: 'SEASON 01', x: 1262, y: 1500, size: 34, r: 0 };
+const PRINT = { text: 'MEMBERS', x: 1262, y: 1500, size: 34, r: 0 };
 const CORDS = [
   { from: [916, 566], d: 'M916 566C914 610 911 650 907 690', tip: [907, 690], r: 3 },
   { from: [1016, 566], d: 'M1016 566C1018 600 1021 640 1026 676', tip: [1026, 676], r: -4 },
@@ -75,7 +75,7 @@ export function describe(look: Look, name = DEFAULT_NAME) {
     look.embroidery && `${name} embroidered in an arched wordmark across the chest`,
     look.liner && `a ${c.linerName.toLowerCase()} ${look.linerStripe ? 'rugby-stripe' : 'jersey'} hood liner`,
     look.rib && 'contrast 2×2 rib at the hem and cuffs',
-    look.print && 'Season 01 in small puff print on the pocket',
+    look.print && 'MEMBERS in small puff print on the pocket',
     look.patch && `a chenille ${initial(name)} patch on the sleeve`,
     look.trims && 'flat drawcords with metal aglets',
     look.construction && 'contrast topstitching',
@@ -414,6 +414,15 @@ function Wordmark({ name, uid }: { name: string; uid: string }) {
   const lead = size * 0.86;
   const ref = useRef<SVGGElement>(null);
   const [fit, setFit] = useState({ k: 1, w: MARK.w * 0.8 });
+  // The script loads after first paint (font-display: swap); measure again once it has.
+  const [fonts, setFonts] = useState(0);
+  useEffect(() => {
+    let live = true;
+    document.fonts?.ready.then(() => live && setFonts((n) => n + 1));
+    return () => {
+      live = false;
+    };
+  }, []);
 
   // Measure after layout: shrink to the chest if the script runs wide, and size the tail to the name.
   useLayoutEffect(() => {
@@ -421,9 +430,10 @@ function Wordmark({ name, uid }: { name: string; uid: string }) {
     if (!el) return;
     const b = el.getBBox();
     if (!b.width) return;
-    const k = Math.min(1, MARK.w / b.width, MARK.h / Math.max(b.height, 1));
+    // 8% margin: the satin edge and the slant run past the measured box.
+    const k = Math.min(1, (MARK.w * 0.92) / b.width, MARK.h / Math.max(b.height, 1));
     setFit((f) => (Math.abs(f.k - k) < 0.005 && Math.abs(f.w - b.width) < 1 ? f : { k, w: b.width }));
-  }, [name, size]);
+  }, [name, size, fonts]);
 
   const top = MARK.y - ((lines.length - 1) * lead) / 2;
   const face = {

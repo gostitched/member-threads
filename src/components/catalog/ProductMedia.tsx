@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import GarmentArt from './GarmentArt';
 import type { CatalogProduct } from '@/lib/catalog/types';
 import { garmentKind, paintOf } from '@/lib/catalog/util';
@@ -45,16 +46,25 @@ export default function ProductMedia({
 }) {
   const gallery = galleryOf(product);
   const image = gallery[imageIndex] ?? gallery[0];
+  const src = image ? (size === 'thumb' ? image.thumbUrl : image.url) : null;
+  // A photo that fails to load (or failed before hydration) falls back to the drawing.
+  const [failed, setFailed] = useState<string | null>(null);
+  const img = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    if (img.current?.complete && !img.current.naturalWidth && src) setFailed(src);
+  }, [src]);
 
-  if (image) {
-    // The ash ground travels with the photo: a hover scale on any ancestor starts a new
-    // stacking context, and a multiply with nothing beneath it inside that context
-    // shows the photo's white square again. Photos only ever sit on ash tiles.
+  if (image && src && failed !== src) {
+    // The plate's ground travels with the photo: a hover scale on any ancestor starts a
+    // new stacking context, and a multiply with nothing beneath it inside that context
+    // shows the photo's white square again.
     return (
-      <div className={`h-full w-full bg-white ${className}`}>
+      <div className={`h-full w-full bg-cream ${className}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={size === 'thumb' ? image.thumbUrl : image.url}
+          ref={img}
+          onError={() => setFailed(src)}
+          src={src}
           alt={image.alt ?? product.name}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"

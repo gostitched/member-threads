@@ -28,29 +28,21 @@ export default function NotFound() {
           <p aria-hidden className="mt-404 t-mast enter -ml-[0.04em] select-none whitespace-nowrap text-ink">
             404
           </p>
-          <span
-            className="woven woven-beige woven-lg absolute bottom-[12%] left-[10%] rotate-[-4deg] sm:left-[16%]"
-          >
-            No. 404 · Not issued
-          </span>
         </div>
 
         <div className="grid-12 mt-14 gap-y-12 lg:mt-20">
           <div className="col-span-4 sm:col-span-8 lg:col-span-5">
-            <p className="t-eyebrow fg-muted">Error 404</p>
-            <h1 className="t-h1 mt-5">
+            <h1 className="t-h1">
               This page isn’t on the <em>roster</em>.
             </h1>
-            <p className="t-lead mt-6 max-w-[30ch]">Whatever was here has moved, or was never issued. These pages are.</p>
+            <p className="t-lead mt-6 max-w-[30ch]">It has moved, or never existed. Try one of these.</p>
           </div>
 
           <nav aria-label="Pages on the roster" className="col-span-4 sm:col-span-8 lg:col-span-6 lg:col-start-7">
             <ol>
-              {ROSTER.map((r, i) => (
+              {ROSTER.map((r) => (
                 <li key={r.href}>
-                  <span aria-hidden className="stitch-rule" />
-                  <Link href={r.href} className="mt-menu-link group flex min-h-[72px] items-center gap-5 py-4">
-                    <span className="t-spec w-6 shrink-0 fg-muted">{String(i + 1).padStart(2, '0')}</span>
+                  <Link href={r.href} className="mt-menu-link group flex min-h-[72px] items-center gap-5 border-t border-rule py-4">
                     <span className="mt-menu-name flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
                       <span className="t-h2">{r.label}</span>
                       <span className="t-spec fg-muted">{r.note}</span>
@@ -60,7 +52,6 @@ export default function NotFound() {
                 </li>
               ))}
             </ol>
-            <span aria-hidden className="stitch-rule" />
           </nav>
         </div>
       </div>

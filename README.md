@@ -14,9 +14,9 @@ Next.js 15 (App Router), React 19, Tailwind, statically rendered.
 
 | Route | What it is |
 |---|---|
-| `/` | Hero, the chapter, how it works, FAQ |
-| `/work`, `/work/[slug]` | Collections |
-| `/catalog`, `/catalog/[slug]` | Pieces: starting points, each priced inside a collection |
+| `/` | Hero, the chapter (hoodie, three pieces, finale), intro, how it works, FAQ |
+| `/work` | Get inspired: a browse-only wall of concept designs drawn in code |
+| `/catalog`, `/catalog/[slug]` | Build your collection: every dashboard piece, a tray that carries picks to `/quote` |
 | `/custom` | Fully custom pieces, developed from scratch |
 | `/about` | Why we exist, the founder, who it's for, `#what-you-get`, Stitched Group |
 | `/quote` | Start a collection (the intake form) |
@@ -54,8 +54,8 @@ Logos: `public/mt-logo.svg` (script "Member" over block "THREADS") and
 `public/mt-mark.svg` (MT lettermark), both green `#133327`;
 `public/favicon.svg` is the lettermark. `Wordmark` in
 `src/components/SiteHeader.tsx` inlines the primary logo's path data
-unchanged with `fill="currentColor"`, so the header shows it in green and the
-footer in cream on dusty blue, as on the brand board. If the logo file
+unchanged with `fill="currentColor"`, so it takes the colour of where it sits (green
+on paper in the header and the footer). If the logo file
 changes, re-copy its paths there.
 
 ### Personalisation and motion
@@ -90,16 +90,19 @@ environment, and nothing here imports from it.
 
 ## The catalog (`/catalog`)
 
-By default the pieces come from local data in `src/lib/catalog/local.ts`
-(`LOCAL_CATALOG`), drawn with `src/components/catalog/GarmentArt.tsx` in each
-colourway. Set `CATALOG_SOURCE=live` to read the dashboard's public catalog API
-instead (see `src/lib/catalog/api.ts`).
+By default the pieces come from the Stitched dashboard's public catalog API
+(`src/lib/catalog/api.ts`), read with this site's embed key (`EMBED_KEY` in
+`src/lib/site.ts`). Set `CATALOG_SOURCE=local` to serve the local list in
+`src/lib/catalog/local.ts` instead, drawn with
+`src/components/catalog/GarmentArt.tsx` in each colourway. Stitched's image
+server refuses most product images on localhost (origin allowlist), so tiles
+fall back to their drawings in development.
 
 ## Running it
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
+npm run dev -- -p 3002   # http://localhost:3002
 npm run build
 ```
 
@@ -108,8 +111,8 @@ npm run build
 | Variable | Purpose | Default |
 |---|---|---|
 | `NEXT_PUBLIC_APP_URL` | Origin of the customer app that serves `/request`. | `https://app.gostitched.com` |
-| `CATALOG_SOURCE` | `live` reads the catalog from the dashboard; anything else uses local data. | local |
-| `STITCHED_CATALOG_KEY` | Embed key for the live catalog. | dashboard default |
+| `CATALOG_SOURCE` | `local` serves `local.ts`; anything else reads the catalog from the dashboard. | live |
+| `STITCHED_CATALOG_KEY` | Embed key for the live catalog. | `EMBED_KEY` |
 
 Set these in the Vercel project for this site. They are read at build time.
 
@@ -131,10 +134,10 @@ Copy is kept out of the components:
 
 - `src/lib/site.ts`: site URL, contact, nav, capabilities, FAQ.
 - `src/lib/about.ts`: founder, origin story, "what you get", the Stitched Group note.
-- `src/lib/work.ts`, `src/lib/cases.ts`: the collections.
-- `src/lib/chapter.ts`, `src/lib/process.ts`: the home chapter.
+- `src/lib/inspo.ts`: the Get inspired concepts (made-up organizations); `src/lib/work.ts`: the drawing types.
+- `src/lib/chapter.ts`: the home chapter.
 - `src/lib/catalog/local.ts`: pieces and starting prices.
-- `src/components/HowItWorks.tsx`: the six steps.
+- `src/components/HowItWorks.tsx`, `src/components/Intro.tsx`: the four steps, the three plates.
 
 ## Before launch
 
@@ -152,8 +155,8 @@ in the code. Check each one; anything left as-is ships as written.
 - [ ] **/quote**: "if the timeline is tight, we tell you on day one" and "a designer reads every request".
 - [ ] **/custom**: the fabric, fit, construction and trim examples; whether fully custom pieces carry the same 36-piece minimum.
 - [ ] **Founder photo**: `public/about/founder.jpg` is approved for use.
-- [ ] **Collections**: any collection not yet produced is labelled "Concept"; piece counts and lead times on them are illustrative. Replace with real collections (and photography, with the organization's permission) as they ship.
-- [ ] **Case study metrics**: lead times and piece counts in `src/lib/cases.ts`.
+- [ ] **Get inspired**: every design is a concept for a made-up organization (`src/lib/inspo.ts`). Add real mockups to `UPLOADS` only with the organization's permission.
+- [ ] **Embed key**: `EMBED_KEY` in `src/lib/site.ts` is identical to The Mitzvah Studio's key (inherited when this site was duplicated). Until Member Threads has its own key, leads and the live catalog land under that site's placements.
 - [ ] **Catalog**: starting prices, fabrics, GSM, colourways and sizes in `src/lib/catalog/local.ts`.
 - [ ] **Intake form**: `/quote` frames Stitched's `/request` form; confirm the form's own copy reads right for organizations, and that leads land under the Member Threads embed key.
 - [ ] **Fonts**: Archivo and Yellowtail are stand-ins for The Bold Font, Acumin and Billion Dreams. Swap in licensed brand fonts if available.

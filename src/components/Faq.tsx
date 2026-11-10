@@ -6,12 +6,12 @@ import { CONTACT, FAQ, type FaqItem } from '@/lib/site';
 import '@/components/home/home.css';
 
 /**
- * Questions, answered. Straight on the paper, no panel. Each question sits
- * over a running stitch with a loose thread at its right end; pulling it (the
- * whole row is the button) unpicks the stitches right to left and the answer
- * opens beneath: the one-glance answer in the serif, the plain sentence under
- * it. One seam open at a time; the thread in the opening sews it shut. The
- * heading and a way to ask something else hold the sticky left column.
+ * Questions, answered. Straight on the paper, no panel: the heading, then the
+ * questions full width. Each question sits over a running stitch with a loose
+ * thread at its right end; pulling it (the whole row is the button) unpicks the
+ * stitches right to left and the answer opens beneath: the one-glance answer in
+ * the serif, the plain sentence under it. One seam open at a time; the thread in
+ * the opening sews it shut. A way to ask something else closes the section.
  *
  * All motion is CSS (`.seam-*` in home/home.css), driven by `data-open`.
  */
@@ -26,27 +26,15 @@ export default function Faq() {
   };
 
   return (
-    <section aria-labelledby="faq-title" className="sec overflow-x-clip bg-paper text-ink">
-      <div className="shell grid-12">
-        <Reveal className="col-span-4 sm:col-span-8 lg:col-span-4">
-          <div className="lg:sticky lg:top-[calc(var(--header-h)+4rem)]">
-            <p className="t-eyebrow fg-muted">Questions</p>
-            <h2 id="faq-title" className="t-h1 mt-5">
-              Questions, <em>answered.</em>
-            </h2>
-            <p className="t-lead mt-6 max-w-[30ch] sm:mt-8">
-              Straight answers on price, minimums, timing and reorders. Pull a thread to open one.
-            </p>
-            <p className="t-body mt-8 text-ink/90">
-              Something else?{' '}
-              <a href={`mailto:${CONTACT.email}`} className="inline-flex min-h-[44px] items-center font-medium">
-                <span className="link-u">{CONTACT.email}</span>
-              </a>
-            </p>
-          </div>
+    <section aria-labelledby="faq-title" className="overflow-x-clip bg-paper pb-20 text-ink sm:pb-28">
+      <div className="shell">
+        <Reveal>
+          <h2 id="faq-title" className="t-h1">
+            Questions, <em>answered.</em>
+          </h2>
         </Reveal>
 
-        <div className="col-span-4 mt-12 sm:col-span-8 lg:col-start-6 lg:col-end-13 lg:mt-0">
+        <div className="mt-10 sm:mt-14">
           {FAQ.map((item, i) => (
             <Entry
               key={item.number}
@@ -60,6 +48,13 @@ export default function Faq() {
             />
           ))}
         </div>
+
+        <p className="t-body mt-8 text-ink/90">
+          Something else?{' '}
+          <a href={`mailto:${CONTACT.email}`} className="inline-flex min-h-[44px] items-center font-medium">
+            <span className="link-u">{CONTACT.email}</span>
+          </a>
+        </p>
       </div>
     </section>
   );
@@ -94,9 +89,6 @@ function Entry({
           className="seam-q"
         >
           <span className="seam-q-row">
-            <span aria-hidden className="t-spec fg-muted">
-              {item.number}
-            </span>
             <span className="seam-q-text t-h3">{item.question}</span>
           </span>
           <Seam />
@@ -105,8 +97,8 @@ function Entry({
 
       <div id={aid} role="region" aria-labelledby={qid} inert={!isOpen} className="seam-under">
         <div className="min-h-0 overflow-hidden">
-          <div className="seam-answer grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-3 pb-6 pt-6 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:pb-8">
-            <div className="col-start-2">
+          <div className="seam-answer pb-6 pt-6 sm:pb-8">
+            <div>
               <p className="t-h2">{item.answer}</p>
               <p className="t-body mt-4 max-w-[62ch] text-ink/90">{item.line}</p>
               <button type="button" onClick={onClose} className="seam-close mt-6">
@@ -118,7 +110,7 @@ function Entry({
                     strokeLinecap="round"
                   />
                 </svg>
-                <span className="t-eyebrow">Close</span>
+                <span className="t-small">Close</span>
               </button>
             </div>
           </div>

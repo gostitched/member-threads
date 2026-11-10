@@ -13,8 +13,8 @@
   :root {
     /* ---- Type families (next/font variables are set on <html>) ---- */
     --font-display: var(--font-archivo);   /* block caps, numerals */
-    --font-sans: var(--font-archivo);      /* body, UI */
-    --font-mono: var(--font-archivo);      /* labels, spec lines (no true mono) */
+    --font-sans: var(--font-hanken);       /* body, UI */
+    --font-mono: var(--font-hanken);       /* labels, spec lines (no true mono) */
     --font-editorial: var(--font-newsreader); /* the voice */
     --font-serif: var(--font-script);      /* LEGACY name for the script */
 
@@ -245,23 +245,21 @@
   }
   /* Eyebrow / section label: small tracked caps. */
   .t-eyebrow {
-    font-family: var(--font-sans);
-    font-weight: 600;
-    font-stretch: 100%;
-    font-size: 12px;
-    line-height: 15px;
-    letter-spacing: 0.18em;
+    font-family: var(--font-varsity);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
-  /* Spec line: the tech-pack voice. STYLE MT-04 · 420 GSM · 36 MIN. */
+  /* Spec line: small, sentence case, tabular. Metadata and captions, never shouted. */
   .t-spec {
     font-family: var(--font-sans);
     font-weight: 500;
     font-stretch: 100%;
-    font-size: 12px;
-    line-height: 16px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 0.005em;
     font-variant-numeric: tabular-nums;
   }
   /* The script. A signature, not a typeface: one or two words, set off the
@@ -278,6 +276,16 @@
     transform-origin: 0 100%;
   }
   .num { font-variant-numeric: lining-nums tabular-nums; }
+  /* The varsity: Big Shoulders Text, tall condensed caps like a team jersey, for
+     short UI lines (nav, buttons, labels, chips, the promises). Never for sentences. */
+  .t-uniform {
+    font-family: var(--font-varsity);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.2;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
 
   /* ---- Legacy type classes, retuned ---- */
 
@@ -290,12 +298,11 @@
   }
   /* = .t-eyebrow. */
   .label {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-stretch: 100%;
-    font-size: 12px;
-    line-height: 15px;
-    letter-spacing: 0.16em;
+    font-family: var(--font-varsity);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
   }
 
@@ -312,12 +319,11 @@
     gap: 0.5em;
     padding: 0.7em 1em 0.66em;
     border-radius: 1px;
-    font-family: var(--font-sans);
-    font-weight: 600;
-    font-stretch: 100%;
-    font-size: 12px;
+    font-family: var(--font-varsity);
+    font-weight: 700;
+    font-size: 15px;
     line-height: 1;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     white-space: nowrap;
   }
@@ -364,9 +370,11 @@
     padding: 0 1.05rem;
     border: 1px solid var(--rule-c);
     border-radius: var(--radius);
-    font-family: var(--font-sans);
-    font-weight: 500;
-    font-size: 14px;
+    font-family: var(--font-varsity);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     line-height: 1;
     transition: background-color var(--dur-quick) ease, color var(--dur-quick) ease, border-color var(--dur-quick) ease;
   }
@@ -381,7 +389,7 @@
   }
 
   /* ---- Buttons ---------------------------------------------------------------
-     Square-shouldered, tracked caps. On hover a stitch runs inside the edge
+     Square-shouldered, sentence case. On hover a stitch runs inside the edge
      (the woven-label move) and the arrow steps forward. No pills, no shadows. */
   .btn {
     position: relative;
@@ -393,12 +401,11 @@
     gap: 0.75rem;
     padding: 0.9rem 1.6rem 0.85rem;
     border-radius: var(--radius);
-    font-family: var(--font-sans);
-    font-weight: 600;
-    font-stretch: 100%;
-    font-size: 13px;
+    font-family: var(--font-varsity);
+    font-weight: 800;
+    font-size: 17px;
     line-height: 1;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     white-space: nowrap;
     transition:
@@ -423,7 +430,7 @@
   .btn svg { flex: none; transition: transform var(--dur-base) var(--ease-out); }
   .btn:hover svg:last-child { transform: translateX(4px); }
   .btn:disabled, .btn[aria-disabled='true'] { opacity: 0.45; pointer-events: none; }
-  .btn-sm { min-height: 44px !important; padding: 0.7rem 1.1rem 0.65rem !important; font-size: 12px; }
+  .btn-sm { min-height: 44px !important; padding: 0.7rem 1.1rem 0.65rem !important; font-size: 16px; }
 
   /* Primary: green, cream type. (Legacy name kept: it is no longer blue.) */
   .btn-blue {
@@ -469,11 +476,17 @@
     100% { background-size: 100% 1px; background-position: 0 100%; }
   }
   /* Arrow link: label + arrow, arrow steps on hover. */
+  /* The secondary CTA beside a button: the varsity a step under .btn, underlined. */
   .link-arrow {
     display: inline-flex;
     align-items: center;
     gap: 0.6em;
     min-height: 44px;
+    font-family: var(--font-varsity);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
   .link-arrow svg { transition: transform var(--dur-base) var(--ease-out); }
   .link-arrow:hover svg { transform: translateX(4px); }
@@ -501,10 +514,9 @@
     margin-bottom: 0.5rem;
     font-family: var(--font-sans);
     font-weight: 600;
-    font-size: 12px;
-    line-height: 15px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-size: 14px;
+    line-height: 18px;
+    letter-spacing: 0.005em;
     color: var(--fg-muted);
   }
   .field {
@@ -604,10 +616,9 @@
     margin-top: 0.75rem;
     font-family: var(--font-sans);
     font-weight: 500;
-    font-size: 12px;
-    line-height: 16px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 0.005em;
     color: var(--fg-muted);
   }
 }
@@ -896,6 +907,29 @@
     70%, 100% { transform: translateY(200%); }
   }
 
+  /* ---- Arriving at a section from another page (see Arrival.tsx) ----------
+     The heading rises out of a clip, the lead and button fade up, each stitch
+     rule sews in from the left and its step follows, one after another. */
+  [data-arrive] .arrive-rise { animation: arrive-rise 760ms var(--ease-out) both; }
+  [data-arrive] .arrive-fade { animation: arrive-fade 640ms var(--ease-out) 260ms both; }
+  [data-arrive] .arrive-sew {
+    transform-origin: 0 50%;
+    animation: arrive-sew 700ms var(--ease-stitch) calc(200ms + var(--i, 0) * 130ms) both;
+  }
+  [data-arrive] .arrive-step > div { animation: arrive-fade 640ms var(--ease-out) calc(320ms + var(--i, 0) * 130ms) both; }
+  @keyframes arrive-rise {
+    from { clip-path: inset(0 -0.2em 100% -0.2em); transform: translateY(0.35em); }
+    to { clip-path: inset(-0.2em -0.2em -0.2em -0.2em); transform: none; }
+  }
+  @keyframes arrive-fade {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes arrive-sew {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .scroll-cue { animation: none !important; transform: none; }
@@ -1129,4 +1163,17 @@
   @media (prefers-reduced-motion: reduce) {
     .rise { animation: none !important; }
   }
+}
+
+/* The site's own filter menu (components/Dropdown): it drops in from the chip, a short pull. */
+.dropdown-menu {
+  transform-origin: top left;
+  animation: dropdown-in 160ms var(--ease-out) both;
+}
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-menu { animation: none; }
 }

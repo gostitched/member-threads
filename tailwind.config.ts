@@ -65,7 +65,7 @@ const config: Config = {
         aqua: '#EEE6D9',
       },
       fontFamily: {
-        // Archivo: body, UI, labels.
+        // Hanken Grotesk: body, UI, labels.
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         // Archivo 900 at full width: the block "THREADS" caps.
         display: ['var(--font-display)', 'system-ui', 'sans-serif'],

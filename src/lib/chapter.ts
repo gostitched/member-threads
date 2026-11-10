@@ -1,7 +1,7 @@
 /**
- * "Not a blank": the chapter under the homepage hero.
+ * "Yours, down to the stitch": the chapter under the homepage hero.
  *
- * Two acts and a close. 01 puts the house hoodie on the development table with
+ * Two acts and a close. 01 puts the signature hoodie on the development table with
  * the visitor's organization on the chest, and lets them build it detail by
  * detail while the tech pack prints. 02 shows the design team turning a loose
  * brief into a whole collection. The close is a cream band: name, colors,
@@ -58,13 +58,12 @@ export const initial = (name: string) => (name.trim().match(/\p{L}|\p{N}/u)?.[0]
 // ── Act 01 ────────────────────────────────────────────────────────────────────
 
 export const ACT1 = {
-  eyebrow: 'The house hoodie · 400 GSM',
   /** Sentence case; the bracketed word is set in the serif italic. */
-  title: ['Not a ', 'blank', '.'] as const,
-  /** The lead: what the hoodie is for. */
-  lead: 'Promo merch starts with a blank and a logo. We start with the garment: better fabric, a better cut, and every detail decided by you.',
+  title: ['Yours, down to the ', 'stitch', '.'] as const,
+  /** The lead, as on The Mitzvah Studio: `mark` is set bold in full ink. */
+  lead: { lead: 'We ', mark: 'literally manufacture', rest: ' every piece from scratch. Better fabric, better fit, and every detail is your call.' },
   /** The small line under it: how to play with the hoodie, and the price of a detail. */
-  hint: 'Type your organization’s name, pick a colorway, then add details. Each one is +$0.',
+  hint: 'Tap a detail to add it. None of them cost extra.',
   /** The chip that lands beside a detail as it goes on. */
   added: '+$0',
   /** The name field. */
@@ -77,7 +76,7 @@ export const ACT1 = {
   details: 'Details',
   reset: 'Start over',
   /** The drawing sheet's title block. */
-  sheet: 'Front · House hoodie',
+  sheet: 'Front · Signature hoodie',
 };
 
 /**
@@ -114,14 +113,14 @@ export type Callout = {
  * The hood liner takes a second press: solid jersey, then a rugby stripe.
  */
 export const CALLOUTS: Callout[] = [
-  { id: 'construction', word: 'Contrast stitch', add: 'Every seam', line: 'Contrast topstitch, {accent}', at: [478, 812], side: 'left', rides: 'side' },
-  { id: 'patch', word: 'Chenille patch', add: 'On the sleeve', line: 'Chenille “{initial}” patch, sleeve', at: [330, 1090], side: 'left', pin: [440, 1190], rides: 'side' },
-  { id: 'color', word: 'Colorway', add: 'Tap to change', line: 'Body / {color} fleece', at: [330, 1250], side: 'left', pin: [760, 1240], rides: 'side' },
-  { id: 'rib', word: 'Contrast rib', add: 'Hem and cuffs', line: '2×2 rib, {liner}, hem + cuffs', at: [300, 1690], side: 'left', pin: [660, 1690], rides: 'side' },
-  { id: 'liner', word: 'Hood liner', add: 'Inside the hood', line: '{liner} jersey hood liner', at: [1120, 300], side: 'right', pin: [1100, 280] },
-  { id: 'trims', word: 'Cords + aglets', add: 'Flat cord, metal tips', line: 'Flat drawcord, metal aglets', at: [1034, 740], side: 'right', pin: [1034, 700] },
-  { id: 'embroidery', word: 'Wordmark', add: 'Script, embroidered', line: '“{name}” script, embroidered, chest', at: [1250, 930], side: 'right', pin: [1240, 900] },
-  { id: 'print', word: 'Puff print', add: 'On the pocket', line: '“Season 01” puff print, pocket', at: [1010, 1500], side: 'right', pin: [1160, 1410] },
+  { id: 'construction', word: 'Contrast stitch', add: 'Every seam', line: 'Contrast topstitch', at: [478, 812], side: 'left', rides: 'side' },
+  { id: 'patch', word: 'Chenille patch', add: 'On the sleeve', line: 'Chenille patch on the sleeve', at: [330, 1090], side: 'left', pin: [440, 1190], rides: 'side' },
+  { id: 'color', word: 'Colorway', add: 'Tap to change', line: '{color} body', at: [330, 1250], side: 'left', pin: [760, 1240], rides: 'side' },
+  { id: 'rib', word: 'Contrast rib', add: 'Hem and cuffs', line: 'Contrast rib', at: [300, 1690], side: 'left', pin: [660, 1690], rides: 'side' },
+  { id: 'liner', word: 'Hood liner', add: 'Inside the hood', line: '{liner} hood liner', at: [1120, 300], side: 'right', pin: [1100, 280] },
+  { id: 'trims', word: 'Cords and aglets', add: 'Flat cord, metal tips', line: 'Flat cords, metal aglets', at: [1034, 740], side: 'right', pin: [1034, 700] },
+  { id: 'embroidery', word: 'Wordmark', add: 'Script, embroidered', line: '{name} on the chest', at: [1250, 850], side: 'right', pin: [1240, 820] },
+  { id: 'print', word: 'Puff print', add: 'On the pocket', line: 'Puff print on the pocket', at: [1010, 1500], side: 'right', pin: [1160, 1410] },
 ];
 
 // ── The garment ──────────────────────────────────────────────────────────────
@@ -199,7 +198,7 @@ export type Look = Record<Exclude<Custom, 'color'>, boolean> & {
 };
 
 /** The hood liner callout, once on: what the next press does, and the slip line with the stripe. */
-export const LINER_STRIPE = { next: 'Tap again for a stripe', on: 'Stripe · +$0', line: '{liner} rugby-stripe hood liner' };
+export const LINER_STRIPE = { next: 'Tap again for a stripe', on: 'Stripe · +$0', line: 'Striped hood liner' };
 
 /** Where the toy starts: dyed in the site's colorway, with the wordmark already on. */
 export const BLANK: Look = {
@@ -224,24 +223,17 @@ export const isOn = (look: Look, id: Custom) => (id === 'color' ? look.colorSet 
  */
 export const SLIP = {
   brand: 'Member Threads',
-  kicker: 'Tech pack',
-  title: '{name}',
-  no: 'MT-HD01',
-  specs: [
-    ['Body', '400 GSM fleece'],
-    ['Fit', 'Oversized, boxy'],
-    ['Colorway', '{color}'],
-    ['Minimum', '36 pcs'],
-  ] as const,
-  label: 'Neck label',
-  item: 'Detail',
+  title: '{name’s} hoodie / tech pack',
+  no: 'Style MT-H01',
+  qty: '400 GSM',
+  item: 'Item',
   upcharge: 'Upcharge',
   included: '+$0',
-  empty: 'Tap a detail to add it',
+  empty: 'Tap a detail to add it.',
   totalLabel: 'Total upcharge',
   total: '$0',
-  note: 'Design help included. One clear price, no customization fees.',
-  code: 'MT-HD01 · Season 01',
+  note: 'Every detail, design and development included',
+  code: 'MT 0400 2026',
 };
 
 // ── Act 02 ────────────────────────────────────────────────────────────────────
@@ -269,12 +261,11 @@ export type Piece = {
 };
 
 export const ACT3 = {
-  eyebrow: 'Design help, included',
   /** One headline; the middle string is set in the serif italic. */
   ask: ['Don’t know what you want yet? We design the ', 'whole', ' collection.'] as const,
-  body: 'Send a logo, a color, a reference, or nothing at all. Our designers build it into a cohesive set of pieces and revise until it’s right. Design help is included.',
-  /** An example collection on /work (slug provided by the Work page). */
-  link: { label: 'See the Eastline Run Club collection', href: '/work/eastline-run-club' },
+  body: 'Send a logo, a color or a screenshot. Your designer builds the set and revises it until it’s right.',
+  /** More concepts, on Get inspired. */
+  link: { label: 'See more concepts', href: '/work' },
   collection: {
     pieces: [
       { kind: 'quarterzip', label: 'Quarter-zip', spec: 'Brushed fleece · Forest', plate: 'cream', color: C.green, trim: C.green,
@@ -290,12 +281,9 @@ export const ACT3 = {
 // ── The close ─────────────────────────────────────────────────────────────────
 
 export const FINALE = {
-  /** Three lines; the last word of the last line is set in the serif italic. */
+  /** Three lines; "Your" becomes the organization's name once it is typed. */
   lines: ['Your name.', 'Your colors.', 'Your collection.'] as const,
-  /** The hang tag: who it's made for, then the house facts. */
-  madeFor: 'Made for',
-  tag: { style: 'The house hoodie', min: 'From 36 pieces' },
-  body: 'Start from the catalog, make every detail yours, and get one clear price. From 36 pieces per style.',
+  /** The sell under the lines. The minimum order lives in the FAQ. */
+  body: 'A free designer, no upcharges, and a collection your members will actually wear.',
   primary: { label: 'Start a collection', href: '/quote' },
-  secondary: { label: 'Browse the catalog', href: '/catalog' },
 };

@@ -106,7 +106,7 @@ export default function SizeChart({
           </caption>
           <thead>
             <tr className="border-b border-ink">
-              <th scope="col" className="t-eyebrow fg-muted sticky left-0 z-[1] w-28 bg-paper py-3 pr-4 font-semibold sm:w-40">
+              <th scope="col" className="t-spec fg-muted sticky left-0 z-[1] w-28 bg-paper py-3 pr-4 font-semibold sm:w-40">
                 Size
               </th>
               {sizes.map((s) => (

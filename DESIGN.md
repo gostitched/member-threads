@@ -10,7 +10,7 @@ Promo merch is *printed on*: a logo pressed onto a blank. Member Threads is *sew
 
 - **The woven label** is the signature object. Small, square-cornered, a running stitch just inside its edge (`.woven`). It carries roster numbers (No. 036), categories, "Members only", status. It overlaps photo edges the way a label overlaps a seam.
 - **The running stitch** is the one line that runs through the site (`.stitch-rule`, beige). It joins steps, divides the roster, underlines. Button hovers stitch themselves (`.btn::after`); links re-sew their underline (`.link-u`).
-- **The roster.** Everything is numbered and issued, like a membership list: collections are No. 001–0XX, catalog styles MT-01–MT-14, steps 01–04. Numbers are set in the block face. 36 (the minimum) is the house number; use it.
+- **The roster.** Everything is numbered and issued, like a membership list: collections are No. 001–0XX, catalog styles MT-01 onward, steps 01–04. Numbers are set in the block face. 36 (the minimum) is the house number; use it.
 
 The mood is the clubhouse, not the costume: Aimé Leon Dore / Sporty & Rich editorial calm with varsity weight used sparingly. Quiet paper, a serious serif voice, and then one heavy block moment that hits like the name across a chest.
 
@@ -21,7 +21,8 @@ Three voices plus a signature. All Google Fonts via `next/font/google` (self-hos
 | Voice | Family | License | Role |
 |---|---|---|---|
 | The Voice | **Newsreader** (Production Type), opsz 6–72, wght 200–800, italic | SIL OFL 1.1 | Headlines, leads, quotes. Italic is the only emphasis. |
-| The Uniform | **Archivo** (Omnibus-Type), wght 100–900, wdth 62–125 | SIL OFL 1.1 | 900 at wdth 125 = the logo's block "THREADS" (numerals, mast, names on garments). 400–600 at wdth 100 = body, UI, labels, spec. |
+| The Uniform | **Archivo** (Omnibus-Type), wght 100–900, wdth 62–125 | SIL OFL 1.1 | 900 at wdth 125 = the logo's block "THREADS" (numerals, names on garments). Display only. |
+| The Hand | **Hanken Grotesk** (Hanken Design Co.), wght 100–900 | SIL OFL 1.1 | The sans at text sizes: body, UI, captions, filters, labels, spec. Warm and quiet beside the serif. Chosen over Archivo, Libre Franklin, Schibsted, Instrument Sans and others. |
 | The Signature | **Yellowtail** (Astigmatic) | Apache 2.0 | Stand-in for Billion Dreams. Script, rare. |
 
 Brand-board fonts (Billion Dreams, Acumin, The Bold Font) are not licensed for web; do not add them. Fontshare's Gambetta was tested and rejected: its ITF license forbids redistribution, and the font files would sit in the repo.
@@ -38,10 +39,10 @@ Brand-board fonts (Billion Dreams, Acumin, The Bold Font) are not licensed for w
 | `.t-quote` | Newsreader 300 italic | 28px | 49px (max 52) | 1.08 | −0.02em | Testimonials, pull quotes. |
 | `.t-lead` | Newsreader 400 | 19px | 24px | 1.42 | −0.006em | First paragraph after a headline. Max 56ch (`max-w-measure`). |
 | `.t-block` | Archivo 900/125 caps | 24px | 43px (max 44) | 0.90 | −0.02em | Numerals, stats, roster numbers, short names. |
-| `.t-body` | Archivo 400 | 16px | 17px | 1.6 | 0 | Reading text. Max 62ch. |
-| `.t-small` | Archivo 400 | 14px | 14px | 1.5 | 0 | Secondary notes. |
+| `.t-body` | Hanken 400 | 16px | 17px | 1.6 | 0 | Reading text. Max 62ch. |
+| `.t-small` | Hanken 400 | 14px | 14px | 1.5 | 0 | Secondary notes. |
 | `.t-eyebrow` | Archivo 600 caps | 12px | 12px | 15px | 0.18em | Section labels. |
-| `.t-spec` | Archivo 500 caps, tabular | 12px | 12px | 16px | 0.06em | Tech-pack lines, captions, prices, metadata. |
+| `.t-spec` | Hanken 500 caps, tabular | 12px | 12px | 16px | 0.06em | Tech-pack lines, captions, prices, metadata. |
 
 **12px floor:** nothing on the site computes below 12px (eyebrows, `.label`, `.t-spec`, `.caption`, `.woven`, chip counts). Don't scale these down with utilities.
 | `.t-script` | Yellowtail | relative | relative | 1 | 0 | See rules. Rotated −5deg. |
@@ -87,6 +88,7 @@ Rules:
 - **Motif budget.** Max ONE hang tag per page. Woven labels only on photo corners and ID/roster numbers, max ~4 per viewport. Dashed stitch rules only as dividers that carry meaning (joining steps, splitting roster rows), never as decoration.
 - **CTA standard.** The only primary label is "Start a collection" (write it in sentence case; `.btn` sets it in tracked caps). One primary per viewport. Secondary actions are sentence-case `.link-arrow` links, never tracked caps or a second button style. No page-level CTA directly above the footer's CTA: end pages with a next-step link instead.
 - **Buttons:** `.btn-blue` (= `.btn-primary`, green), `.btn-white` (= `.btn-cream`, for dark bands), `.btn-outline` (hairline, current colour), modifier `.btn-sm`. Tracked caps 13px, 52/56px tall, square. Hover: a stitch appears inside the edge and the trailing arrow steps 4px. Always end primary CTAs with the arrow SVG. One primary per viewport.
+- **The varsity:** short UI lines (nav, buttons, chips, woven labels, eyebrows, the hero promises "Premium Quality · Unlimited Customization · No Upcharges", Menu) are Big Shoulders Text caps (`--font-varsity`, `.t-uniform`), tall and condensed like a team jersey. Body and captions are Hanken Grotesk, the slip DM Mono; headlines stay Newsreader. Write them in Title Case or sentence case in source; CSS caps them. Never a sentence.
 - **Links:** `.link-u` (re-sewing underline) for inline and nav; `.link-arrow` for "See all →".
 - **Labels:** `.t-eyebrow`; `.woven` (cream), `.woven-green`, `.woven-beige`, `.woven-dusty`, `.woven-lg`. `.stamp` is legacy and renders as `.woven-green`.
 - **Tags:** `.tag` (outlined, quiet: garment lists). **Chips:** `.chip` for filters and choices; selected state via `aria-pressed`/`aria-checked`/`aria-selected`/`data-on="true"`. 44px tall.
@@ -100,7 +102,7 @@ The photo editor will add files to `public/photos/` and a manifest at `src/lib/p
 
 - **Subjects:** real members in real places: a run club at 6am, a chapter on the quad steps, a team on an office rooftop, a fundraiser crowd. Groups of 3–8, mid-laugh, arms over shoulders: *belonging*. Details at macro: chenille texture, satin-stitch embroidery, a woven label, a rib cuff. Product: flat-lay or folded stacks on cream linen, shot top-down. No models isolated on white, no stock handshakes.
 - **Each photo asset is used once site-wide.** Exception: a collection's photos may appear both on its wall tile and on its own page.
-- **Frames:** use only `RATIO` from `src/lib/design.ts`: portrait 4:5 (people), tall 2:3 (hero, editorial), square (details), landscape 3:2 (places), cinema 21:9 (dossier heroes, desktop only; fall back to 4:5 on mobile). Crop tight: cut people at the shoulder or knee, never at joints; details fill the frame edge to edge.
+- **Frames:** use only `RATIO` from `src/lib/design.ts`: portrait 4:5 (people), tall 2:3 (hero, editorial), square (details), landscape 3:2 (places), cinema 21:9 (wide editorial plates, desktop only; fall back to 4:5 on mobile). Crop tight: cut people at the shoulder or knee, never at joints; details fill the frame edge to edge.
 - **Treatment:** wrap in `.photo` plus one of: `.grade` (default: warm, slightly desaturated, lifted, film-like), `.duo` (green shadows/cream highlights) or `.duo-dusty`. Add `.grain` to all of them. Duo is for "at rest" (wall tiles, roster hover thumbs, anything with type over it); full grade is for "in focus". Hovering a duo tile can release it to `.grade`: that is the wall's core interaction.
 - **Type and photos:** a headline may overlap a photo edge by up to one line; a woven label may sit across the edge. Type on a photo only with `.duo` or `.scrim`. Captions go under the image in `.caption`, never on it.
 - **Motion:** `.wipe-in` (uncovers bottom-up as it enters) or `.drift-in` (in-frame parallax, 14%). One per image, not both.
@@ -116,37 +118,35 @@ Things are sewn, not animated: a pull, then a soft stop.
 
 ## 8. Page direction
 
-**Header.** 72px, paper, hairline-b appears after 8px of scroll. Logo left (`mt-logo.svg`, 44/52/56px tall). Nav centre in Archivo 500 14px sentence case with `.link-u`, active page underlined permanently. Right: `.btn-blue .btn-sm` "Start a collection". Mobile menu: full-screen `.band-green`, items in `.t-h1` serif numbered with `.t-spec` 01–04, stitch rules between, `.woven-beige` "Est. 2023 · Members only" at the bottom.
+The site runs on the shared Stitched sister-site framework (the same page structure, components and UX as The Mitzvah Studio), dressed in this brand. Layouts below describe that framework as Member Threads renders it.
 
-**Home: Hero.** `.t-display` headline cols 1–8, sentence case, "*actually*" in Newsreader italic (no script in the hero). `.t-lead` under it, max 34ch, then primary + `.link-arrow`. Photo (2:3, grade + grain) cols 8–12, its top aligned with the eyebrow, its right edge bleeding to the viewport edge; a `.woven` "No. 036 · Harbor Run Club" crosses its bottom-left corner. Proof row in `.t-spec` separated by short stitch segments. Mobile: headline, lead, CTA, then the photo full-bleed.
+**Header.** 72/84/92px, paper, hairline-b after 8px of scroll. Logo left (`Wordmark`, 44/52/56px tall). Three links centred from md (How it works `/#how`, Catalog `/catalog`, Get inspired `/work`) in the varsity (Big Shoulders Text 800, 16px caps); hover sews an underline in, the active page keeps a running stitch. Right: `.btn-blue .btn-sm` "Start a collection". Mobile menu: full-screen paper sheet, the three pages in `.t-h1` serif numbered with `.t-spec` 01–03, stitch rules between, the primary, the email and a `.woven-beige` "Est. 2023 · A Stitched Group company"; the lettermark watermarks the corner in cream.
 
-**Home: Chapter (the hoodie).** `.band-cream`, full width. Headline `.t-h1` "Not a blank." with the explainer in `.t-lead`. Callouts become square `.chip`s; leader lines 1px dashed ink at 40%. The receipt keeps its paper and `.lift`, set in `.t-spec`. Script is right here: the name on the hoodie is the one script moment on the home page. Hoodie colours from the board.
+**Home: Hero.** Picture right. Left: the page's `.t-display` in two lines, "Apparel your members / *actually* want to wear." (no script in the hero), `.t-lead`, the primary + a `.link-arrow`, then the promises in `.t-spec` joined by short stitch segments. Right: two portrait photos (`.photo grade grain`), the second dropped 12%, on a square beige plate; the `RosterLabel` woven "No. 036 · Harbor Run Club" (it takes the typed name) crosses the plate's lower-left corner. Below lg everything centres and stacks. A stitched divider, "Sewn in, not printed on", sits just below the fold.
 
-**Home: Intro.** "Not merch. *A collection.*" in `.t-display`. The idea, made explicit: a two-column contrast, "Printed on" (blank tee, flat, muted) vs "Sewn in" (macro of embroidery), as two photos with `.caption`s. Then three pillars without cards: columns divided by vertical hairlines, each with a `.t-block` beige numeral, `.t-h3`, `.t-body`.
+**Home: Chapter (the hoodie).** On paper over `.board-grid`. Centred `.t-eyebrow`, `.t-h1` "Not a *blank*.", `.t-lead`, a `.t-small` hint. Desktop: one board: the house hoodie on a cream drawing sheet (linen, crop marks), eight numbered square `.chip`s either side with 1px dashed leaders, the name field and colorway swatches on the sheet under the garment, the woven sheet label "No. 036 · {name}" across the sheet's bottom edge, and the tech pack (`.lift`) on the board's lower right from xl (under the board below xl). Phone: the sheet with numbered pins, name and swatches, chips 2-up, the tech pack. Script lives here: the name on the hoodie is the home page's one script moment. Then Act 02: copy cols 1–4, three drawn pieces on square cream/beige plates carrying the name (phones swipe). Then the finale: one square `.band-green` panel (the page's one dark band), "*Your* name. / *Your* colors. / *Your* collection." in serif (the typed name replaces "Your"), a stitch, the lead, `.btn-white` + link, a `.woven-beige` "No. 036" in the corner.
 
-**Home: Audiences.** The site's `.band-green`: *The Roster*. Five full-width rows separated by hairlines: `.t-spec` number, audience name in `.t-h1` cream serif, one-line description, `.tag`s. Desktop hover: a 4:5 `.duo` photo follows the cursor within the row and the name shifts 8px right. Mobile: static list, tags visible. Close with "If you have 36 people who'd wear it, we can make it." and `.btn-white`.
+**Home: Intro.** Eyebrow + `.t-h1` "Not merch. *A collection.*" left, `.t-lead` right; three square plates (cream, oat, sand) each with a `.woven-green` "No. 0X", `.t-h3`, `.t-body`; a centred `.t-h2` closing line.
 
-**Home: How it works.** Sticky left column (cols 1–4): `.t-h1` + lead. Right (cols 6–12): four steps stacked with 96px between, joined by a vertical `.stitch-rule-v` that draws in. Each step: `.t-block` numeral, `.t-h3`, `.t-body`, and a small detail photo or drawing.
+**Home: How it works.** Sticky left column: eyebrow, `.t-h1` "Four steps. *One* collection.", lead, the primary. Right: four rows divided by stitch rules: `.t-block` beige-deep numeral, two-line `.t-h3`, `.t-body`.
 
-**Home: FAQ.** Keep the seam-unpicking interaction (it is the concept). Kill the white rounded panel: questions sit on paper in `.t-h3` serif, seams beige. Left sticky `.t-h1` "Questions, answered." Answers `.t-body` max 62ch.
+**Home: FAQ.** The seam-unpicking interaction (it is the concept), on paper, no panel. Eyebrow + `.t-h1` "Questions, *answered.*" on top, the six questions full width, the email under them.
 
-**Catalog.** Header: `.t-display` "The catalog." + lead; facts (Minimum 36 · Design included · 6–8 weeks) as a 3-column hairline table, `.t-eyebrow` over `.t-h3`. Keep the colour strip, square. Filters are `.chip`s, view toggles `.link-u`. Rack: keep the interaction; product tiles are cream plates (4:5, no radius) with `.t-spec` style code, `.t-h3` name, `.t-spec` "From $XX". No card chrome.
+**Catalog (/catalog).** "Build your *collection*." (`.t-h1`) + lead. One `Dropdown` filter (square chip, hairline menu, title-case group labels with counts) and a `.t-spec` count. A grid of every piece the dashboard publishes to this site (`CollectionBuilder`), on square plates tinted by kind from the board (cream, oat, sand, sage, mist), each with a `.t-spec` style number MT-01…, a serif name and a square + chip. Picked pieces gather in a green tray at the bottom that carries their names to `/quote?piece=…`. A photo that fails to load falls back to its drawing. Then a cream plate: "Need a piece that isn't *here?*" → /custom.
 
-**Product page.** Desktop: gallery cols 1–7 (stacked 4:5 plates, first one 2:3), info cols 9–12 sticky: `.t-spec` style code, `.t-h1` name, `.t-lead`, round colour swatches with the colour name in `.t-spec`, option `.chip`s, estimator as a hairline spec table with `.num`, full-width primary. Below: details as hairline rows (Fabric, Fit, Decoration, Care), size chart in tabular `.t-spec`. Mobile: gallery as a horizontal snap strip, then info.
+**Product page (/catalog/[slug]).** Breadcrumb link. Left (sticky): a square cream stage (photo or drawing) with thumbnails (photos, or colorways as drawings). Right: `.t-eyebrow` category, `.t-h1` name, `.t-spec` price line, `.t-lead` first paragraph, round colour swatches, the primary. Under it two cream plates (the details as hairline rows; the price estimator), a size-chart disclosure, and "Goes *with it*." with three `ProductCard`s.
 
-**Collections wall (/work).** "The members' wall." Asymmetric grid (spans of 4/5/3 columns, staggered vertical offsets), photos `.duo` at rest releasing to `.grade` on hover/focus, `.woven` "No. 012" over each tile's corner, org name `.t-h3` + `.t-spec` category under. Filter `.chip`s by audience. Mobile: single column, full grade.
+**Get inspired (/work).** "Get *inspired*." + lead; two `Dropdown`s (All Organizations, All Pieces), Clear, a count. A mixed-size wall of square tiles (`work/Catalog.tsx`), each a concept drawn in code (`work/art.tsx`) for a made-up organization in `src/lib/inspo.ts`, captioned "{Organization} · {Piece}" in `.t-spec`; "Show more designs". Real mockups go in `UPLOADS` (empty until there are approved ones). Ends on a cream plate (`Ending.tsx`): "The {name} collection." with the name typed into the headline in serif italic on a stitched underline, "starts here.", the primary.
 
-**Collection page (/work/[slug]).** A dossier. Full-bleed hero (21:9 desktop / 4:5 mobile) with the org name in `.t-display` overlapping its bottom edge by one line. Spec block as the one allowed label object: a cream `.woven`-style panel listing Org, Members, Pieces, Decoration, Year in `.t-spec`. Then alternating photo pairs and short paragraphs, one `.t-quote`, a row of the pieces (links to product pages), and a full-width "Next collection →" band.
+**About.** `.t-display` "Started for the clubs we were *in*.", the intro and the first line of the story, `founder.jpg` (4:5, grade) with a caption. "What you *get*." as four cream plates with woven numbers (`#what-you-get`), the Stitched Group note (`#stitched`), the primary and the email.
 
-**About.** Opens with `.t-display` founder line ("Started for the clubs we were in.") and `founder.jpg` (4:5, grade). The story as roster rows: year in `.t-block`, event in `.t-h3`, line in `.t-body`. Stitched Group in the page's `.band-green`.
+**Custom.** `.t-display` "Describe the *piece*." + "We'll develop it." + one paragraph; four cream plates (fabric, fit, construction, trims & labels) with woven numbers; what we make and how we finish it as `.tag`s; the primary.
 
-**Custom.** The tech-pack page. `harbor-working-drawing.svg` large on cream with numbered callouts (`.t-spec`) and dashed leaders; what you can change as a hairline table; CTA.
-
-**Quote.** Two columns: left sticky `.t-h1` "Start a collection." + three next steps + `.woven` reassurances (Design included · No upcharges · From 36). Right: the request form, which is an embedded Stitched app iframe (`RequestForm.tsx`; the remote sets `frame-ancestors`, so it is blank on localhost). Design the frame around it: no white rounded box, a cream plate with a `.t-spec` header line ("Request No. — · Member Threads × Stitched"), and a plain-link fallback to the form. Use `.field`/`.chip` for anything native. Success state: `.band-green` with the script sign-off "Welcome to the club." (the page's script moment).
+**Quote.** `QuoteTitle` (`.t-display`, personalised), one italic line, one sentence; the "For {name}" woven label and the email; a cream "You picked" plate when pieces arrive from the catalog; then the request form, an embedded Stitched app iframe (`RequestForm.tsx`; the remote sets `frame-ancestors`, so it is blank on localhost) in a cream plate with a `.t-spec` header line and a plain-link fallback. Success state: `.band-green` with the script sign-off "Welcome to the club." (the page's script moment).
 
 **404.** `.t-mast` "404" cropped by the viewport edge, `.t-h1` "Not on the roster.", links to catalog and home.
 
-**Footer.** `.band-green` on `green-deep`. Top: `.t-h1` "Ready when your members are." + `.btn-white`. Middle: link columns, `.t-eyebrow` heads in beige. Bottom: `.t-mast` "THREADS" in cream, full width, cropped ~18% by the bottom edge; `.woven-beige` "Est. 2023 · A Stitched Group company" and legal in `.t-spec`.
+**Footer.** Paper under a top rule: the wordmark and the email, two link columns (Explore, Company) with `.t-eyebrow` heads, the legal line in `.t-spec` with a `.woven-beige` "Est. 2023 · A Stitched Group company". Then `.t-mast` "THREADS" in green, full width, cropped ~18% by the bottom edge: the site's one heavy varsity moment.
 
 ## 9. Quality checklist (critics grade against this)
 
