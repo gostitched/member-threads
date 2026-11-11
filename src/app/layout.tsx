@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     siteName: 'Member Threads',
     type: 'website',
   },
-  icons: { icon: '/mt-icon.svg', apple: '/mt-icon.svg' },
+  icons: { icon: '/mt-icon.svg?v=2', apple: '/mt-icon.svg?v=2' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
