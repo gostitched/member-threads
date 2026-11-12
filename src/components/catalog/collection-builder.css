@@ -15,10 +15,12 @@
   aspect-ratio: 1;
   overflow: hidden;
   padding: 10%;
+  background: theme('colors.paper');
+  box-shadow: inset 0 0 0 1px theme('colors.rule');
   isolation: isolate;
-  transition: filter var(--dur-quick) ease-out;
+  transition: background-color var(--dur-quick) ease-out;
 }
-.cb-tile:hover .cb-tile-pic { filter: brightness(0.97); }
+.cb-tile:hover .cb-tile-pic { background: #fff; }
 .cb-tile-name {
   display: block;
   margin-top: 0.75rem;

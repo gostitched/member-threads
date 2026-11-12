@@ -11,8 +11,8 @@ import { garmentKind } from '@/lib/catalog/util';
 import './collection-builder.css';
 
 /**
- * The catalog: every piece the dashboard publishes to this site, grouped and tinted by
- * kind, each on a square plate. Visitors add pieces to a tray and
+ * The catalog: every piece the dashboard publishes to this site, grouped by kind, each
+ * on a blank hairline tile (the group tint only colours a fallback drawing). Visitors add pieces to a tray and
  * take the list to the quote form. Each tile still opens its piece page. A photo that
  * fails to load falls back to its drawing.
  */
@@ -98,7 +98,7 @@ export default function CollectionBuilder({ products }: { products: CatalogProdu
           return (
             <li key={product.slug} className="relative">
               <Link href={`/catalog/${product.slug}`} className="cb-tile">
-                <span className="cb-tile-pic" style={{ background: tint }}>
+                <span className="cb-tile-pic">
                   <Picture product={product} color={tint} />
                 </span>
                 <span className="cb-tile-name">{product.name}</span>
