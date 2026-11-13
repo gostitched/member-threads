@@ -144,92 +144,6 @@ body:has(.rk) { background: theme('colors.paper'); }
 .ct-sw:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 /* ── Estimator ────────────────────────────────────────────────────────────── */
-.ct-tier {
-  position: relative;
-  transition: background-color var(--dur-quick) ease, color var(--dur-quick) ease;
-}
-.ct-tier::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: -1px;
-  bottom: -1px;
-  width: 2px;
-  background: theme('colors.ink');
-  transform: scaleY(0);
-  transform-origin: 50% 50%;
-  transition: transform var(--dur-base) var(--ease-stitch);
-}
-.ct-tier[data-on='true']::before { transform: none; }
-.ct-tier[data-on='true'] { background: theme('colors.cream'); }
-.ct-tier button { min-height: 44px; }
-.ct-tier:hover:not([data-on='true']) { background: color-mix(in srgb, theme('colors.cream') 55%, transparent); }
-
-.ct-stepper button {
-  display: inline-grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--rule-c);
-  border-radius: var(--radius);
-  transition: border-color var(--dur-quick) ease, background-color var(--dur-quick) ease;
-}
-.ct-stepper button:hover:not(:disabled) { border-color: currentColor; }
-.ct-stepper button:disabled { opacity: 0.35; }
-.ct-stepper input {
-  width: 5.5ch;
-  min-height: 44px;
-  background: transparent;
-  border-bottom: 1px solid color-mix(in srgb, currentColor 32%, transparent);
-  text-align: center;
-  font-family: var(--font-sans);
-  font-size: 17px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  -moz-appearance: textfield;
-}
-.ct-stepper input::-webkit-outer-spin-button,
-.ct-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.ct-stepper input:focus-visible { outline: none; border-bottom-color: currentColor; box-shadow: 0 1px 0 0 currentColor; }
-
-/* The slider's filled run, drawn as a stitch up to the thumb. */
-.ct-range { position: relative; }
-.ct-range-fill {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  height: 2px;
-  margin-top: -1px;
-  background: theme('colors.ink');
-  pointer-events: none;
-}
-.ct-range-tick {
-  position: absolute;
-  top: 50%;
-  width: 1px;
-  height: 10px;
-  margin-top: -5px;
-  background: theme('colors.ink');
-  opacity: 0.35;
-  pointer-events: none;
-}
-.ct-range .range { position: relative; z-index: 1; }
-.ct-range .range::-webkit-slider-runnable-track { background: transparent; }
-.ct-range .range::-moz-range-track { background: transparent; }
-.ct-range-track {
-  position: absolute;
-  inset: 50% 0 auto 0;
-  height: 2px;
-  margin-top: -1px;
-  background: theme('colors.rule');
-  pointer-events: none;
-}
-.ct-range .range::-webkit-slider-thumb { box-shadow: none; border-color: theme('colors.paper'); }
-.ct-range .range:focus-visible { outline: none; }
-.ct-range:has(.range:focus-visible) { outline: 2px solid theme('colors.dusty'); outline-offset: 2px; }
-.ct-range .range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px theme('colors.paper'), 0 0 0 4px var(--focus); }
-.ct-range .range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px theme('colors.paper'), 0 0 0 4px var(--focus); }
-
 /* A figure changing: it ticks up from below, once per change. */
 .ct-tick { display: inline-block; animation: ct-tick var(--dur-base) var(--ease-out); }
 @keyframes ct-tick { from { opacity: 0.2; transform: translateY(0.25em); } to { opacity: 1; transform: none; } }
@@ -309,8 +223,6 @@ details[open] .ct-plus::after { transform: rotate(0deg); }
 
 @media (prefers-reduced-motion: reduce) {
   .ct-plate::after,
-  .ct-tier,
-  .ct-tier::before,
   .ct-sw > i,
   .ct-plus::before,
   .ct-plus::after { transition: none; }
