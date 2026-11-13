@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import { Arrow } from '@/components/SiteHeader';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { LOOKBOOK_KIND_LABELS, type LookbookPiece, type LookbookSet } from '@/lib/catalog/types';
 import { layFlat } from './flatlay';
 
@@ -10,8 +9,8 @@ export const pieceName = (p: LookbookPiece) => p.label ?? LOOKBOOK_KIND_LABELS[p
 
 /**
  * A set, enlarged: the same flat-lay at full size on its own ground, with a Front/Back
- * switch (when the set has backs) and arrows to step through the wall. Esc or a click
- * outside closes it.
+ * switch (when the set has backs) and arrows to step through the wall. A piece made from
+ * a catalog product links to it by name. Esc or a click outside closes it.
  */
 export default function SetViewer({
   sets,
@@ -32,7 +31,6 @@ export default function SetViewer({
   const names = s.pieces.map(pieceName).join(' + ');
   const placed = layFlat(s.pieces);
   const hasBack = s.pieces.some((p) => p.back);
-  const made = s.pieces.filter((p) => p.product);
   const step = (d: number) => onIndex((index + d + sets.length) % sets.length);
 
   useEffect(() => {
@@ -73,14 +71,37 @@ export default function SetViewer({
             </div>
           );
         })}
+        {sets.length > 1 && (
+          <>
+            <button type="button" onClick={() => step(-1)} aria-label="Previous design" className="set-viewer-nav is-prev">
+              <span aria-hidden>←</span>
+            </button>
+            <button type="button" onClick={() => step(1)} aria-label="Next design" className="set-viewer-nav is-next">
+              <span aria-hidden>→</span>
+            </button>
+          </>
+        )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 pt-4">
+      <div className="flex items-center gap-3 pt-3">
         <div className="min-w-0">
           <p className="t-spec text-muted">{s.theme}</p>
-          <p className="t-body font-medium text-ink">{names}</p>
+          <p className="t-body font-medium text-ink">
+            {s.pieces.map((p, i) => (
+              <Fragment key={p.id}>
+                {i > 0 && ' + '}
+                {p.product ? (
+                  <Link href={`/catalog/${p.product.slug}`} className="set-viewer-piece">
+                    {pieceName(p)}
+                  </Link>
+                ) : (
+                  pieceName(p)
+                )}
+              </Fragment>
+            ))}
+          </p>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center">
           {hasBack && (
             <div className="flex border border-[var(--rule-c)]" role="group" aria-label="Side">
               {(['Front', 'Back'] as const).map((label) => {
@@ -99,29 +120,8 @@ export default function SetViewer({
               })}
             </div>
           )}
-          <button type="button" onClick={() => step(-1)} aria-label="Previous design" className="set-viewer-nav">
-            <span aria-hidden>←</span>
-          </button>
-          <button type="button" onClick={() => step(1)} aria-label="Next design" className="set-viewer-nav">
-            <span aria-hidden>→</span>
-          </button>
-          <Link href="/quote" className="btn-blue ml-1 hidden sm:inline-flex">
-            Start a collection <Arrow className="h-[14px] w-[19px]" />
-          </Link>
         </div>
       </div>
-
-      {made.length > 0 && (
-        <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2 border-t border-[var(--rule-c)] pt-3">
-          {made.map((p) => (
-            <li key={p.id}>
-              <Link href={`/catalog/${p.product!.slug}`} className="t-body font-medium text-ink">
-                <span className="link-u">Make this: {p.product!.name}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
 
       <button type="button" onClick={() => ref.current?.close()} aria-label="Close" className="set-viewer-close">
         <svg aria-hidden viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="square">

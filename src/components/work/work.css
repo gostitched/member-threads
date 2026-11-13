@@ -45,28 +45,34 @@
 .set-open { position: absolute; inset: 0; z-index: 2; cursor: zoom-in; }
 .set-open:focus-visible { outline: 2px solid theme('colors.ink'); outline-offset: -4px; }
 .set-viewer {
-  width: min(92vw, 78vh + 3rem);
+  width: min(92vw, 62vh + 1.5rem);
   max-width: none;
   max-height: none;
   margin: auto;
-  padding: 1rem 1rem 1.125rem;
+  padding: 0.75rem 0.75rem 1rem;
   background: theme('colors.paper');
   overflow: visible;
 }
 .set-viewer::backdrop { background: rgba(19, 51, 39, 0.6); }
 .set-viewer[open] { animation: set-in 260ms cubic-bezier(0.16, 1, 0.3, 1); }
 @keyframes set-in { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
-.set-viewer-stage { position: relative; aspect-ratio: 1; max-height: 78vh; margin-inline: auto; overflow: hidden; }
-.set-viewer-nav {
-  display: inline-flex; height: 2.75rem; width: 2.75rem; align-items: center; justify-content: center;
-  border: 1px solid var(--rule-c); color: theme('colors.ink'); font-size: 1.125rem;
-}
-.set-viewer-nav:hover { background: rgba(19, 51, 39, 0.06); }
+.set-viewer-stage { position: relative; aspect-ratio: 1; max-height: 62vh; margin-inline: auto; overflow: hidden; }
+/* Arrows and close sit on the picture, so the row below holds only the name and the side. */
+.set-viewer-nav,
 .set-viewer-close {
-  position: absolute; right: -0.75rem; top: -0.75rem; display: inline-flex; height: 2.75rem; width: 2.75rem;
-  align-items: center; justify-content: center; background: theme('colors.paper'); color: theme('colors.ink');
-  box-shadow: 0 4px 14px rgba(19, 51, 39, 0.2);
+  position: absolute; z-index: 3; display: inline-flex; height: 2.5rem; width: 2.5rem; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.85); color: theme('colors.ink'); font-size: 1rem;
+  box-shadow: inset 0 0 0 1px var(--rule-c);
+  transition: background-color 160ms ease-out;
 }
+.set-viewer-nav:hover,
+.set-viewer-close:hover { background: #fff; }
+.set-viewer-nav { top: 50%; translate: 0 -50%; }
+.set-viewer-nav.is-prev { left: 0.625rem; }
+.set-viewer-nav.is-next { right: 0.625rem; }
+.set-viewer-close { right: 1.375rem; top: 1.375rem; }
+.set-viewer-piece { text-decoration: underline; text-decoration-color: rgba(19, 51, 39, 0.3); text-underline-offset: 4px; }
+.set-viewer-piece:hover { text-decoration-color: currentColor; }
 @media (prefers-reduced-motion: reduce) { .set-viewer[open] { animation: none; } }
 
 /* The closing panel: the name typed straight into the headline, on a stitched underline. */

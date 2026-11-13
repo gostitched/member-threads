@@ -92,11 +92,11 @@ export default async function ProductPage({ params }: Props) {
       {(specs.length > 0 || breaks.length > 0) && (
         <section className={`shell grid gap-4 pb-16 [&>*]:min-w-0 ${specs.length && breaks.length ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]' : ''}`}>
           {specs.length > 0 && (
-            <div className="bg-cream p-6 sm:p-8">
+            <div className="bg-white p-6 ring-1 ring-inset ring-rule sm:p-8">
               <h2 className="t-h3">The details.</h2>
               <dl className="mt-5">
                 {specs.map(([k, v]) => (
-                  <div key={k} className="flex items-baseline justify-between gap-6 border-t border-[#CFC2AD] py-3.5">
+                  <div key={k} className="flex items-baseline justify-between gap-6 border-t border-rule py-3.5">
                     <dt className="t-spec shrink-0 text-muted">{k}</dt>
                     <dd className="t-body text-right">{v}</dd>
                   </div>
@@ -105,7 +105,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
           )}
           {breaks.length > 0 && (
-            <div className="bg-cream p-6 sm:p-8">
+            <div className="bg-white p-6 ring-1 ring-inset ring-rule sm:p-8">
               <h2 className="t-h3">Order more, pay less.</h2>
               <div className="mt-5">
                 <PriceEstimator breaks={breaks} minimum={product.minimumOrderQuantity} />
@@ -117,7 +117,7 @@ export default async function ProductPage({ params }: Props) {
 
       {hasChart && (
         <section className="shell pb-16">
-          <details className="group bg-cream p-6 sm:p-8">
+          <details className="group bg-white p-6 ring-1 ring-inset ring-rule sm:p-8">
             <summary className="t-h3 flex min-h-[44px] cursor-pointer list-none items-center justify-between [&::-webkit-details-marker]:hidden">
               Size chart
               <span aria-hidden className="text-ink transition-transform duration-quick group-open:rotate-45 motion-reduce:transition-none">+</span>
