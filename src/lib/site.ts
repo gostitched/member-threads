@@ -24,11 +24,10 @@ export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.gostitche
  * Member Threads's embed key (Stitched dashboard → Embed sites). Public by design:
  * it tells the dashboard which site is asking, so leads land under this brand and the
  * form only frames on this site's registered origins. The live catalog reads with it too.
- * [CONFIRM] This value is identical to the sister site's key (inherited when this site
- * was duplicated): until Member Threads has its own, leads and catalog placements are that
- * site's. Set NEXT_PUBLIC_EMBED_KEY / STITCHED_CATALOG_KEY or replace it here.
+ * Member Threads has no key of its own in code: set NEXT_PUBLIC_EMBED_KEY. Never fall back
+ * to another site's key; without one, the catalog and Get inspired render empty.
  */
-export const EMBED_KEY = process.env.NEXT_PUBLIC_EMBED_KEY || 'emb_live_NGvIwbuofqui3d54tGp97zcJ';
+export const EMBED_KEY = process.env.NEXT_PUBLIC_EMBED_KEY?.trim() || '';
 export const REQUEST_FORM_URL = `${APP_URL}/embed/v1/form?embed=true&key=${encodeURIComponent(EMBED_KEY)}`;
 
 /** [CONFIRM] inbox. */

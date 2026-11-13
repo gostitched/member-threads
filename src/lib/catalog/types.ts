@@ -119,3 +119,72 @@ export interface Catalog {
   brand: CatalogBrand | null;
   products: CatalogProduct[];
 }
+
+// ── The lookbook ──────────────────────────────────────────────────────────────
+
+/**
+ * The dashboard's lookbook, as `GET /api/embed/v1/catalog/lookbook` serves it: the
+ * published sets of design flats placed on this site. Kinds and labels mirror the
+ * dashboard (`src/modules/catalog/lookbook/types.ts`).
+ */
+export type LookbookPieceKind =
+  | 'hoodie' | 'zip_hoodie' | 'crewneck' | 'quarter_zip'
+  | 'jersey' | 'polo' | 'tee' | 'baby_tee' | 'tank' | 'crop_top'
+  | 'sweatpant' | 'jogger' | 'legging' | 'pj_pant' | 'short' | 'skirt'
+  | 'hat' | 'tote' | 'other';
+
+export const LOOKBOOK_KIND_LABELS: Readonly<Record<LookbookPieceKind, string>> = {
+  hoodie: 'Hoodie',
+  zip_hoodie: 'Zip hoodie',
+  crewneck: 'Crewneck',
+  quarter_zip: 'Quarter zip',
+  jersey: 'Jersey',
+  polo: 'Polo',
+  tee: 'Tee',
+  baby_tee: 'Baby tee',
+  tank: 'Tank',
+  crop_top: 'Crop top',
+  sweatpant: 'Sweatpant',
+  jogger: 'Jogger',
+  legging: 'Legging',
+  pj_pant: 'PJ pant',
+  short: 'Short',
+  skirt: 'Skirt',
+  hat: 'Hat',
+  tote: 'Tote',
+  other: 'Other',
+};
+
+/** One side of a flat. Absolute URLs that redirect to a signed image. */
+export interface LookbookImage {
+  url: string;
+  thumbUrl: string;
+}
+
+export interface LookbookPiece {
+  id: string;
+  position: number;
+  kind: LookbookPieceKind;
+  /** The editor's name for the piece; the kind's label when null. */
+  label: string | null;
+  /** The catalog piece it is made from, if any. */
+  product: { slug: string; name: string } | null;
+  /** The flat's pixel size. */
+  w: number;
+  h: number;
+  front: LookbookImage;
+  back: LookbookImage | null;
+}
+
+export interface LookbookSet {
+  id: string;
+  theme: string;
+  sort: number;
+  pieces: LookbookPiece[];
+}
+
+export interface Lookbook {
+  siteId: string;
+  version: string | number;
+  sets: LookbookSet[];
+}

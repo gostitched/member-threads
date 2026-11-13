@@ -19,9 +19,10 @@
  *
  * ── THE KEY ──────────────────────────────────────────────────────────────────
  * Catalog reads require an embed key; a keyless read is refused. The key is public by
- * design (it sits in page source wherever the catalog is embedded), so it falls back to
- * this site's own embed key, the same one the request form uses. `STITCHED_CATALOG_KEY` overrides it,
- * and must after a key rotation.
+ * design (it sits in page source wherever the catalog is embedded). It is
+ * `STITCHED_CATALOG_KEY`, else `NEXT_PUBLIC_EMBED_KEY` (`EMBED_KEY`, the one the request
+ * form uses). There is no key in code: never another site's. Without one, nothing is
+ * read and the catalog and lookbook render empty.
  *
  * Server-side requests carry no `Origin`, which the dashboard's allowlist permits;
  * browsers never call the API from this site, so no CORS entry is involved.
@@ -34,13 +35,14 @@
 
 import { APP_URL, EMBED_KEY } from '@/lib/site';
 import { LOCAL_CATALOG } from './local';
-import type { Catalog, CatalogBrand, CatalogProduct, CatalogSource } from './types';
+import type { Catalog, CatalogBrand, CatalogProduct, CatalogSource, Lookbook, LookbookSet } from './types';
 
 /** The dashboard is the default; `CATALOG_SOURCE=local` serves the local list. */
 const LIVE = process.env.CATALOG_SOURCE?.trim().toLowerCase() !== 'local';
 
-/** This site's embed key (see `EMBED_KEY` in `@/lib/site`); `STITCHED_CATALOG_KEY` overrides it. */
+/** `STITCHED_CATALOG_KEY`, else `NEXT_PUBLIC_EMBED_KEY` (`EMBED_KEY` in `@/lib/site`), else none. */
 const KEY = process.env.STITCHED_CATALOG_KEY?.trim() || EMBED_KEY;
+const NO_KEY = 'no embed key: set STITCHED_CATALOG_KEY or NEXT_PUBLIC_EMBED_KEY';
 const REVALIDATE_SECONDS = 60;
 /** Every catalog read carries this tag; `/api/revalidate` drops them all at once. */
 export const CATALOG_TAG = 'stitched-catalog';
@@ -72,6 +74,10 @@ const nothing = (source: CatalogSource, brand: CatalogBrand | null): Catalog => 
 /** Every product placed on this site, featured first as the dashboard orders them. */
 export async function getCatalog(): Promise<Catalog> {
   if (!LIVE) return LOCAL_CATALOG;
+  if (!KEY) {
+    console.warn(`[catalog] ${NO_KEY}`);
+    return nothing('unavailable', null);
+  }
   const products: CatalogProduct[] = [];
   let brand: CatalogBrand | null = null;
 
@@ -105,7 +111,7 @@ export async function getProduct(slug: string): Promise<{ product: CatalogProduc
   // (placed in the last minute).
   const listed = catalog.products.find((p) => p.slug === slug);
   if (listed) return { product: listed, source: catalog.source };
-  if (!LIVE) return null;
+  if (!LIVE || !KEY) return null;
 
   try {
     const { body } = await getJson<{ product: CatalogProduct }>(endpoint(`/products/${encodeURIComponent(slug)}`));
@@ -113,4 +119,27 @@ export async function getProduct(slug: string): Promise<{ product: CatalogProduc
   } catch {
     return null;
   }
+}
+
+/**
+ * The lookbook's published sets for this site, in the dashboard's order. Read live
+ * whatever `CATALOG_SOURCE` says: there is no local lookbook. No key reads nothing.
+ * Throws when the dashboard refuses or can't be reached, so the page keeps its last good
+ * render instead of going blank.
+ */
+export async function getLookbook(): Promise<LookbookSet[]> {
+  if (!KEY) {
+    console.warn(`[lookbook] ${NO_KEY}`);
+    return [];
+  }
+  let result: Awaited<ReturnType<typeof getJson<Lookbook>>>;
+  try {
+    result = await getJson<Lookbook>(endpoint('/lookbook'));
+  } catch (error) {
+    throw new Error(`[lookbook] could not reach the dashboard at ${APP_URL}`, { cause: error });
+  }
+  if (!result.body) throw new Error(`[lookbook] the dashboard refused the lookbook read (${result.status})`);
+  return [...result.body.sets]
+    .sort((a, b) => a.sort - b.sort)
+    .map((set) => ({ ...set, pieces: [...set.pieces].sort((a, b) => a.position - b.position) }));
 }

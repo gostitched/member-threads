@@ -1,9 +1,8 @@
 /**
  * The drawings: the types every drawn piece on the site is built from.
  *
- * Get Inspired (`@/lib/inspo`) and the chapter's three example pieces
- * (`@/lib/chapter`) describe garments with these types; `@/components/work/art`
- * draws them as SVG, in the organization's colors. None of it is a real
+ * The chapter's three example pieces (`@/lib/chapter`) describe garments with these
+ * types; `@/components/work/art` draws them as SVG, in the organization's colors. None of it is a real
  * organization's work: every drawing is a concept.
  */
 

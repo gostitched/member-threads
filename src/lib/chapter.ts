@@ -264,8 +264,8 @@ export const ACT3 = {
   /** One headline; the middle string is set in the serif italic. */
   ask: ['Don’t know what you want yet? We design the ', 'whole', ' collection.'] as const,
   body: 'Send a logo, a color or a screenshot. Your designer builds the set and revises it until it’s right.',
-  /** More concepts, on Get inspired. */
-  link: { label: 'See more concepts', href: '/work' },
+  /** More designs, on Get inspired. */
+  link: { label: 'See more designs', href: '/work' },
   collection: {
     pieces: [
       { kind: 'quarterzip', label: 'Quarter-zip', spec: 'Brushed fleece · Forest', plate: 'cream', color: C.green, trim: C.green,
