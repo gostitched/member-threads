@@ -1,66 +1,77 @@
 'use client';
 
-import Image from 'next/image';
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import Dropdown from '@/components/Dropdown';
+import { Arrow } from '@/components/SiteHeader';
+import type { LookbookSet } from '@/lib/catalog/types';
+import { GROUNDS, GROUP_OF, PIECE_GROUPS, type PieceGroup } from '@/lib/lookbook';
 import Ending from './Ending';
-import WorkArt from './art';
-import { INSPO, INSPO_THEMES, PIECE_GROUPS, type Inspo, type PieceGroup } from '@/lib/inspo';
+import { layFlat } from './flatlay';
+import SetViewer, { pieceName } from './SetViewer';
 import './work.css';
 
 /**
- * Get Inspired: a wall of concept designs to browse. Nothing to open; what's shown is
- * what there is. Filter by organization and by piece. Every tile is a concept, drawn
- * for a made-up club, team, company or cause.
+ * Get Inspired: the lookbook, one card per set, laid flat, front first. Hover (or tap
+ * the See back pill) to see the back; click to enlarge. Filter by organization and by
+ * piece. Sets come from the dashboard, in its order.
  */
 
 const PAGE = 48;
 
-const luminance = (hex: string) => {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-};
-
-function Tile({ t }: { t: Inspo }) {
-  const fills = !!t.src || t.art?.t === 'plate';
+function SetCard({ s, ground, onOpen }: { s: LookbookSet; ground: string; onOpen: () => void }) {
+  const [back, setBack] = useState(false);
+  const names = s.pieces.map(pieceName).join(' + ');
+  const placed = layFlat(s.pieces);
+  const hasBack = s.pieces.some((p) => p.back);
   return (
-    <div className="cat-tile" style={{ '--span': Math.round(t.ratio * 12) } as React.CSSProperties}>
-      <figure className="relative h-full overflow-hidden" style={{ background: t.ground }}>
-        <div className={fills ? 'absolute inset-0' : 'absolute inset-x-[9%] bottom-[5%] top-[13%]'}>
-          {t.src ? (
-            <Image src={t.src} alt="" fill sizes="(min-width: 1536px) 19vw, (min-width: 1024px) 24vw, (min-width: 640px) 32vw, 48vw" className="object-cover" />
-          ) : t.art ? (
-            <WorkArt art={t.art} className="absolute inset-0 h-full w-full" />
-          ) : null}
-        </div>
-        <figcaption
-          className={`t-spec absolute ${
-            fills ? 'left-2 top-2 bg-paper/95 px-2 py-1 text-ink' : `inset-x-3 top-2.5 ${luminance(t.ground) < 0.18 ? 'text-paper' : 'text-ink'}`
-          }`}
-        >
-          <span className="sr-only">Concept design: </span>
-          {t.theme} · {t.piece}
-        </figcaption>
-      </figure>
-    </div>
+    <figure className="set-card" data-back={back || undefined} style={{ background: ground }}>
+      {s.pieces.map((p, i) => {
+        const at = placed[i];
+        return (
+          <div
+            key={p.id}
+            className="set-piece"
+            data-flip={p.back ? '' : undefined}
+            style={{ left: `${at.left}%`, top: `${at.top}%`, width: `${at.width}%`, height: `${at.height}%`, rotate: `${at.rotate}deg`, zIndex: i === 0 ? 2 : 1 }}
+          >
+            <img src={p.front.thumbUrl} alt="" loading="lazy" decoding="async" className="set-face is-front" />
+            {p.back && <img src={p.back.thumbUrl} alt="" loading="lazy" decoding="async" className="set-face is-back" />}
+          </div>
+        );
+      })}
+      <figcaption className="t-spec absolute inset-x-3 top-2.5 text-ink">
+        {s.theme} · {names}
+      </figcaption>
+      <button type="button" onClick={onOpen} className="set-open" aria-label={`Enlarge ${s.theme}: ${names}`} />
+      {hasBack && (
+        <button type="button" aria-pressed={back} onClick={() => setBack((b) => !b)} className="set-flip">
+          {back ? 'See front' : 'See back'}
+          <span className="sr-only"> of {names}</span>
+        </button>
+      )}
+    </figure>
   );
 }
 
-export default function Catalog() {
+export default function Catalog({ sets }: { sets: LookbookSet[] }) {
   const [theme, setTheme] = useState<string | null>(null);
   const [group, setGroup] = useState<PieceGroup | null>(null);
   const [shown, setShown] = useState(PAGE);
+  const [open, setOpen] = useState<number | null>(null);
 
-  const matches = useMemo(
-    () => INSPO.filter((t) => (!theme || t.theme === theme) && (!group || t.group === group)),
-    [theme, group],
-  );
+  // A set keeps its ground whatever the filters show.
+  const grounds = useMemo(() => new Map(sets.map((s, i) => [s.id, GROUNDS[i % GROUNDS.length]])), [sets]);
+  const allThemes = useMemo(() => [...new Set(sets.map((s) => s.theme))].sort((a, b) => a.localeCompare(b)), [sets]);
+  const has = (s: LookbookSet, g: PieceGroup | null) => !g || s.pieces.some((p) => GROUP_OF[p.kind] === g);
+  const matches = useMemo(() => sets.filter((s) => (!theme || s.theme === theme) && has(s, group)), [sets, theme, group]);
   // Only offer choices that lead somewhere, so a filter can never land on nothing.
-  const themes = useMemo(() => INSPO_THEMES.filter((name) => INSPO.some((t) => t.theme === name && (!group || t.group === group))), [group]);
-  const groups = useMemo(() => PIECE_GROUPS.filter((g) => INSPO.some((t) => t.group === g.id && (!theme || t.theme === theme))), [theme]);
+  const themes = useMemo(() => allThemes.filter((name) => sets.some((s) => s.theme === name && has(s, group))), [allThemes, sets, group]);
+  const groups = useMemo(() => PIECE_GROUPS.filter((g) => sets.some((s) => has(s, g.id) && (!theme || s.theme === theme))), [sets, theme]);
   const choose = (next: () => void) => {
     next();
     setShown(PAGE);
+    setOpen(null);
   };
 
   return (
@@ -74,47 +85,62 @@ export default function Catalog() {
         </p>
       </header>
 
-      <div className="relative flex flex-wrap items-center gap-2 pb-5">
-        <Dropdown
-          label="Filter by organization"
-          all="All Organizations"
-          value={theme ?? ''}
-          options={themes.map((t) => ({ value: t, label: t }))}
-          onChange={(v) => choose(() => setTheme(v || null))}
-        />
-        <Dropdown
-          label="Filter by piece"
-          all="All Pieces"
-          value={group ?? ''}
-          options={groups.map((g) => ({ value: g.id, label: g.label }))}
-          onChange={(v) => choose(() => setGroup((v as PieceGroup) || null))}
-        />
-        {(theme || group) && (
-          <button
-            type="button"
-            onClick={() => choose(() => { setTheme(null); setGroup(null); })}
-            className="min-h-11 px-2 font-sans text-[0.9375rem] font-medium text-ink"
-          >
-            <span className="link-u">Clear</span>
-          </button>
-        )}
-        <p role="status" className="t-spec num ml-auto whitespace-nowrap text-muted">
-          {matches.length} {matches.length === 1 ? 'design' : 'designs'}
-        </p>
-      </div>
-
-      <div className="cat-frame">
-        <div className="cat-wall">
-          {matches.slice(0, shown).map((t) => <Tile key={t.id} t={t} />)}
+      {sets.length === 0 ? (
+        <div className="flex flex-col items-start gap-5 bg-cream p-10 sm:p-16">
+          <p className="t-h2">New designs are on the way.</p>
+          <Link href="/quote" className="btn-blue">
+            Start a collection <Arrow className="h-[14px] w-[19px]" />
+          </Link>
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="relative flex flex-wrap items-center gap-2 pb-5">
+            <Dropdown
+              label="Filter by organization"
+              all="All Organizations"
+              value={theme ?? ''}
+              options={themes.map((t) => ({ value: t, label: t }))}
+              onChange={(v) => choose(() => setTheme(v || null))}
+            />
+            <Dropdown
+              label="Filter by piece"
+              all="All Pieces"
+              value={group ?? ''}
+              options={groups.map((g) => ({ value: g.id, label: g.label }))}
+              onChange={(v) => choose(() => setGroup((v as PieceGroup) || null))}
+            />
+            {(theme || group) && (
+              <button
+                type="button"
+                onClick={() => choose(() => { setTheme(null); setGroup(null); })}
+                className="min-h-11 px-2 font-sans text-[0.9375rem] font-medium text-ink"
+              >
+                <span className="link-u">Clear</span>
+              </button>
+            )}
+            <p role="status" className="t-spec num ml-auto whitespace-nowrap text-muted">
+              {matches.length} {matches.length === 1 ? 'design' : 'designs'}
+            </p>
+          </div>
 
-      {matches.length > shown && (
-        <div className="mt-8 flex justify-center">
-          <button type="button" onClick={() => setShown((n) => n + PAGE)} className="btn-outline">
-            Show more designs
-          </button>
-        </div>
+          <div className="set-grid">
+            {matches.slice(0, shown).map((s, i) => (
+              <SetCard key={s.id} s={s} ground={grounds.get(s.id)!} onOpen={() => setOpen(i)} />
+            ))}
+          </div>
+
+          {matches.length > shown && (
+            <div className="mt-8 flex justify-center">
+              <button type="button" onClick={() => setShown((n) => n + PAGE)} className="btn-outline">
+                Show more designs
+              </button>
+            </div>
+          )}
+
+          {open !== null && matches[open] && (
+            <SetViewer sets={matches} grounds={grounds} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />
+          )}
+        </>
       )}
 
       <Ending />

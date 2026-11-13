@@ -15,7 +15,7 @@ Next.js 15 (App Router), React 19, Tailwind, statically rendered.
 | Route | What it is |
 |---|---|
 | `/` | Hero, the chapter (hoodie, three pieces, finale), intro, how it works, FAQ |
-| `/work` | Get inspired: a browse-only wall of concept designs drawn in code |
+| `/work` | Get inspired: the dashboard's lookbook, sets of design flats published to this site |
 | `/catalog`, `/catalog/[slug]` | Build your collection: every dashboard piece, a tray that carries picks to `/quote` |
 | `/custom` | Fully custom pieces, developed from scratch |
 | `/about` | Why we exist, the founder, who it's for, `#what-you-get`, Stitched Group |
@@ -91,8 +91,8 @@ environment, and nothing here imports from it.
 ## The catalog (`/catalog`)
 
 By default the pieces come from the Stitched dashboard's public catalog API
-(`src/lib/catalog/api.ts`), read with this site's embed key (`EMBED_KEY` in
-`src/lib/site.ts`). Set `CATALOG_SOURCE=local` to serve the local list in
+(`src/lib/catalog/api.ts`), read with this site's embed key (`STITCHED_CATALOG_KEY`, else
+`NEXT_PUBLIC_EMBED_KEY`). Set `CATALOG_SOURCE=local` to serve the local list in
 `src/lib/catalog/local.ts` instead, drawn with
 `src/components/catalog/GarmentArt.tsx` in each colourway. Stitched's image
 server refuses most product images on localhost (origin allowlist), so tiles
@@ -112,7 +112,8 @@ npm run build
 |---|---|---|
 | `NEXT_PUBLIC_APP_URL` | Origin of the customer app that serves `/request`. | `https://app.gostitched.com` |
 | `CATALOG_SOURCE` | `local` serves `local.ts`; anything else reads the catalog from the dashboard. | live |
-| `STITCHED_CATALOG_KEY` | Embed key for the live catalog. | `EMBED_KEY` |
+| `NEXT_PUBLIC_EMBED_KEY` | This site's embed key: the request form, the catalog and the lookbook. Required. | none |
+| `STITCHED_CATALOG_KEY` | Overrides the key for catalog and lookbook reads. | `NEXT_PUBLIC_EMBED_KEY` |
 
 Set these in the Vercel project for this site. They are read at build time.
 
@@ -134,7 +135,7 @@ Copy is kept out of the components:
 
 - `src/lib/site.ts`: site URL, contact, nav, capabilities, FAQ.
 - `src/lib/about.ts`: founder, origin story, "what you get", the Stitched Group note.
-- `src/lib/inspo.ts`: the Get inspired concepts (made-up organizations); `src/lib/work.ts`: the drawing types.
+- `src/lib/lookbook.ts`: Get inspired's piece filter and grounds (the sets come from the dashboard's lookbook); `src/lib/work.ts`: the drawing types.
 - `src/lib/chapter.ts`: the home chapter.
 - `src/lib/catalog/local.ts`: pieces and starting prices.
 - `src/components/HowItWorks.tsx`, `src/components/Intro.tsx`: the four steps, the three plates.
@@ -155,8 +156,8 @@ in the code. Check each one; anything left as-is ships as written.
 - [ ] **/quote**: "if the timeline is tight, we tell you on day one" and "a designer reads every request".
 - [ ] **/custom**: the fabric, fit, construction and trim examples; whether fully custom pieces carry the same 36-piece minimum.
 - [ ] **Founder photo**: `public/about/founder.jpg` is approved for use.
-- [ ] **Get inspired**: every design is a concept for a made-up organization (`src/lib/inspo.ts`). Add real mockups to `UPLOADS` only with the organization's permission.
-- [ ] **Embed key**: `EMBED_KEY` in `src/lib/site.ts` is identical to The Mitzvah Studio's key (inherited when this site was duplicated). Until Member Threads has its own key, leads and the live catalog land under that site's placements.
+- [ ] **Get inspired**: sets come from the dashboard's lookbook (Catalog → Lookbook, published to this site). Publish a real organization's design only with its permission.
+- [ ] **Embed key**: there is no key in code. Set `NEXT_PUBLIC_EMBED_KEY` to Member Threads's own key (Stitched dashboard → Embed sites); without it the request form, the catalog and Get inspired have nothing to read.
 - [ ] **Catalog**: starting prices, fabrics, GSM, colourways and sizes in `src/lib/catalog/local.ts`.
 - [ ] **Intake form**: `/quote` frames Stitched's `/request` form; confirm the form's own copy reads right for organizations, and that leads land under the Member Threads embed key.
 - [ ] **Fonts**: Archivo and Yellowtail are stand-ins for The Bold Font, Acumin and Billion Dreams. Swap in licensed brand fonts if available.
