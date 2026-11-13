@@ -1,0 +1,36 @@
+/* ── Product page panels ─────────────────────────────────────────────────────
+   White cards with a hairline edge. --card-bg is what the size chart's sticky
+   first column and edge fade paint, so they never show as a shaded strip. */
+.pdp { --pdp-r: 10px; }
+
+.pdp-card {
+  --card-bg: #fff;
+  background: var(--card-bg);
+  border-radius: var(--pdp-r);
+  box-shadow: inset 0 0 0 1px theme('colors.rule');
+  padding: 1.5rem;
+}
+@media (min-width: 640px) { .pdp-card { padding: 2rem 2.25rem; } }
+
+.pdp-sticky { background: var(--card-bg, theme('colors.paper')); }
+/* A sticky cell's background paints over its row's border, so it draws its own. */
+.pdp thead .pdp-sticky { box-shadow: inset 0 -1px 0 theme('colors.ink'); }
+.pdp tbody .pdp-sticky { box-shadow: inset 0 -1px 0 theme('colors.rule'); }
+@media (max-width: 639px) { .pdp tbody .pdp-sticky { box-shadow: inset 0 -1px 0 theme('colors.rule'), 1px 0 0 theme('colors.rule'); } }
+.pdp-fade { background: linear-gradient(to left, var(--card-bg, theme('colors.paper')), transparent); }
+
+.pdp-summary {
+  display: flex;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.pdp-summary::-webkit-details-marker { display: none; }
+.pdp-summary:focus-visible { outline: none; }
+.pdp-summary:focus-visible .pdp-h { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px; }
+.pdp-plus { width: 14px; height: 14px; flex: none; transition: transform 200ms ease-out; }
+details[open] > .pdp-summary .pdp-plus { transform: rotate(45deg); }
+@media (prefers-reduced-motion: reduce) { .pdp-plus { transition: none; } }

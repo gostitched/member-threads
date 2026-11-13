@@ -37,7 +37,7 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
     <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-end">
       <div>
         <p className="t-spec text-muted">Quantity</p>
-        <p className="t-block num mt-3 text-[clamp(3rem,5vw,4.5rem)]">{qty.toLocaleString('en-US')}</p>
+        <p className="num mt-2 font-editorial text-[clamp(3.25rem,5vw,4.5rem)] leading-none tracking-[-0.03em]">{qty.toLocaleString('en-US')}</p>
         <input
           type="range"
           min={0}
@@ -52,11 +52,11 @@ export default function PriceEstimator({ breaks, minimum }: { breaks: PublicPric
         <div className="mt-6 grid grid-cols-2 gap-6 border-t border-rule pt-5" aria-live="polite">
           <div>
             <p className="t-spec text-muted">Per piece</p>
-            <p className="t-block num mt-2 text-[clamp(1.5rem,2.2vw,2rem)]">{formatMoney(active.unitPriceCents, currency)}</p>
+            <p className="num mt-1.5 font-editorial text-[clamp(1.625rem,2.2vw,2rem)] leading-tight tracking-[-0.015em]">{formatMoney(active.unitPriceCents, currency)}</p>
           </div>
           <div>
             <p className="t-spec text-muted">Estimated total</p>
-            <p className="t-block num mt-2 text-[clamp(1.5rem,2.2vw,2rem)]">
+            <p className="num mt-1.5 font-editorial text-[clamp(1.625rem,2.2vw,2rem)] leading-tight tracking-[-0.015em]">
               <span key={total} className="ct-tick">
                 {formatMoney(total, currency)}
               </span>
