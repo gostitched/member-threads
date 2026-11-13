@@ -20,7 +20,8 @@
   isolation: isolate;
   transition: background-color var(--dur-quick) ease-out;
 }
-.cb-tile:hover .cb-tile-pic { background: #fff; }
+/* Hover deepens the paper to cream: a white plate glares on it. */
+.cb-tile:hover .cb-tile-pic { background: theme('colors.cream'); }
 .cb-tile-name {
   display: block;
   margin-top: 0.75rem;
