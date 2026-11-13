@@ -2,10 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import '../catalog.css';
-import PriceEstimator from '@/components/catalog/PriceEstimator';
 import ProductCard from '@/components/catalog/ProductCard';
+import ProductPanels from '@/components/catalog/ProductPanels';
 import ProductView from '@/components/catalog/ProductView';
-import SizeChart from '@/components/catalog/SizeChart';
 import { getCatalog, getProduct } from '@/lib/catalog/api';
 import type { CatalogProduct } from '@/lib/catalog/types';
 import { flatBreaks, leadTimeLabel } from '@/lib/catalog/util';
@@ -70,7 +69,6 @@ export default async function ProductPage({ params }: Props) {
   const { product } = found;
 
   const specs = specRows(product);
-  const hasChart = Object.keys(product.sizeChart).length > 0;
   const breaks = flatBreaks(product.pricing);
   const others = catalog.products.filter((p) => p.slug !== product.slug);
   const related = [
@@ -89,45 +87,7 @@ export default async function ProductPage({ params }: Props) {
         <ProductView product={product} />
       </div>
 
-      {(specs.length > 0 || breaks.length > 0) && (
-        <section className={`shell grid gap-4 pb-16 [&>*]:min-w-0 ${specs.length && breaks.length ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]' : ''}`}>
-          {specs.length > 0 && (
-            <div className="bg-white p-6 ring-1 ring-inset ring-rule sm:p-8">
-              <h2 className="t-h3">The details.</h2>
-              <dl className="mt-5">
-                {specs.map(([k, v]) => (
-                  <div key={k} className="flex items-baseline justify-between gap-6 border-t border-rule py-3.5">
-                    <dt className="t-spec shrink-0 text-muted">{k}</dt>
-                    <dd className="t-body text-right">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
-          {breaks.length > 0 && (
-            <div className="bg-white p-6 ring-1 ring-inset ring-rule sm:p-8">
-              <h2 className="t-h3">Order more, pay less.</h2>
-              <div className="mt-5">
-                <PriceEstimator breaks={breaks} minimum={product.minimumOrderQuantity} />
-              </div>
-            </div>
-          )}
-        </section>
-      )}
-
-      {hasChart && (
-        <section className="shell pb-16">
-          <details className="group bg-white p-6 ring-1 ring-inset ring-rule sm:p-8">
-            <summary className="t-h3 flex min-h-[44px] cursor-pointer list-none items-center justify-between [&::-webkit-details-marker]:hidden">
-              Size chart
-              <span aria-hidden className="text-ink transition-transform duration-quick group-open:rotate-45 motion-reduce:transition-none">+</span>
-            </summary>
-            <div className="mt-6">
-              <SizeChart chart={product.sizeChart} unit={product.sizeChartUnit} />
-            </div>
-          </details>
-        </section>
-      )}
+      <ProductPanels product={product} specs={specs} breaks={breaks} />
 
       {related.length > 0 && (
         <section className="shell pb-20 sm:pb-28">

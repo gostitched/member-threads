@@ -51,6 +51,17 @@ function inches(value: number, exact: boolean): React.ReactNode {
   return <Fraction whole={whole} num={num} den={den} />;
 }
 
+/**
+ * The dashboard's measurement names come in Title Case ("Chest (Pit to Pit)"); the site
+ * writes in sentence case. Acronyms (HPS) keep their capitals.
+ */
+function sentenceCase(name: string): string {
+  return name
+    .split(' ')
+    .map((w, i) => (i === 0 || /^\(?[A-Z]{2,}\)?$/.test(w) ? w : w.toLowerCase()))
+    .join(' ');
+}
+
 function decimal(value: number): string {
   const r = Math.round(value * 10) / 10;
   return Number.isInteger(r) ? String(r) : r.toFixed(1);
@@ -86,10 +97,10 @@ export default function SizeChart({
   return (
     <div>
       <div className="mb-6 flex items-center justify-between gap-4">
-        <p className="t-spec fg-muted">Measured flat · {shown === 'in' ? 'Inches' : 'Centimetres'}</p>
-        <div className="flex gap-1.5" role="group" aria-label="Units">
+        <p className="t-spec fg-muted">Measured flat, in {shown === 'in' ? 'inches' : 'centimetres'}</p>
+        <div className="flex border border-rule p-0.5" role="group" aria-label="Units">
           {(['in', 'cm'] as const).map((u) => (
-            <button key={u} type="button" aria-pressed={shown === u} onClick={() => setShown(u)} className="chip min-w-[52px] px-3">
+            <button key={u} type="button" aria-pressed={shown === u} onClick={() => setShown(u)} className={`h-9 w-11 font-sans text-[0.8125rem] font-semibold ${shown === u ? 'bg-ink text-paper' : 'text-muted hover:text-ink'}`}>
               {u}
             </button>
           ))}
@@ -106,7 +117,7 @@ export default function SizeChart({
           </caption>
           <thead>
             <tr className="border-b border-ink">
-              <th scope="col" className="t-spec fg-muted sticky left-0 z-[1] w-28 bg-paper py-3 pr-4 font-semibold sm:w-40">
+              <th scope="col" className="t-spec fg-muted pdp-sticky sticky left-0 z-[1] w-28 py-3 pr-4 font-semibold sm:w-40">
                 Size
               </th>
               {sizes.map((s) => (
@@ -126,8 +137,8 @@ export default function SizeChart({
           <tbody>
             {measurements.map((m) => (
               <tr key={m} className="border-b border-[var(--rule-c)]">
-                <th scope="row" className="t-small sticky left-0 z-[1] whitespace-nowrap bg-paper py-3.5 pr-4 font-medium shadow-[1px_0_0_var(--rule-c)] sm:shadow-none">
-                  {m}
+                <th scope="row" className="t-small pdp-sticky sticky left-0 z-[1] whitespace-nowrap py-3.5 pr-4 font-medium shadow-[1px_0_0_var(--rule-c)] sm:shadow-none">
+                  {sentenceCase(m)}
                 </th>
                 {sizes.map((s) => {
                   const v = chart[s][m];
@@ -149,7 +160,7 @@ export default function SizeChart({
         </table>
       </div>
       {/* Edge fade: there is more table to the right. */}
-      <span aria-hidden className="pointer-events-none absolute -right-5 top-0 h-full w-12 bg-gradient-to-l from-paper to-transparent sm:hidden" />
+      <span aria-hidden className="pointer-events-none absolute -right-5 top-0 h-full pdp-fade w-12 sm:hidden" />
       </div>
     </div>
   );
