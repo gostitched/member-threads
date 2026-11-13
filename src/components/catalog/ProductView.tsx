@@ -92,8 +92,15 @@ export default function ProductView({ product }: { product: CatalogProduct }) {
           {price ? `From ${formatMoney(price.cents, price.currency).replace(/\.00$/, '')}` : 'Priced inside your collection'}
           <span className="ml-2 text-muted">a piece · design included</span>
         </p>
-        {/* The first paragraph only: the rest is for the call. */}
-        {paragraphs.length > 0 && <p className="t-lead mt-6 max-w-measure">{paragraphs[0]}</p>}
+        {paragraphs.length > 0 && (
+          <div className="mt-6 max-w-measure space-y-4">
+            {paragraphs.map((text, i) => (
+              <p key={i} className="t-lead">
+                {text}
+              </p>
+            ))}
+          </div>
+        )}
 
         {product.colorways.length > 0 && (
           <section className="mt-8" aria-labelledby="colourways">
