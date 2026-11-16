@@ -40,7 +40,7 @@ function groupsOf(products: CatalogProduct[]) {
   return out.filter((g) => g.items.length > 0);
 }
 
-function Picture({ product, color }: { product: CatalogProduct; color: string }) {
+function Picture({ product, color, eager = false }: { product: CatalogProduct; color: string; eager?: boolean }) {
   const [failed, setFailed] = useState(false);
   const img = useRef<HTMLImageElement>(null);
   const image = galleryOf(product)[0];
@@ -50,7 +50,7 @@ function Picture({ product, color }: { product: CatalogProduct; color: string })
   }, []);
   if (image && !failed) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img ref={img} src={image.thumbUrl} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} className="h-full w-full object-contain mix-blend-multiply" />;
+    return <img ref={img} src={image.thumbUrl} alt="" loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : undefined} decoding="async" onError={() => setFailed(true)} className="h-full w-full object-contain mix-blend-multiply" />;
   }
   return <GarmentArt kind={garmentKind(product)} color={color} className="h-full w-full" />;
 }
@@ -93,13 +93,13 @@ export default function CollectionBuilder({ products }: { products: CatalogProdu
       </div>
 
       <ul className="cb-grid">
-        {shown.map(({ product, tint }) => {
+        {shown.map(({ product, tint }, i) => {
           const on = picked.includes(product.slug);
           return (
             <li key={product.slug} className="relative">
               <Link href={`/catalog/${product.slug}`} className="cb-tile">
                 <span className="cb-tile-pic">
-                  <Picture product={product} color={tint} />
+                  <Picture product={product} color={tint} eager={i < 8} />
                 </span>
                 <span className="cb-tile-name">{product.name}</span>
               </Link>

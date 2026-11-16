@@ -35,6 +35,7 @@
 
 import { APP_URL, EMBED_KEY } from '@/lib/site';
 import { LOCAL_CATALOG } from './local';
+import { fastProduct, fastSet } from './fast';
 import type { Catalog, CatalogBrand, CatalogProduct, CatalogSource, Lookbook, LookbookSet } from './types';
 
 /** The dashboard is the default; `CATALOG_SOURCE=local` serves the local list. */
@@ -91,7 +92,7 @@ export async function getCatalog(): Promise<Catalog> {
         return nothing('unavailable', null);
       }
       brand = body.catalog.brand;
-      products.push(...body.products);
+      products.push(...body.products.map(fastProduct));
       if (!body.page.more) break;
     }
   } catch (error) {
@@ -115,7 +116,7 @@ export async function getProduct(slug: string): Promise<{ product: CatalogProduc
 
   try {
     const { body } = await getJson<{ product: CatalogProduct }>(endpoint(`/products/${encodeURIComponent(slug)}`));
-    return body ? { product: body.product, source: 'live' } : null;
+    return body ? { product: fastProduct(body.product), source: 'live' } : null;
   } catch {
     return null;
   }
@@ -139,7 +140,7 @@ export async function getLookbook(): Promise<LookbookSet[]> {
     throw new Error(`[lookbook] could not reach the dashboard at ${APP_URL}`, { cause: error });
   }
   if (!result.body) throw new Error(`[lookbook] the dashboard refused the lookbook read (${result.status})`);
-  return [...result.body.sets]
+  return [...result.body.sets.map(fastSet)]
     .sort((a, b) => a.sort - b.sort)
     .map((set) => ({ ...set, pieces: [...set.pieces].sort((a, b) => a.position - b.position) }));
 }
