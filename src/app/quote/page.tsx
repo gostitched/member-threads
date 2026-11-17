@@ -15,9 +15,12 @@ export const metadata: Metadata = {
  * the email, what the visitor picked in the catalog, and the request plate that
  * frames the Stitched form.
  */
-export default async function QuotePage({ searchParams }: { searchParams: Promise<{ piece?: string }> }) {
+export default async function QuotePage({ searchParams }: { searchParams: Promise<{ piece?: string; items?: string }> }) {
   // Sent from the catalog: the pieces the visitor added, to paste into the brief.
-  const { piece } = await searchParams;
+  const params = await searchParams;
+  // With catalog slugs the form starts with those pieces added, so the note isn't needed.
+  const items = catalogSlugs(params.items);
+  const piece = items.length ? undefined : params.piece;
 
   // Side by side from lg: the headline, the lede, the label and the email on the left
   // (held in view while the form scrolls), the form on the right. Stacked below that.
@@ -51,10 +54,16 @@ export default async function QuotePage({ searchParams }: { searchParams: Promis
             </div>
           )}
           <div className="-mx-5 -mt-4">
-            <RequestForm />
+            <RequestForm items={items} />
           </div>
         </div>
       </div>
     </section>
   );
+}
+
+/** Catalog slugs from `?items=` (the catalog tray or a product page), kept to what a slug can be. */
+function catalogSlugs(raw: string | undefined): string[] {
+  const list = (raw ?? '').split(',').map((s) => s.trim()).filter((s) => /^[a-z0-9-]{1,80}$/.test(s));
+  return [...new Set(list)].slice(0, 20);
 }

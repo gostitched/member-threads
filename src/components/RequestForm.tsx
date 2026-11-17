@@ -29,7 +29,9 @@ const PING_TIMEOUT_MS = 30000;
  * keeps its own scrollbars until it hears a height that matches its content, so
  * a missing ack leaves the customer with a nested scroll area.
  */
-export default function RequestForm() {
+export default function RequestForm({ items = [] }: { items?: string[] }) {
+  // Catalog picks (slugs): the form starts its project step with these pieces added.
+  const formUrl = items.length ? `${REQUEST_FORM_URL}&items=${encodeURIComponent(items.join(','))}` : REQUEST_FORM_URL;
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
   const [submitted, setSubmitted] = useState(false);
@@ -116,7 +118,7 @@ export default function RequestForm() {
     <div className="relative overflow-hidden" style={status === 'loading' ? { maxHeight: LOADING_HEIGHT } : undefined}>
       <iframe
         ref={frameRef}
-        src={REQUEST_FORM_URL}
+        src={formUrl}
         title="Start a collection: request form"
         // Left scrollable on purpose: the height above is only as good as the
         // handshake, and a lost message with scrolling off is a dead end.
@@ -141,7 +143,7 @@ export default function RequestForm() {
         <div className="absolute inset-x-0 top-0 border-b border-[var(--rule-c)] bg-paper px-5 py-6 sm:px-8" role="status">
           <p className="t-body max-w-[52ch]">
             The form is taking longer than it should.{' '}
-            <a href={REQUEST_FORM_URL} target="_blank" rel="noopener" className="link-u font-medium">
+            <a href={formUrl} target="_blank" rel="noopener" className="link-u font-medium">
               Open it in a new tab
             </a>{' '}
             or write to{' '}
