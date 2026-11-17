@@ -66,7 +66,7 @@ export default function CollectionBuilder({ products }: { products: CatalogProdu
   const [picked, setPicked] = useState<string[]>([]);
   const toggle = (slug: string) => setPicked((all) => (all.includes(slug) ? all.filter((s) => s !== slug) : [...all, slug]));
   const chosen = picked.map((slug) => products.find((p) => p.slug === slug)).filter((p): p is CatalogProduct => !!p);
-  const quote = `/quote?piece=${encodeURIComponent(chosen.map((p) => p.name).join(', '))}`;
+  const quote = `/quote?piece=${encodeURIComponent(chosen.map((p) => p.name).join(', '))}&items=${encodeURIComponent(chosen.map((p) => p.slug).join(','))}`;
 
   return (
     <div className={chosen.length ? 'pb-28' : ''}>

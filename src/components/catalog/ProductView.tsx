@@ -135,7 +135,7 @@ export default function ProductView({ product }: { product: CatalogProduct }) {
 
         <div className="mt-10 lg:mt-auto lg:pt-10">
           <div className="flex flex-wrap gap-3">
-            <Link href={`/quote?piece=${encodeURIComponent(product.name)}`} className="btn-blue">
+            <Link href={`/quote?piece=${encodeURIComponent(product.name)}&items=${encodeURIComponent(product.slug)}`} className="btn-blue">
               Start a collection <Arrow className="h-[14px] w-[19px]" />
             </Link>
             {product.sizeGuideUrl && (
