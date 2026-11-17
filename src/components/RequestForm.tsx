@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Submitted, { type SentRequest } from '@/components/Submitted';
 import { useOrgName } from '@/lib/name';
 import { APP_URL, CONTACT, REQUEST_FORM_URL } from '@/lib/site';
 
@@ -34,7 +35,7 @@ export default function RequestForm({ items = [] }: { items?: string[] }) {
   const formUrl = items.length ? `${REQUEST_FORM_URL}&items=${encodeURIComponent(items.join(','))}` : REQUEST_FORM_URL;
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
-  const [submitted, setSubmitted] = useState(false);
+  const [sent, setSent] = useState<SentRequest | null>(null);
   // 'loading' until the form answers the height handshake; 'quiet' if it never
   // does (blocked, offline, or framed somewhere it isn't allowed), which
   // uncovers the frame and offers the plain routes.
@@ -69,7 +70,9 @@ export default function RequestForm({ items = [] }: { items?: string[] }) {
         }
       }
 
-      if (data.type === 'stitched-form-success') setSubmitted(true);
+      if (data.type === 'stitched-form-success') {
+        setSent({ booking: data.booking ?? null, bookingPending: data.bookingPending === true });
+      }
     }
 
     window.addEventListener('message', onMessage);
@@ -100,16 +103,11 @@ export default function RequestForm({ items = [] }: { items?: string[] }) {
     };
   }, []);
 
-  if (submitted) {
+  if (sent) {
     return (
-      <div className="band-green px-6 py-14 sm:px-12 sm:py-20" role="status">
-        <h2 className="t-h1">
-          Your designer is <em>next</em>.
-        </h2>
-        <p className="t-script mt-6 text-[clamp(2.25rem,4vw,3.25rem)] text-beige">Welcome to the club.</p>
-        <p className="t-body mt-10 max-w-[44ch] text-cream/90">
-          We review your timeline first, then a designer reaches out to start on the collection.
-        </p>
+      // The quote page pulls the form out by its own 20px inset; the panel has none.
+      <div className="mx-5 mt-4">
+        <Submitted sent={sent} />
       </div>
     );
   }
