@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useOrgName } from '@/lib/name';
 import { APP_URL, CONTACT, REQUEST_FORM_URL } from '@/lib/site';
 
-const MIN_HEIGHT = 1200;
+const MIN_HEIGHT = 560;
 const MAX_HEIGHT = 25000;
 /** Before the form reports its height: about one screen of fields, not a page of blank. */
-const DEFAULT_HEIGHT = 1200;
+const DEFAULT_HEIGHT = 760;
 const QUIET_AFTER_MS = 9000;
 /** The plate's height while the form loads: calm, not a page of blank. */
 const LOADING_HEIGHT = 560;
@@ -113,47 +113,45 @@ export default function RequestForm() {
   }
 
   return (
-    <div className="band-cream">
-      <div className="relative overflow-hidden" style={status === 'loading' ? { maxHeight: LOADING_HEIGHT } : undefined}>
-        <iframe
-          ref={frameRef}
-          src={REQUEST_FORM_URL}
-          title="Start a collection: request form"
-          // Left scrollable on purpose: the height above is only as good as the
-          // handshake, and a lost message with scrolling off is a dead end.
-          className="block w-full border-0 bg-transparent"
-          style={status === 'quiet' ? { height: QUIET_HEIGHT } : { height, minHeight: MIN_HEIGHT }}
-        />
+    <div className="relative overflow-hidden" style={status === 'loading' ? { maxHeight: LOADING_HEIGHT } : undefined}>
+      <iframe
+        ref={frameRef}
+        src={REQUEST_FORM_URL}
+        title="Start a collection: request form"
+        // Left scrollable on purpose: the height above is only as good as the
+        // handshake, and a lost message with scrolling off is a dead end.
+        className="block w-full border-0"
+        style={status === 'quiet' ? { height: QUIET_HEIGHT } : { height, minHeight: MIN_HEIGHT }}
+      />
 
-        {/* Loading: a stitch sews across while the form is fetched. No fake fields. */}
-        <div
-          aria-hidden={status !== 'loading'}
-          data-done={status !== 'loading'}
-          className="mt-plate-loading absolute inset-0 flex flex-col items-start justify-center gap-6 bg-cream px-5 sm:px-12"
-        >
-          <p className="t-spec" role="status">
-            Loading the request form
-          </p>
-          <span className="mt-sewing stitch-rule w-full max-w-[28rem]" />
-          <p className="t-body max-w-[40ch] text-ink/90">This usually takes a few seconds.</p>
-        </div>
-
-        {status === 'quiet' && (
-          <div className="absolute inset-x-0 top-0 border-b border-[var(--rule-c)] bg-cream px-5 py-6 sm:px-8" role="status">
-            <p className="t-body max-w-[52ch]">
-              The form is taking longer than it should.{' '}
-              <a href={REQUEST_FORM_URL} target="_blank" rel="noopener" className="link-u font-medium">
-                Open it in a new tab
-              </a>{' '}
-              or write to{' '}
-              <a href={`mailto:${CONTACT.email}`} className="link-u font-medium">
-                {CONTACT.email}
-              </a>
-              .
-            </p>
-          </div>
-        )}
+      {/* Loading: a stitch sews across while the form is fetched. No fake fields. */}
+      <div
+        aria-hidden={status !== 'loading'}
+        data-done={status !== 'loading'}
+        className="mt-plate-loading absolute inset-0 flex flex-col items-start justify-center gap-6 bg-paper px-5 sm:px-12"
+      >
+        <p className="t-spec" role="status">
+          Loading the request form
+        </p>
+        <span className="mt-sewing stitch-rule w-full max-w-[28rem]" />
+        <p className="t-body max-w-[40ch] text-ink/90">This usually takes a few seconds.</p>
       </div>
+
+      {status === 'quiet' && (
+        <div className="absolute inset-x-0 top-0 border-b border-[var(--rule-c)] bg-paper px-5 py-6 sm:px-8" role="status">
+          <p className="t-body max-w-[52ch]">
+            The form is taking longer than it should.{' '}
+            <a href={REQUEST_FORM_URL} target="_blank" rel="noopener" className="link-u font-medium">
+              Open it in a new tab
+            </a>{' '}
+            or write to{' '}
+            <a href={`mailto:${CONTACT.email}`} className="link-u font-medium">
+              {CONTACT.email}
+            </a>
+            .
+          </p>
+        </div>
+      )}
     </div>
   );
 }
