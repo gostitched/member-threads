@@ -5,6 +5,9 @@ import { sentence } from '@/components/chrome/nav';
 import { FRAME } from '@/components/frame';
 import '@/components/chrome/chrome.css';
 
+/** The group's Instagram accounts, listed in every brand's footer. */
+const INSTAGRAMS = ['shopaltaratelier', 'themitzvahstudio', 'gostitched', 'celebrationcollectiveco', 'memberthreads'];
+
 /**
  * Paper footer under a top rule: the wordmark and the email, two short link
  * columns, the legal line.
@@ -36,8 +39,21 @@ export default function SiteFooter() {
           </Col>
         </div>
 
+        <div className="pb-10">
+          <h2 className="font-sans text-[0.875rem] font-semibold tracking-normal text-ink">Instagram</h2>
+          <ul className="mt-2 flex flex-wrap gap-x-6 sm:mt-3">
+            {INSTAGRAMS.map((h) => (
+              <li key={h}>
+                <a href={`https://www.instagram.com/${h}/`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[0.9375rem] text-ink/85 transition-colors duration-quick hover:text-ink sm:min-h-9">
+                  <span className="link-u">@{h}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         <p className="t-spec fg-muted border-t border-rule py-5">
-          © {new Date().getFullYear()} Member Threads · A Stitched Group company
+          © {new Date().getFullYear()} Member Threads · <a href="https://gostitched.com" className="underline decoration-current/30 underline-offset-4 transition-colors hover:text-ink hover:decoration-current">A Stitched Group company</a>
         </p>
       </div>
 
