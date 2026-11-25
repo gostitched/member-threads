@@ -5,9 +5,6 @@ import { sentence } from '@/components/chrome/nav';
 import { FRAME } from '@/components/frame';
 import '@/components/chrome/chrome.css';
 
-/** The group's Instagram accounts, listed in every brand's footer. */
-const INSTAGRAMS = ['shopaltaratelier', 'themitzvahstudio', 'gostitched', 'celebrationcollectiveco', 'memberthreads'];
-
 /**
  * Paper footer under a top rule: the wordmark and the email, two short link
  * columns, the legal line.
@@ -24,6 +21,16 @@ export default function SiteFooter() {
             <a href={`mailto:${CONTACT.email}`} className="mt-6 flex min-h-11 w-fit items-center text-[1.0625rem] font-medium text-ink">
               <span className="link-u">{CONTACT.email}</span>
             </a>
+            <a
+              href="https://www.instagram.com/memberthreads/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="memberthreads on Instagram"
+              className="flex min-h-11 w-fit items-center gap-2 text-[0.9375rem] text-ink/85 transition-colors duration-quick hover:text-ink"
+            >
+              <InstagramIcon />
+              <span className="link-u">@memberthreads</span>
+            </a>
           </div>
           <Col title="Explore">
             {NAV.map((l) => (
@@ -37,19 +44,6 @@ export default function SiteFooter() {
             <FooterLink href="/custom">Fully custom</FooterLink>
             <FooterLink href={NAV_CTA.href}>{NAV_CTA.label}</FooterLink>
           </Col>
-        </div>
-
-        <div className="pb-10">
-          <h2 className="font-sans text-[0.875rem] font-semibold tracking-normal text-ink">Instagram</h2>
-          <ul className="mt-2 flex flex-wrap gap-x-6 sm:mt-3">
-            {INSTAGRAMS.map((h) => (
-              <li key={h}>
-                <a href={`https://www.instagram.com/${h}/`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[0.9375rem] text-ink/85 transition-colors duration-quick hover:text-ink sm:min-h-9">
-                  <span className="link-u">@{h}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
         </div>
 
         <p className="t-spec fg-muted border-t border-rule py-5">
@@ -77,5 +71,15 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
         <span className="link-u">{children}</span>
       </Link>
     </li>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className="h-[1.125em] w-[1.125em] shrink-0" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
